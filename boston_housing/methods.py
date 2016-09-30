@@ -34,7 +34,7 @@ def fit_model(X, y):
     scoring_fnc = make_scorer(performance_metric)
 
     # TODO: Create the grid search object
-    grid = GridSearchCV(regressor, params, scoring_fnc)
+    grid = GridSearchCV(regressor, params, scoring=scoring_fnc, cv=cv_sets)
 
     # Fit the grid search object to the data to compute the optimal model
     grid = grid.fit(X, y)
