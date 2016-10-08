@@ -10,6 +10,7 @@
 *.zip
 *.tgz
 *.exe
+*.pyc
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
