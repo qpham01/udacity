@@ -6,11 +6,15 @@
 *.user
 *.userosscache
 *.sln.docstates
-*.msi
-*.zip
+*.gz
 *.tgz
-*.exe
+*.msi
 *.pyc
+*.zip
+*.exe
+*.pkl
+*.pickle
+
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

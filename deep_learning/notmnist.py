@@ -289,7 +289,3 @@ print ("Train and Test Overlap:     ", overlap_count(train_dataset, test_dataset
 print ("Validate and Test Overlap:  ", overlap_count(valid_dataset, test_dataset, valid_labels, test_labels))
 """
 
-from sklearn.linear_model import LinearRegression
-
-clf = LinearRegression()
-clf.fit(train_dataset, train_labels)
