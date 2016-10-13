@@ -14,7 +14,7 @@ def train_two_layer(data, weights1, biases1, weights2, biases2):
   return logits
 
 
-batch_size = 8
+batch_size = 28
 hidden_nodes = 1024
 graph = tf.Graph()
 with graph.as_default():
