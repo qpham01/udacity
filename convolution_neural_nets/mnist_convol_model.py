@@ -33,15 +33,11 @@ padded so that the output is the same size as the input. Our pooling is plain ol
 pooling over 2x2 blocks. To keep our code cleaner, let's also abstract those operations 
 into functions.
 """
-
 def conv2d(x, W):
-  with tf.device('/gpu:0'):
-    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME', use_cudnn_on_gpu=True)
+  return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME', use_cudnn_on_gpu=True)
 
 def max_pool_2x2(x):
-  with tf.device('/gpu:0'):
-    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1],
-                        strides=[1, 2, 2, 1], padding='SAME')
+  return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
 """
 Weights and biases
@@ -99,9 +95,10 @@ sess = tf.Session()
 init = tf.initialize_all_variables()
 sess.run(init)
 
+num_steps = 2001
 t0 = time()
 with sess.as_default():
-  for i in range(2000):
+  for i in range(num_steps):
     batch = mnist.train.next_batch(50)
     if i%100 == 0:
       train_accuracy = accuracy.eval(feed_dict={x:batch[0], y_: batch[1], keep_prob: 1.0})

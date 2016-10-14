@@ -2,12 +2,21 @@ from read_data import *
 import tensorflow as tf
 from time import time
 
-batch_size = 16
+batch_size = 50
 patch_size = 5
 depth = 16
 num_hidden = 64
 
 graph = tf.Graph()
+
+def conv2d(x, W):
+      return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME', use_cudnn_on_gpu=True)
+
+def max_pool_2x2(x):
+  return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')  
+
+from tensorflow.examples.tutorials.mnist import input_data  
+mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 
 with graph.as_default():
 
@@ -33,32 +42,44 @@ with graph.as_default():
   layer4_biases = tf.Variable(tf.constant(1.0, shape=[num_labels]))
   
   # Model.
-  def model(data):
-    #conv = tf.nn.conv2d(data, layer1_weights, [1, 2, 2, 1], padding='SAME')
-    pool = tf.nn.max_pool(data, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-    hidden = tf.nn.relu(pool + layer1_biases)
+  def model(data, keep_prob): 
+    # Reshape
+    # x_image = tf.reshape(data, [-1,28,28,1])
 
-    #conv = tf.nn.conv2d(pool, layer2_weights, [1, 2, 2, 1], padding='SAME')
-    pool = tf.nn.max_pool(hidden, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-    hidden = tf.nn.relu(pool + layer2_biases)
+    # First Convolutional Layer
+    h_conv1 = tf.nn.relu(conv2d(data, layer1_weights) + layer1_biases)
+    h_pool1 = max_pool_2x2(h_conv1)
 
-    shape = hidden.get_shape().as_list()
-    reshape = tf.reshape(hidden, [shape[0], shape[1] * shape[2] * shape[3]])
-    hidden = tf.nn.relu(tf.matmul(reshape, layer3_weights) + layer3_biases)
-    return tf.matmul(hidden, layer4_weights) + layer4_biases
+    # Second Convolutional Layer
+    h_conv2 = tf.nn.relu(conv2d(h_pool1, layer2_weights) + layer2_biases)  
+    h_pool2 = max_pool_2x2(h_conv2)
+
+    # Densely Connected Layer 1
+    h_pool2_flat = tf.reshape(h_pool2, [-1, 7 * 7 * depth])
+    h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, layer3_weights) + layer3_biases)
+
+    # Dropout
+    h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
+    
+    # Readout Layer with Softmax
+    y = tf.nn.softmax(tf.matmul(h_fc1_drop, layer4_weights) + layer4_biases)
+    return y  
+
   
   # Training computation.
-  logits = model(tf_train_dataset)
+  keep_prob = 0.5
+  logits = model(tf_train_dataset, keep_prob)
   loss = tf.reduce_mean(
     tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
     
   # Optimizer.
   optimizer = tf.train.GradientDescentOptimizer(0.05).minimize(loss)
-  
+  #optimizer = tf.train.AdamOptimizer(1e-4).minimize(loss)
+
   # Predictions for the training, validation, and test data.
   train_prediction = tf.nn.softmax(logits)
-  valid_prediction = tf.nn.softmax(model(tf_valid_dataset))
-  test_prediction = tf.nn.softmax(model(tf_test_dataset))
+  valid_prediction = tf.nn.softmax(model(tf_valid_dataset, 1.0))
+  test_prediction = tf.nn.softmax(model(tf_test_dataset, 1.0))
 
 num_steps = 5001
 
