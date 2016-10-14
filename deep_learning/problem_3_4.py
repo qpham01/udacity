@@ -2,37 +2,35 @@ from read_data import *
 from time import time
 import tensorflow as tf
 
-beta = 0.002
-
 # The knobs
 batch_size = 128
 hidden_nodes = 2048
 hidden_nodes_l2 = 512
 starter_learn_rate = 0.5
-reg_beta = 5e-4
-num_steps = 20001
+reg_beta = 2e-3
+num_steps = 5001
 
 # Flow the data sets thru the layers
-def flowNN3Layer(d_set, use_dropout):
+def train_three_layer(X, use_dropout):
     # Training computation.
 
-    h1_logits = tf.nn.relu(tf.matmul(d_set, weights_1) + biases_1)
+    y1 = tf.nn.relu(tf.matmul(X, W1) + b1)
 
-    h2_logits = None
+    y2 = None
     if use_dropout:
-        h1_dropout = tf.nn.dropout(h1_logits, keep_prob)
-        h2_logits = tf.nn.relu(tf.matmul(h1_dropout, weights_2) + biases_2)
+        y1d = tf.nn.dropout(y1, input_keep_prob)
+        y2 = tf.nn.relu(tf.matmul(y1d, W2) + b2)
     else:
-        h2_logits = tf.nn.relu(tf.matmul(h1_logits, weights_2) + biases_2)
+        y2 = tf.nn.relu(tf.matmul(y1, W2) + b2)
 
-    h3_logits = None
+    y3 = None
     if use_dropout:
-        h2_dropout = tf.nn.dropout(h2_logits, keep_prob)
-        h3_logits = tf.nn.relu(tf.matmul(h2_dropout, weights_3) + biases_3)
+        y2d = tf.nn.dropout(y2, train_keep_prob)
+        y3 = tf.nn.relu(tf.matmul(y2d, W3) + b3)
     else:
-        h3_logits = tf.nn.relu(tf.matmul(h2_logits, weights_3) + biases_3)
+        y3 = tf.nn.relu(tf.matmul(y2, W3) + b3)
 
-    return h3_logits
+    return y3
 
 # Graph with stochastic gradient descent
 graph = tf.Graph()
@@ -45,28 +43,29 @@ with graph.as_default():
     tf_test_dataset = tf.constant(test_dataset)
 
     # Variables.
-    keep_prob = tf.placeholder("float")
+    input_keep_prob = tf.placeholder("float")
+    train_keep_prob = tf.placeholder("float")
 
-    weights_1 = tf.Variable(tf.truncated_normal([image_size * image_size, hidden_nodes], stddev=0.03))
-    biases_1 = tf.Variable(tf.zeros([hidden_nodes]))
+    W1 = tf.Variable(tf.truncated_normal([image_size * image_size, hidden_nodes], stddev=0.03))
+    b1 = tf.Variable(tf.zeros([hidden_nodes]))
 
-    weights_2 = tf.Variable(tf.truncated_normal([hidden_nodes, hidden_nodes_l2], stddev=0.01))
-    biases_2 = tf.Variable(tf.zeros([hidden_nodes_l2]))
+    W2 = tf.Variable(tf.truncated_normal([hidden_nodes, hidden_nodes_l2], stddev=0.01))
+    b2 = tf.Variable(tf.zeros([hidden_nodes_l2]))
 
-    weights_3 = tf.Variable(tf.truncated_normal([hidden_nodes_l2, num_labels], stddev=0.01))
-    biases_3 = tf.Variable(tf.zeros([num_labels]))
+    W3 = tf.Variable(tf.truncated_normal([hidden_nodes_l2, num_labels], stddev=0.01))
+    b3 = tf.Variable(tf.zeros([num_labels]))
 
     # Computation
-    logits = flowNN3Layer(tf_train_dataset, True)
-    logits_valid = flowNN3Layer(tf_valid_dataset, True)
-    logits_test = flowNN3Layer(tf_test_dataset, True)
+    y_train = train_three_layer(tf_train_dataset, True)
+    y_valid = train_three_layer(tf_valid_dataset, True)
+    y_test = train_three_layer(tf_test_dataset, True)
 
-    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
+    loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y_train, tf_train_labels))
 
     # L2 regularization for the fully connected parameters.
     # https://tensorflow.googlesource.com/tensorflow/+/master/tensorflow/models/image/mnist/convolutional.py
-    regularizers = (tf.nn.l2_loss(weights_1) + tf.nn.l2_loss(biases_1) +
-                  tf.nn.l2_loss(weights_2) + tf.nn.l2_loss(biases_2))
+    regularizers = (tf.nn.l2_loss(W1) + tf.nn.l2_loss(b1) +
+                  tf.nn.l2_loss(W2) + tf.nn.l2_loss(b2))
     # Add the regularization term to the loss.
     loss += reg_beta * regularizers
 
@@ -82,9 +81,9 @@ with graph.as_default():
     merged = tf.merge_all_summaries()
 
 # Predictions for the training, validation, and test data.
-train_prediction = tf.nn.softmax(logits)
-valid_prediction = tf.nn.softmax(logits_valid)
-test_prediction = tf.nn.softmax(logits_test)
+train_prediction = tf.nn.softmax(y_train)
+valid_prediction = tf.nn.softmax(y_valid)
+test_prediction = tf.nn.softmax(y_test)
 
 # Let's run it
 with tf.Session(graph=graph) as session:
@@ -106,18 +105,18 @@ with tf.Session(graph=graph) as session:
         # Prepare a dictionary telling the session where to feed the minibatch.
         # The key of the dictionary is the placeholder node of the graph to be fed,
         # and the value is the numpy array to feed to it.
-        feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels, keep_prob : 0.5}
+        feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels, input_keep_prob : 0.9, train_keep_prob : 0.5}
         _, l, predictions, merged_summary, lr = session.run([optimizer, loss, train_prediction, merged, learn_rate], feed_dict=feed_dict)
         writer.add_summary(merged_summary, step)
 
         if step % 500 == 0:
             print("Minibatch loss at step %d: %f" % (step, l))
             print("Minibatch accuracy: %.1f%%" % accuracy(train_prediction.eval(
-                feed_dict={tf_train_dataset : batch_data, tf_train_labels : batch_labels, keep_prob : 1.0}), batch_labels))
+                feed_dict={tf_train_dataset : batch_data, tf_train_labels : batch_labels, input_keep_prob : 1.0, train_keep_prob: 1.0}), batch_labels))
             print("Learn rate: ", lr)
 
             # Calling .eval() on valid_prediction is basically like calling run(), but
             # just to get that one numpy array. Note that it recomputes all its graph dependencies.
-            print("Validation accuracy: %.1f%%" % accuracy(valid_prediction.eval(feed_dict={keep_prob : 1.0}), valid_labels))
+            print("Validation accuracy: %.1f%%" % accuracy(valid_prediction.eval(feed_dict={input_keep_prob : 1.0, train_keep_prob: 1.0}), valid_labels))
 
-    print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(feed_dict={keep_prob:1.0}), test_labels))
+    print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(feed_dict={input_keep_prob : 1.0, train_keep_prob: 1.0}), test_labels))
