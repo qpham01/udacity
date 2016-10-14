@@ -1,0 +1,4 @@
+notMNIST*
+*.pkl
+*.pickle
+.vscode
