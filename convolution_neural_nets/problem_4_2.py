@@ -2,11 +2,13 @@ from read_data import *
 import tensorflow as tf
 from time import time
 
-batch_size = 150
+batch_size = 128
 patch_size = 5
 depth = 16
-num_hidden = 64
+num_hidden = 2048
 output_step = 1000
+num_steps = 20001
+reg_beta = 0.002
 
 graph = tf.Graph()
 
@@ -73,6 +75,16 @@ with graph.as_default():
   loss = tf.reduce_mean(
     tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
     
+  # L2 regularization for the fully connected parameters.
+  # https://tensorflow.googlesource.com/tensorflow/+/master/tensorflow/models/image/mnist/convolutional.py
+  regularizers = (tf.nn.l2_loss(layer1_weights) + tf.nn.l2_loss(layer1_biases) +
+                  tf.nn.l2_loss(layer2_weights) + tf.nn.l2_loss(layer2_biases) +
+                  tf.nn.l2_loss(layer3_weights) + tf.nn.l2_loss(layer3_biases) +
+                  tf.nn.l2_loss(layer4_weights) + tf.nn.l2_loss(layer4_biases))
+
+  # Add the regularization term to the loss.
+  # loss += reg_beta * regularizers
+
   # Optimizer.
   optimizer = tf.train.GradientDescentOptimizer(0.05).minimize(loss)
   #optimizer = tf.train.AdamOptimizer(1e-4).minimize(loss)
@@ -81,8 +93,6 @@ with graph.as_default():
   train_prediction = tf.nn.softmax(logits)
   valid_prediction = tf.nn.softmax(model(tf_valid_dataset, 1.0))
   test_prediction = tf.nn.softmax(model(tf_test_dataset, 1.0))
-
-num_steps = 50001
 
 with tf.Session(graph=graph) as session:
   tf.initialize_all_variables().run()
