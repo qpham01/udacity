@@ -67,15 +67,16 @@ with graph.as_default():
     regularizers = (tf.nn.l2_loss(W1) + tf.nn.l2_loss(b1) +
                   tf.nn.l2_loss(W2) + tf.nn.l2_loss(b2))
     # Add the regularization term to the loss.
-    loss += reg_beta * regularizers
+    # loss += reg_beta * regularizers
 
     loss_summary = tf.scalar_summary("loss", loss)
 
-    global_step = tf.Variable(0)  # count the number of steps taken.
-    learn_rate = tf.train.exponential_decay(starter_learn_rate, global_step, 500, 0.96)
+    #global_step = tf.Variable(0)  # count the number of steps taken.
+    #learn_rate = tf.train.exponential_decay(starter_learn_rate, global_step, 500, 0.96)
 
     # Optimizer.
-    optimizer = tf.train.GradientDescentOptimizer(learn_rate).minimize(loss, global_step=global_step)
+    optimizer = tf.train.GradientDescentOptimizer(starter_learn_rate).minimize(loss)
+    #   minimize(loss, global_step=global_step)
 
     # Merge all the summaries and write them out to /tmp/mnist_logs
     merged = tf.merge_all_summaries()
@@ -93,6 +94,7 @@ with tf.Session(graph=graph) as session:
     tf.initialize_all_variables().run()
     print("Initialized")
 
+    t0 = time()
     for step in range(num_steps):
         # Pick an offset within the training data, which has been randomized.
         # Note: we could use better randomization across epochs.
@@ -106,17 +108,20 @@ with tf.Session(graph=graph) as session:
         # The key of the dictionary is the placeholder node of the graph to be fed,
         # and the value is the numpy array to feed to it.
         feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels, input_keep_prob : 0.9, train_keep_prob : 0.5}
-        _, l, predictions, merged_summary, lr = session.run([optimizer, loss, train_prediction, merged, learn_rate], feed_dict=feed_dict)
+        # _, l, predictions, merged_summary, lr = 
+            #session.run([optimizer, loss, train_prediction, merged, learn_rate], feed_dict=feed_dict)
+        _, l, predictions, merged_summary = session.run([optimizer, loss, train_prediction, merged], feed_dict=feed_dict)
         writer.add_summary(merged_summary, step)
 
         if step % 500 == 0:
             print("Minibatch loss at step %d: %f" % (step, l))
             print("Minibatch accuracy: %.1f%%" % accuracy(train_prediction.eval(
                 feed_dict={tf_train_dataset : batch_data, tf_train_labels : batch_labels, input_keep_prob : 1.0, train_keep_prob: 1.0}), batch_labels))
-            print("Learn rate: ", lr)
+            # print("Learn rate: ", lr)
 
             # Calling .eval() on valid_prediction is basically like calling run(), but
             # just to get that one numpy array. Note that it recomputes all its graph dependencies.
             print("Validation accuracy: %.1f%%" % accuracy(valid_prediction.eval(feed_dict={input_keep_prob : 1.0, train_keep_prob: 1.0}), valid_labels))
 
     print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(feed_dict={input_keep_prob : 1.0, train_keep_prob: 1.0}), test_labels))
+    print("Elapsed time:  %.1f seconds" % (time() - t0))

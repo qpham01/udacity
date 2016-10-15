@@ -76,7 +76,6 @@ with tf.Session(graph=graph) as session:
     if (step % 50 == 0):
       print('Minibatch loss at step %d: %f' % (step, l))
       print('Minibatch accuracy: %.1f%%' % accuracy(predictions, batch_labels))
-      print('Validation accuracy: %.1f%%' % accuracy(
-        valid_prediction.eval(), valid_labels))
+      print('Validation accuracy: %.1f%%' % accuracy(valid_prediction.eval(), valid_labels))
   print ('Elapsed time %.1f seconds' % (time() - t0))
   print('Test accuracy: %.1f%%' % accuracy(test_prediction.eval(), test_labels))

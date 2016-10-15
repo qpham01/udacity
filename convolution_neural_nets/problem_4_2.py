@@ -2,10 +2,11 @@ from read_data import *
 import tensorflow as tf
 from time import time
 
-batch_size = 50
+batch_size = 150
 patch_size = 5
 depth = 16
 num_hidden = 64
+output_step = 1000
 
 graph = tf.Graph()
 
@@ -81,7 +82,7 @@ with graph.as_default():
   valid_prediction = tf.nn.softmax(model(tf_valid_dataset, 1.0))
   test_prediction = tf.nn.softmax(model(tf_test_dataset, 1.0))
 
-num_steps = 5001
+num_steps = 50001
 
 with tf.Session(graph=graph) as session:
   tf.initialize_all_variables().run()
@@ -94,7 +95,7 @@ with tf.Session(graph=graph) as session:
     feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels}
     _, l, predictions = session.run(
       [optimizer, loss, train_prediction], feed_dict=feed_dict)
-    if (step % 50 == 0):
+    if (step % output_step == 0):
       print('Minibatch loss at step %d: %f' % (step, l))
       print('Minibatch accuracy: %.1f%%' % accuracy(predictions, batch_labels))
       print('Validation accuracy: %.1f%%' % accuracy(
