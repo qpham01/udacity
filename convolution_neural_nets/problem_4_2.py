@@ -9,6 +9,8 @@ num_hidden = 2048
 output_step = 1000
 num_steps = 20001
 reg_beta = 0.002
+starter_learn_rate = 0.05
+keep_prob = 0.5
 
 graph = tf.Graph()
 
@@ -70,7 +72,6 @@ with graph.as_default():
 
   
   # Training computation.
-  keep_prob = 0.5
   logits = model(tf_train_dataset, keep_prob)
   loss = tf.reduce_mean(
     tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
@@ -86,8 +87,19 @@ with graph.as_default():
   # loss += reg_beta * regularizers
 
   # Optimizer.
-  optimizer = tf.train.GradientDescentOptimizer(0.05).minimize(loss)
+  optimizer = tf.train.GradientDescentOptimizer(starter_learn_rate).minimize(loss)
   #optimizer = tf.train.AdamOptimizer(1e-4).minimize(loss)
+
+  # Add learning rate decay
+
+  # global_step = tf.Variable(0)  # count the number of steps taken.
+  # learn_rate = tf.train.exponential_decay(starter_learn_rate, global_step, 500, 0.96)
+
+  # Optimizer.
+  #optimizer = tf.train.GradientDescentOptimizer(learn_rate).minimize(loss, global_step=global_step)
+
+  # Merge all the summaries and write them out to /tmp/mnist_logs
+  merged = tf.merge_all_summaries()
 
   # Predictions for the training, validation, and test data.
   train_prediction = tf.nn.softmax(logits)
@@ -110,5 +122,6 @@ with tf.Session(graph=graph) as session:
       print('Minibatch accuracy: %.1f%%' % accuracy(predictions, batch_labels))
       print('Validation accuracy: %.1f%%' % accuracy(
         valid_prediction.eval(), valid_labels))
+      # print('Learn rate: ', lr)  
   print ('Elapsed time %.1f seconds' % (time() - t0))
   print('Test accuracy: %.1f%%' % accuracy(test_prediction.eval(), test_labels))
