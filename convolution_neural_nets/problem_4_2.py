@@ -7,7 +7,7 @@ patch_size = 5
 depth = 16
 num_hidden = 2048
 output_step = 1000
-num_steps = 200001
+num_steps = 100001
 reg_beta = 0.002
 starter_learn_rate = 0.05
 keep_prob = 0.5
@@ -78,13 +78,11 @@ with graph.as_default():
     
   # L2 regularization for the fully connected parameters.
   # https://tensorflow.googlesource.com/tensorflow/+/master/tensorflow/models/image/mnist/convolutional.py
-  regularizers = (tf.nn.l2_loss(layer1_weights) + tf.nn.l2_loss(layer1_biases) +
-                  tf.nn.l2_loss(layer2_weights) + tf.nn.l2_loss(layer2_biases) +
-                  tf.nn.l2_loss(layer3_weights) + tf.nn.l2_loss(layer3_biases) +
+  regularizers = (tf.nn.l2_loss(layer3_weights) + tf.nn.l2_loss(layer3_biases) +
                   tf.nn.l2_loss(layer4_weights) + tf.nn.l2_loss(layer4_biases))
 
   # Add the regularization term to the loss.
-  # loss += reg_beta * regularizers
+  loss += reg_beta * regularizers
 
   # Optimizer.
   optimizer = tf.train.GradientDescentOptimizer(starter_learn_rate).minimize(loss)
