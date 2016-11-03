@@ -5,6 +5,7 @@ import unittest
 from next_word import next_word_probability
 from next_word import probability_from_count
 from later_words import later_words_probabilities
+from later_words import best_later_word
 
 TEST_TEXT1 = 'This is a test. That is not a test and is a mess.'
 ONE_THIRD = 1.0/3.0
@@ -48,6 +49,13 @@ class TestProbability(unittest.TestCase):
         self.assertEqual(TWO_THIRDS, later_words[1]['a'][0]['test'])
         self.assertEqual(ONE_THIRD, later_words[1]['a'][0]['mess'])
         self.assertEqual(1, later_words[1]['not'][0]['a'])
+
+    def test_best_later_words(self):
+        '''Test best_later_word'''
+        best = best_later_word(TEST_TEXT1, 'is', 2)
+        print best
+        self.assertEqual('test', best[0])
+        self.assertAlmostEqual(0.44444444, best[1])
 
 if __name__ == '__main__':
     unittest.main()

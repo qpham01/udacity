@@ -52,24 +52,45 @@ def later_words_probabilities(sample, word, distance):
 
     return node
 
-def leaf_probabilities(root):
+def leaf_probabilities(root, parent_probability):
     '''
     Calculates the probabilities of the leaf nodes given the root of a probability tree
     '''
-    leaf_prob = dict()
-    return leaf_prob
+    node = root[0]
+    if len(root) == 1:
+        # At leaf
+        leaf_probs = []
+        for key, value in node.iteritems():
+            leaf_probs.append([key, parent_probability * value])
+        return leaf_probs
+    else:
+        # Still on a branch
+        edges = root[1]
+        leaves = []
+        for key, value in node.iteritems():
+            prob = parent_probability * value
+            children = leaf_probabilities(edges[key], prob)
+            for leaf in children:
+                leaves.append(leaf)
+        return leaves
 
 def best_later_word(sample, word, distance):
     '''
     Calculate the word with the maximum probabilities some distance after given word
     '''
     prob_tree = later_words_probabilities(sample, word, distance)
-    leaf_prob = leaf_probabilities(prob_tree)
+    leaf_probs = leaf_probabilities(prob_tree, 1.0)
 
-    best_word = max(leaf_prob.iteritems(), key=operator.itemgetter(1))[0]
-    best_word_prob = leaf_prob[best_word]
-    return best_word_prob
+    best_word = None
+    best_word_prob = 0
+    for item in leaf_probs:
+        if item[1] > best_word_prob:
+            best_word_prob = item[1]
+            best_word = item[0]
+
+    return [best_word, best_word_prob]
+
 
 #print best_later_word(SAMPLE_MEMO, "ahead", 2)
-TEST_TEXT2 = 'This is a test. That is not a test and is a mess.'
-print later_words_probabilities(TEST_TEXT2, 'is', 2)
+for guess_word in WORDS_TO_GUESS:
+    print best_later_word(SAMPLE_MEMO, guess_word, 2)
