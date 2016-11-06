@@ -162,29 +162,13 @@ clf_B = LogisticRegressionCV(random_state=1001)
 clf_C = BaggingClassifier(random_state=1001)
 
 # TODO: Set up the training set sizes
-X_train_100 = X_train[0:100]
-y_train_100 = y_train[0:100]
-
-X_train_200 = X_train[0:200]
-y_train_200 = y_train[0:200]
-
-X_train_300 = X_train[0:300]
-y_train_300 = y_train[0:300]
-
 # TODO: Execute the 'train_predict' function for each classifier and each training set size
-train_predict(clf_A, X_train_100, y_train_100, X_test, y_test)
-train_predict(clf_A, X_train_200, y_train_200, X_test, y_test)
-train_predict(clf_A, X_train_300, y_train_300, X_test, y_test)
-
 # TODO: Execute the 'train_predict' function for each classifier and each training set size
-train_predict(clf_B, X_train_100, y_train_100, X_test, y_test)
-train_predict(clf_B, X_train_200, y_train_200, X_test, y_test)
-train_predict(clf_B, X_train_300, y_train_300, X_test, y_test)
-
 # TODO: Execute the 'train_predict' function for each classifier and each training set size
-train_predict(clf_C, X_train_100, y_train_100, X_test, y_test)
-train_predict(clf_C, X_train_200, y_train_200, X_test, y_test)
-train_predict(clf_C, X_train_300, y_train_300, X_test, y_test)
+for clf in [clf_A, clf_B, clf_C]:
+    print "\n{}: \n".format(clf.__class__.__name__)
+    for n in [100, 200, 300]:
+        train_predict(clf, X_train[:n], y_train[:n], X_test, y_test)
 
 print clf_C
 

@@ -11801,7 +11801,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Import libraries</span>
@@ -11853,14 +11853,14 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># TODO: Calculate number of students</span>
 <span class="n">n_students</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">student_data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 
 <span class="c1"># TODO: Calculate number of features</span>
-<span class="n">n_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">student_data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+<span class="n">n_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">student_data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
 <span class="c1"># TODO: Calculate passing students</span>
 <span class="n">PASSED</span> <span class="o">=</span> <span class="n">student_data</span><span class="p">[</span><span class="n">student_data</span><span class="p">[</span><span class="s1">&#39;passed&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;yes&#39;</span><span class="p">]</span>
@@ -11892,7 +11892,7 @@ div#notebook {
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>Total number of students: 395
-Number of features: 31
+Number of features: 30
 Number of students who passed: 265.0
 Number of students who failed: 130.0
 Graduation rate of the class: 67.09%
@@ -11918,7 +11918,7 @@ Graduation rate of the class: 67.09%
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Extract feature columns</span>
@@ -12000,7 +12000,7 @@ Feature values:
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">preprocess_features</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
@@ -12071,7 +12071,7 @@ Feature values:
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># TODO: Import any additional functionality you may need here</span>
@@ -12084,7 +12084,7 @@ Feature values:
 <span class="n">num_test</span> <span class="o">=</span> <span class="n">X_all</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">num_train</span>
 
 <span class="c1"># TODO: Shuffle and split the data into training and testing subsets</span>
-<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_all</span><span class="p">,</span> <span class="n">y_all</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="n">num_test</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">222</span><span class="p">)</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_all</span><span class="p">,</span> <span class="n">y_all</span><span class="p">,</span> <span class="n">test_size</span> <span class="o">=</span> <span class="n">num_test</span><span class="p">,</span> <span class="n">random_state</span> <span class="o">=</span> <span class="mi">222</span><span class="p">)</span>
 
 <span class="c1"># Show the results of the split</span>
 <span class="k">print</span> <span class="s2">&quot;Training set has {} samples.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -12153,7 +12153,7 @@ Testing set has 95 samples.
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p><strong>Answer: </strong></p>
-<p>The classifier versions of SVM, Bagging, and LogisticRegression are three appropriate models for this problem.  For this dataset, hey are the best performing versions with default settings from each of the following families of models, respectively: Instance-Based Learning (SVM), Ensemble Learning (Bagging), and Linear Models (LogisticRegression).  LogisticRegression in its standard form with its use of logits is also a binary classifier.  Bagging can be applied to either binary or multi-category classification.  Naive Bayes and Decision Trees were also tested but they significantly underperform the above models using default settings with test F1 scores in the mid 70%.</p>
+<p>The classifier versions of SVM, Bagging, and LogisticRegression are three appropriate models for this problem.  For this dataset, hey are the best performing versions with default settings from each of the following families of models, respectively: Instance-Based Learning (SVM), Ensemble Learning (Bagging), and Linear Models (LogisticRegression). These three are typically among the first to be tried due to their ease of use, simplicity of tuning (particularly Bagging), transparency (LogisticRegression) and likelihood of good performance (all three, see details below). With our small dataset, it was actually practical to actually try every single one of the classifiers in the above supervised learning list to see how well they did on this dataset out of the box.  These three classifiers are among the best performing.  Naive Bayes and Decision Trees were also tested but they significantly underperform the above models using default settings with test F1 scores in the mid 70%.</p>
 <p><em>Note: Stochastic Gradient Descent, also a linear model, outperforms LogisticRegression with default settings on this dataset with 100 and 200 data points but fails to predict any outcome for 300 data points; so LogisticRegression is chosen to represent linear models instead. Also, while the other three ensemble options are all known to work better in general than Bagging, with the default settings on this dataset Bagging gives the best F1 score by over 2% so it is chosen... the data has spoken.</em></p>
 <p><strong>SVM</strong></p>
 <p>SVM has been widely used in countless manners since its invention in the late 1990s.  One SVM application list can be found here: <a href="http://www.clopinet.com/SVM.applications.html">http://www.clopinet.com/SVM.applications.html</a>.  From the lectures, SVM works well with complicated, high dimensional datasets where the data is cleanly separated, being a maximum margin type of classifier.  However, because the training time is cubic to dataset size, training of large datasets can be too costly in time and/or processing resources, and if the data is noisy, then SVMs could overfit on the noise.</p>
@@ -12165,7 +12165,7 @@ Testing set has 95 samples.
 <p>– Non-traditional data like strings and trees can be used as input to SVM, instead of feature vectors</p>
 <p>Weaknesses of SVM include:</p>
 <p>– Need a “good” kernel function, meaning that finding a good kernel function for a particular dataset requires expertise.</p>
-<p>SVM, being a maximum margin classifier, is essentially a binary classifier which is the problem here, though it could be extended for multi-class classification.  Noisy data means a probabilistic NaiveBayes classifier is a better choice, but since SVM substantially outperforms NaiveBayes out of the box on this dataset, it seems noise will not be a significant issue.</p>
+<p>SVM, being a maximum margin classifier, is essentially a binary classifier which directly applicable to the problem here, though it could also work for multi-class classification.  For small samples and non-text classification SVM should be one of the first classifiers to try due to its simplicity of use and likelihood of good performance out of of the box.</p>
 <p><strong>Bagging</strong></p>
 <p>The paper at <a href="http://www.sciencedirect.com/science/article/pii/S1877050915007103">http://www.sciencedirect.com/science/article/pii/S1877050915007103</a> describes an application of Bagging Classifier for credit card frautd detection.  From the brief lecture on bagging, the main advantage discussed is the separate fitting of different data subsets and averaging of these sub-fits that makes the overall fit less affected by outliers and less likely to overfit to any one part of the data.</p>
 <p>I found a list of Bagging strengths and weaknesses at <a href="http://www.datasciencecentral.com/m/blogpost?id=6448529%3ABlogPost%3A428995">http://www.datasciencecentral.com/m/blogpost?id=6448529%3ABlogPost%3A428995</a></p>
@@ -12189,7 +12189,7 @@ Since it is tree based it confers most of the advantages of trees like handling 
 Lack of transparancy due to the complexity of multiple tree
 
 </code></pre>
-<p>BaggingClassifier can be used for binary or for multi-class classification.</p>
+<p>BaggingClassifier is another easy to use classifier that could work well regardless of outliers and noise.  It's a good approach to try first because it has the potential to yield good result with relatively little tuning due to only a few parameters that have known good default values.  It's tree-based approach can handle non-linear relationships if they are present.  With our 30 features and potential datapoints in the thousands its slowness from increased complexity won't be much of an issue.</p>
 <p><strong>LogisticRegression</strong></p>
 <p>The paper at <a href="http://www.math.montana.edu/grad/writing-projects/09sulock.pdf">http://www.math.montana.edu/grad/writing-projects/09sulock.pdf</a> describes an application of logistic regression to predicting college enrollment. LogisticRegression wasn't covered by the source materials, but in separate readings I gather that this is a classifier that determines the probability of value of a binary dependent variable based on a number of input independent variables using the logistic distribution function.  This is the exactly the form of the student intervention problem where there is a number of (presumably, but not proven) independent variables (sex, age, Mjob, etc.) that determines the likelihood of a binary dependent variable (passed, yes or no).</p>
 <p>A list of strengths and weaknesses of logistric regression can be found at <a href="http://www.edvancer.in/logistic-regression-vs-decision-trees-vs-svm-part2/">http://www.edvancer.in/logistic-regression-vs-decision-trees-vs-svm-part2/</a></p>
@@ -12216,7 +12216,7 @@ Relies on entire data [ Not a very serious drawback I’d say]
 
 </code></pre>
 <p>I've also read that logistic regression will overfit if there are dependencies among the features and will not produce good models if one or more relevant features are omitted from the data.  Hopefully the features are sufficiently relevant to the dependent variables 'passed' so predictions with this model will be useful.</p>
-<p>LogisticRegression is designed for binary classification which is the case with the student intervention problem.</p>
+<p>LogisticRegression is often recommended as one of the first classifier to try since it can work quickly and transparently.  It's widely used for this reason.  With 30 features there could be a performance issue with LogisticRegression but empirically it still seems to work well on this dataset and much better than decision trees.  It's top level performance among all the various classifiers on this dataset indicates that its weaknesses are not substantially in play here.</p>
 
 </div>
 </div>
@@ -12241,7 +12241,7 @@ Relies on entire data [ Not a very serious drawback I’d say]
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="k">def</span> <span class="nf">train_classifier</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">):</span>
@@ -12314,7 +12314,7 @@ Relies on entire data [ Not a very serious drawback I’d say]
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># TODO: Import the three supervised learning models from sklearn</span>
@@ -12328,29 +12328,13 @@ Relies on entire data [ Not a very serious drawback I’d say]
 <span class="n">clf_C</span> <span class="o">=</span> <span class="n">LogisticRegressionCV</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">1001</span><span class="p">)</span>
 
 <span class="c1"># TODO: Set up the training set sizes</span>
-<span class="n">X_train_100</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">100</span><span class="p">]</span>
-<span class="n">y_train_100</span> <span class="o">=</span> <span class="n">y_train</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">100</span><span class="p">]</span>
-
-<span class="n">X_train_200</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">200</span><span class="p">]</span>
-<span class="n">y_train_200</span> <span class="o">=</span> <span class="n">y_train</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">200</span><span class="p">]</span>
-
-<span class="n">X_train_300</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">300</span><span class="p">]</span>
-<span class="n">y_train_300</span> <span class="o">=</span> <span class="n">y_train</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">300</span><span class="p">]</span>
-
 <span class="c1"># TODO: Execute the &#39;train_predict&#39; function for each classifier and each training set size</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_A</span><span class="p">,</span> <span class="n">X_train_100</span><span class="p">,</span> <span class="n">y_train_100</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_A</span><span class="p">,</span> <span class="n">X_train_200</span><span class="p">,</span> <span class="n">y_train_200</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_A</span><span class="p">,</span> <span class="n">X_train_300</span><span class="p">,</span> <span class="n">y_train_300</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-
 <span class="c1"># TODO: Execute the &#39;train_predict&#39; function for each classifier and each training set size</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_B</span><span class="p">,</span> <span class="n">X_train_100</span><span class="p">,</span> <span class="n">y_train_100</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_B</span><span class="p">,</span> <span class="n">X_train_200</span><span class="p">,</span> <span class="n">y_train_200</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_B</span><span class="p">,</span> <span class="n">X_train_300</span><span class="p">,</span> <span class="n">y_train_300</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-
 <span class="c1"># TODO: Execute the &#39;train_predict&#39; function for each classifier and each training set size</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_C</span><span class="p">,</span> <span class="n">X_train_100</span><span class="p">,</span> <span class="n">y_train_100</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_C</span><span class="p">,</span> <span class="n">X_train_200</span><span class="p">,</span> <span class="n">y_train_200</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
-<span class="n">train_predict</span><span class="p">(</span><span class="n">clf_C</span><span class="p">,</span> <span class="n">X_train_300</span><span class="p">,</span> <span class="n">y_train_300</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">clf</span> <span class="ow">in</span> <span class="p">[</span><span class="n">clf_A</span><span class="p">,</span> <span class="n">clf_B</span><span class="p">,</span> <span class="n">clf_C</span><span class="p">]:</span>
+    <span class="k">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">{}: </span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">300</span><span class="p">]:</span>
+        <span class="n">train_predict</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_train</span><span class="p">[:</span><span class="n">n</span><span class="p">],</span> <span class="n">y_train</span><span class="p">[:</span><span class="n">n</span><span class="p">],</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12363,17 +12347,20 @@ Relies on entire data [ Not a very serious drawback I’d say]
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Training a SVC using a training set size of 100. . .
-Trained model in 0.0020 seconds
+<pre>
+SVC: 
+
+Training a SVC using a training set size of 100. . .
+Trained model in 0.0010 seconds
 Made predictions in 0.0010 seconds.
 F1 score for training set: 0.8701.
 Made predictions in 0.0010 seconds.
 F1 score for test set: 0.8375.
 Training a SVC using a training set size of 200. . .
-Trained model in 0.0050 seconds
+Trained model in 0.0040 seconds
 Made predictions in 0.0030 seconds.
 F1 score for training set: 0.8822.
-Made predictions in 0.0020 seconds.
+Made predictions in 0.0010 seconds.
 F1 score for test set: 0.8366.
 Training a SVC using a training set size of 300. . .
 Trained model in 0.0090 seconds
@@ -12381,39 +12368,45 @@ Made predictions in 0.0060 seconds.
 F1 score for training set: 0.8739.
 Made predictions in 0.0020 seconds.
 F1 score for test set: 0.8205.
+
+BaggingClassifier: 
+
 Training a BaggingClassifier using a training set size of 100. . .
 Trained model in 0.0240 seconds
-Made predictions in 0.0020 seconds.
+Made predictions in 0.0010 seconds.
 F1 score for training set: 0.9851.
 Made predictions in 0.0020 seconds.
 F1 score for test set: 0.7910.
 Training a BaggingClassifier using a training set size of 200. . .
-Trained model in 0.0280 seconds
-Made predictions in 0.0010 seconds.
+Trained model in 0.0290 seconds
+Made predictions in 0.0020 seconds.
 F1 score for training set: 0.9846.
 Made predictions in 0.0010 seconds.
 F1 score for test set: 0.7424.
 Training a BaggingClassifier using a training set size of 300. . .
-Trained model in 0.0330 seconds
-Made predictions in 0.0020 seconds.
+Trained model in 0.0320 seconds
+Made predictions in 0.0030 seconds.
 F1 score for training set: 0.9975.
-Made predictions in 0.0010 seconds.
+Made predictions in 0.0020 seconds.
 F1 score for test set: 0.8321.
+
+LogisticRegressionCV: 
+
 Training a LogisticRegressionCV using a training set size of 100. . .
-Trained model in 0.4640 seconds
-Made predictions in 0.0010 seconds.
-F1 score for training set: 0.9000.
+Trained model in 0.4580 seconds
 Made predictions in 0.0000 seconds.
+F1 score for training set: 0.9000.
+Made predictions in 0.0010 seconds.
 F1 score for test set: 0.8194.
 Training a LogisticRegressionCV using a training set size of 200. . .
-Trained model in 0.5180 seconds
-Made predictions in 0.0000 seconds.
-F1 score for training set: 0.8311.
+Trained model in 0.4480 seconds
 Made predictions in 0.0010 seconds.
+F1 score for training set: 0.8311.
+Made predictions in 0.0000 seconds.
 F1 score for test set: 0.8138.
 Training a LogisticRegressionCV using a training set size of 300. . .
-Trained model in 0.4630 seconds
-Made predictions in 0.0020 seconds.
+Trained model in 0.3930 seconds
+Made predictions in 0.0010 seconds.
 F1 score for training set: 0.8117.
 Made predictions in 0.0000 seconds.
 F1 score for test set: 0.8267.
@@ -12627,7 +12620,7 @@ F1 score for test set: 0.8267.
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># TODO: Import &#39;GridSearchCV&#39; and &#39;make_scorer&#39;</span>
@@ -12687,13 +12680,27 @@ F1 score for test set: 0.8267.
 [CV] max_features=0.6, max_samples=0.1, n_estimators=10 ..............
 [CV]  max_features=0.6, max_samples=0.1, n_estimators=10, score=0.762500 -   0.1s
 [CV] max_features=0.6, max_samples=0.1, n_estimators=10 ..............
-[CV]  max_features=0.6, max_samples=0.1, n_estimators=10, score=0.760563 -   0.1s
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>C:\Program Files\Anaconda2\lib\site-packages\sklearn\cross_validation.py:516: Warning: The least populated class in y has only 2 members, which is too few. The minimum number of labels for any class cannot be less than n_folds=3.
+  % (min_labels, self.n_folds)), Warning)
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[CV]  max_features=0.6, max_samples=0.1, n_estimators=10, score=0.760563 -   0.1s
 [CV] max_features=0.6, max_samples=0.1, n_estimators=15 ..............
-[CV]  max_features=0.6, max_samples=0.1, n_estimators=15, score=0.787500 -   0.2s
+[CV]  max_features=0.6, max_samples=0.1, n_estimators=15, score=0.787500 -   0.1s
 [CV] max_features=0.6, max_samples=0.1, n_estimators=15 ..............
-[CV]  max_features=0.6, max_samples=0.1, n_estimators=15, score=0.797468 -   0.2s
+[CV]  max_features=0.6, max_samples=0.1, n_estimators=15, score=0.797468 -   0.1s
 [CV] max_features=0.6, max_samples=0.1, n_estimators=15 ..............
-[CV]  max_features=0.6, max_samples=0.1, n_estimators=15, score=0.712121 -   0.2s
+[CV]  max_features=0.6, max_samples=0.1, n_estimators=15, score=0.712121 -   0.1s
 [CV] max_features=0.6, max_samples=0.2, n_estimators=5 ...............
 [CV]  max_features=0.6, max_samples=0.2, n_estimators=5, score=0.802721 -   0.0s
 [CV] max_features=0.6, max_samples=0.2, n_estimators=5 ...............
@@ -12745,7 +12752,7 @@ F1 score for test set: 0.8267.
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stderr output_text">
-<pre>[Parallel(n_jobs=1)]: Done  31 tasks       | elapsed:    6.2s
+<pre>[Parallel(n_jobs=1)]: Done  31 tasks       | elapsed:    5.4s
 </pre>
 </div>
 </div>
@@ -12756,11 +12763,11 @@ F1 score for test set: 0.8267.
 [CV] max_features=0.8, max_samples=0.1, n_estimators=10 ..............
 [CV]  max_features=0.8, max_samples=0.1, n_estimators=10, score=0.748387 -   0.1s
 [CV] max_features=0.8, max_samples=0.1, n_estimators=15 ..............
-[CV]  max_features=0.8, max_samples=0.1, n_estimators=15, score=0.795031 -   0.2s
+[CV]  max_features=0.8, max_samples=0.1, n_estimators=15, score=0.795031 -   0.1s
 [CV] max_features=0.8, max_samples=0.1, n_estimators=15 ..............
-[CV]  max_features=0.8, max_samples=0.1, n_estimators=15, score=0.745098 -   0.2s
+[CV]  max_features=0.8, max_samples=0.1, n_estimators=15, score=0.745098 -   0.1s
 [CV] max_features=0.8, max_samples=0.1, n_estimators=15 ..............
-[CV]  max_features=0.8, max_samples=0.1, n_estimators=15, score=0.795031 -   0.2s
+[CV]  max_features=0.8, max_samples=0.1, n_estimators=15, score=0.795031 -   0.1s
 [CV] max_features=0.8, max_samples=0.2, n_estimators=5 ...............
 [CV]  max_features=0.8, max_samples=0.2, n_estimators=5, score=0.748201 -   0.0s
 [CV] max_features=0.8, max_samples=0.2, n_estimators=5 ...............
@@ -12792,11 +12799,11 @@ F1 score for test set: 0.8267.
 [CV] max_features=0.8, max_samples=0.3, n_estimators=10 ..............
 [CV]  max_features=0.8, max_samples=0.3, n_estimators=10, score=0.719424 -   0.1s
 [CV] max_features=0.8, max_samples=0.3, n_estimators=15 ..............
-[CV]  max_features=0.8, max_samples=0.3, n_estimators=15, score=0.780822 -   0.3s
+[CV]  max_features=0.8, max_samples=0.3, n_estimators=15, score=0.780822 -   0.2s
 [CV] max_features=0.8, max_samples=0.3, n_estimators=15 ..............
-[CV]  max_features=0.8, max_samples=0.3, n_estimators=15, score=0.802632 -   0.3s
+[CV]  max_features=0.8, max_samples=0.3, n_estimators=15, score=0.802632 -   0.2s
 [CV] max_features=0.8, max_samples=0.3, n_estimators=15 ..............
-[CV]  max_features=0.8, max_samples=0.3, n_estimators=15, score=0.742857 -   0.3s
+[CV]  max_features=0.8, max_samples=0.3, n_estimators=15, score=0.742857 -   0.2s
 [CV] max_features=1.0, max_samples=0.1, n_estimators=5 ...............
 [CV]  max_features=1.0, max_samples=0.1, n_estimators=5, score=0.764706 -   0.0s
 [CV] max_features=1.0, max_samples=0.1, n_estimators=5 ...............
@@ -12810,11 +12817,11 @@ F1 score for test set: 0.8267.
 [CV] max_features=1.0, max_samples=0.1, n_estimators=10 ..............
 [CV]  max_features=1.0, max_samples=0.1, n_estimators=10, score=0.773723 -   0.1s
 [CV] max_features=1.0, max_samples=0.1, n_estimators=15 ..............
-[CV]  max_features=1.0, max_samples=0.1, n_estimators=15, score=0.746667 -   0.2s
+[CV]  max_features=1.0, max_samples=0.1, n_estimators=15, score=0.746667 -   0.1s
 [CV] max_features=1.0, max_samples=0.1, n_estimators=15 ..............
-[CV]  max_features=1.0, max_samples=0.1, n_estimators=15, score=0.768212 -   0.2s
+[CV]  max_features=1.0, max_samples=0.1, n_estimators=15, score=0.768212 -   0.1s
 [CV] max_features=1.0, max_samples=0.1, n_estimators=15 ..............
-[CV]  max_features=1.0, max_samples=0.1, n_estimators=15, score=0.777778 -   0.2s
+[CV]  max_features=1.0, max_samples=0.1, n_estimators=15, score=0.777778 -   0.1s
 [CV] max_features=1.0, max_samples=0.2, n_estimators=5 ...............
 [CV]  max_features=1.0, max_samples=0.2, n_estimators=5, score=0.787097 -   0.0s
 [CV] max_features=1.0, max_samples=0.2, n_estimators=5 ...............
@@ -12840,24 +12847,24 @@ F1 score for test set: 0.8267.
 [CV] max_features=1.0, max_samples=0.3, n_estimators=5 ...............
 [CV]  max_features=1.0, max_samples=0.3, n_estimators=5, score=0.746667 -   0.0s
 [CV] max_features=1.0, max_samples=0.3, n_estimators=10 ..............
-[CV]  max_features=1.0, max_samples=0.3, n_estimators=10, score=0.765101 -   0.2s
+[CV]  max_features=1.0, max_samples=0.3, n_estimators=10, score=0.765101 -   0.1s
 [CV] max_features=1.0, max_samples=0.3, n_estimators=10 ..............
-[CV]  max_features=1.0, max_samples=0.3, n_estimators=10, score=0.797297 -   0.2s
+[CV]  max_features=1.0, max_samples=0.3, n_estimators=10, score=0.797297 -   0.1s
 [CV] max_features=1.0, max_samples=0.3, n_estimators=10 ..............
-[CV]  max_features=1.0, max_samples=0.3, n_estimators=10, score=0.773333 -   0.2s
+[CV]  max_features=1.0, max_samples=0.3, n_estimators=10, score=0.773333 -   0.1s
 [CV] max_features=1.0, max_samples=0.3, n_estimators=15 ..............
-[CV]  max_features=1.0, max_samples=0.3, n_estimators=15, score=0.781457 -   0.3s
+[CV]  max_features=1.0, max_samples=0.3, n_estimators=15, score=0.781457 -   0.2s
 [CV] max_features=1.0, max_samples=0.3, n_estimators=15 ..............
-[CV]  max_features=1.0, max_samples=0.3, n_estimators=15, score=0.773333 -   0.3s
+[CV]  max_features=1.0, max_samples=0.3, n_estimators=15, score=0.773333 -   0.2s
 [CV] max_features=1.0, max_samples=0.3, n_estimators=15 ..............
-[CV]  max_features=1.0, max_samples=0.3, n_estimators=15, score=0.783784 -   0.3s
+[CV]  max_features=1.0, max_samples=0.3, n_estimators=15, score=0.783784 -   0.2s
 </pre>
 </div>
 </div>
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stderr output_text">
-<pre>[Parallel(n_jobs=1)]: Done  81 out of  81 | elapsed:   17.8s finished
+<pre>[Parallel(n_jobs=1)]: Done  81 out of  81 | elapsed:   15.2s finished
 </pre>
 </div>
 </div>
@@ -12865,8 +12872,8 @@ F1 score for test set: 0.8267.
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-Grid search took 18.14 seconds.
-Made predictions in 0.0020 seconds.
+Grid search took 15.55 seconds.
+Made predictions in 0.0010 seconds.
 Tuned model has a training F1 score of 0.8344.
 Made predictions in 0.0010 seconds.
 Tuned model has a testing F1 score of 0.8421.
