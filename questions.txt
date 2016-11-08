@@ -1,0 +1,6 @@
+What is a good f1 score?
+- f1 score is between 0 and 1.  the closer to 1 the better.  Mid-eighties is pretty good.
+
+What is a good lab for understanding bias?
+
+Can independent component analysis (ICA) work on categorical data?
