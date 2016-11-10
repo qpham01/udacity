@@ -4,3 +4,5 @@ What is a good f1 score?
 What is a good lab for understanding bias?
 
 Can independent component analysis (ICA) work on categorical data?
+
+How is the R^2 score calculated and what does it mean?
