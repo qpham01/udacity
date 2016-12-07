@@ -18,6 +18,7 @@ class LearningAgent(Agent):
         self.Q = dict()          # Create a Q-table which will be a dictionary of tuples
         self.epsilon = epsilon   # Random exploration factor
         self.alpha = alpha       # Learning factor
+        self.trial = 1           # Trial counter
 
         ###########
         ## TO DO ##
@@ -33,6 +34,9 @@ class LearningAgent(Agent):
         # Select the destination as the new location to route to
         self.planner.route_to(destination)
 
+        #increment trial number
+        self.trial += 1
+
         ###########
         ## TO DO ##
         ###########
@@ -44,7 +48,10 @@ class LearningAgent(Agent):
             self.alpha = 0
         else:
             if self.epsilon > 0:
-                self.epsilon = self.epsilon - 0.01
+                #self.epsilon = self.epsilon - 0.003333
+                self.epsilon = math.exp(-0.005 * self.trial)
+                #self.epsilon = math.cos(0.0025 * self.trial)
+                #self.alpha += 0.0007
         return None
 
     def build_state(self):
@@ -223,7 +230,7 @@ def run():
     # Flags:
     #   tolerance  - epsilon tolerance before beginning testing, default is 0.05
     #   n_test     - discrete number of testing trials to perform, default is 0
-    sim.run(n_test=50)
+    sim.run(n_test=100)
 
 
 if __name__ == '__main__':
