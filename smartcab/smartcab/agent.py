@@ -118,7 +118,7 @@ class LearningAgent(Agent):
 
     def random_action(self):
         """ Returns a random action """
-        random.choice(self.valid_actions)
+        return random.choice(self.valid_actions)
         '''
         random_action = random.randint(1, 4)
         if random_action == 1:
@@ -165,20 +165,19 @@ class LearningAgent(Agent):
             receives an award. This function does not consider future rewards
             when conducting learning. """
 
-        action_key = action
-        # if action_key is None:
-        #    action_key = 'none'
 
         ###########
         ## TO DO ##
         ###########
         # When learning, implement the value iteration update rule
         #   Use only the learning rate 'alpha' (do not use the discount factor 'gamma')
-        current_q = self.Q[state][action_key]
-        next_q = reward # + self.gamma * self.get_maxQ(state) -- note second term is future learning discounted by gamma 
+        if self.learning:
+            action_key = action
+            current_q = self.Q[state][action_key]
+            next_q = reward # + self.gamma * self.get_maxQ(state) -- note second term is future learning discounted by gamma 
 
-        # move toward next_q by alpha
-        self.Q[state][action_key] = (1 - self.alpha) * current_q + self.alpha * next_q
+            # move toward next_q by alpha
+            self.Q[state][action_key] = (1 - self.alpha) * current_q + self.alpha * next_q
 
         return
 
