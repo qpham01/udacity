@@ -8,7 +8,7 @@ class LearningAgent(Agent):
     """ An agent that learns to drive in the Smartcab world.
         This is the object you will be modifying. """ 
 
-    def __init__(self, env, learning=False, epsilon=1.0, alpha=0.5, optimized=True):
+    def __init__(self, env, learning=False, epsilon=1.0, alpha=0.5, alpha_param=0.001, optimized=True):
         super(LearningAgent, self).__init__(env)     # Set the agent in the evironment 
         self.planner = RoutePlanner(self.env, self)  # Create a route planner
         self.valid_actions = self.env.valid_actions  # The set of valid actions
@@ -17,7 +17,8 @@ class LearningAgent(Agent):
         self.learning = learning # Whether the agent is expected to learn
         self.Q = dict()          # Create a Q-table which will be a dictionary of tuples
         self.epsilon = epsilon   # Random exploration factor
-        self.alpha = alpha       # Learning factor
+        self.alpha = alpha       # Initial alpha
+        self.alpha_param = alpha_param # Learning factor parameter
         self.trial = 1           # Trial counter
 
         ###########
@@ -48,10 +49,10 @@ class LearningAgent(Agent):
             self.alpha = 0
         else:
             if self.epsilon > 0:
-                #self.epsilon = self.epsilon - 0.003333
-                self.epsilon = math.exp(-0.005 * self.trial)
-                #self.epsilon = math.cos(0.0025 * self.trial)
-                #self.alpha += 0.0007
+                #self.epsilon = self.epsilon - 0.0033
+                #self.epsilon = math.exp(-0.0025 * self.trial)
+                self.epsilon = math.cos(0.0007 * self.trial)
+                self.alpha = math.cos(self.alpha_param * self.trial)
         return None
 
     def build_state(self):
@@ -101,6 +102,7 @@ class LearningAgent(Agent):
         # When learning, check if the 'state' is not in the Q-table
         # If it is not, create a new dictionary for that state
         #   Then, for each action available, set the initial Q-value to 0.0
+        '''
         if state not in self.Q:
             q_values = dict()
             q_values['none'] = 0
@@ -108,10 +110,16 @@ class LearningAgent(Agent):
             q_values['left'] = 0
             q_values['right'] = 0
             self.Q[state] = q_values
+        '''
+        if (self.learning) and (state not in self.Q):
+            self.Q[state] = {action: 0 for action in self.valid_actions}
+
         return
 
     def random_action(self):
         """ Returns a random action """
+        random.choice(self.valid_actions)
+        '''
         random_action = random.randint(1, 4)
         if random_action == 1:
             return None
@@ -121,6 +129,7 @@ class LearningAgent(Agent):
             return 'right'
         elif random_action == 4:
             return 'forward'
+        '''
 
     def choose_action(self, state):
         """ The choose_action function is called when the agent is asked to choose
@@ -142,11 +151,7 @@ class LearningAgent(Agent):
             for key in q_values:
                 if q_values[key] == max_q:
                     action = key
-                    if action == 'none':
-                        action = None
                     break
-            if action != self.next_waypoint:
-                action = None
         else:
             action = self.random_action()
 
@@ -159,8 +164,8 @@ class LearningAgent(Agent):
             when conducting learning. """
 
         action_key = action
-        if action_key is None:
-            action_key = 'none'
+        # if action_key is None:
+        #    action_key = 'none'
 
         ###########
         ## TO DO ##
@@ -168,7 +173,7 @@ class LearningAgent(Agent):
         # When learning, implement the value iteration update rule
         #   Use only the learning rate 'alpha' (do not use the discount factor 'gamma')
         current_q = self.Q[state][action_key]
-        next_q = reward + self.get_maxQ(state)
+        next_q = reward # + self.gamma * self.get_maxQ(state) -- note second term is future learning discounted by gamma 
 
         # move toward next_q by alpha
         self.Q[state][action_key] = (1 - self.alpha) * current_q + self.alpha * next_q
@@ -208,7 +213,7 @@ def run():
     #   learning   - set to True to force the driving agent to use Q-learning
     #    * epsilon - continuous value for the exploration factor, default is 1
     #    * alpha   - continuous value for the learning rate, default is 0.5
-    agent = env.create_agent(LearningAgent, learning=True, epsilon=1, alpha=0.5)
+    agent = env.create_agent(LearningAgent, learning=True, epsilon=1, alpha_param=0.0006)
 
     ##############
     # Follow the driving agent
@@ -230,7 +235,7 @@ def run():
     # Flags:
     #   tolerance  - epsilon tolerance before beginning testing, default is 0.05
     #   n_test     - discrete number of testing trials to perform, default is 0
-    sim.run(n_test=100)
+    sim.run(n_test=50)
 
 
 if __name__ == '__main__':
