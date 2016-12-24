@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import numpy as np
 import cv2
+from lane_segment import LaneSegment
 
 #reading in an image
 image = mpimg.imread('test_images/solidWhiteRight.jpg')
@@ -22,7 +23,7 @@ def grayscale(img):
     return cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     # Or use BGR2GRAY if you read an image with cv2.imread()
     # return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    
+
 def canny(img, low_threshold, high_threshold):
     """Applies the Canny transform"""
     return cv2.Canny(img, low_threshold, high_threshold)
@@ -34,48 +35,67 @@ def gaussian_blur(img, kernel_size):
 def region_of_interest(img, vertices):
     """
     Applies an image mask.
-    
+
     Only keeps the region of the image defined by the polygon
     formed from `vertices`. The rest of the image is set to black.
     """
     #defining a blank mask to start with
-    mask = np.zeros_like(img)   
-    
+    mask = np.zeros_like(img)
+
     #defining a 3 channel or 1 channel color to fill the mask with depending on the input image
     if len(img.shape) > 2:
         channel_count = img.shape[2]  # i.e. 3 or 4 depending on your image
         ignore_mask_color = (255,) * channel_count
     else:
         ignore_mask_color = 255
-        
-    #filling pixels inside the polygon defined by "vertices" with the fill color    
+
+    #filling pixels inside the polygon defined by "vertices" with the fill color
     cv2.fillPoly(mask, vertices, ignore_mask_color)
-    
+
     #returning the image only where mask pixels are nonzero
     masked_image = cv2.bitwise_and(img, mask)
     return masked_image
 
-
 def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
     """
-    NOTE: this is the function you might want to use as a starting point once you want to 
+    NOTE: this is the function you might want to use as a starting point once you want to
     average/extrapolate the line segments you detect to map out the full
     extent of the lane (going from the result shown in raw-lines-example.mp4
-    to that shown in P1_example.mp4).  
-    
-    Think about things like separating line segments by their 
+    to that shown in P1_example.mp4).
+
+    Think about things like separating line segments by their
     slope ((y2-y1)/(x2-x1)) to decide which segments are part of the left
-    line vs. the right line.  Then, you can average the position of each of 
+    line vs. the right line.  Then, you can average the position of each of
     the lines and extrapolate to the top and bottom of the lane.
-    
-    This function draws `lines` with `color` and `thickness`.    
+
+    This function draws `lines` with `color` and `thickness`.
     Lines are drawn on the image inplace (mutates the image).
     If you want to make the lines semi-transparent, think about combining
     this function with the weighted_img() function below
     """
+    MIN_DY = 5
+    MIN_ABS_SLOPE = 0.5
+    MAX_ABS_SLOPE = 3.0
+
+    MID_X = XSIZE / 2
+    print ("mid x", MID_X)
+    valid_lane_lines = []
     for line in lines:
-        for x1,y1,x2,y2 in line:
-            cv2.line(img, (x1, y1), (x2, y2), color, thickness)
+        for x1, y1, x2, y2 in line:
+            lane_segment = LaneSegment(x1, y1, x2, y2)
+            # Ignore segments that don't looks like lane lines in slope and length
+            if math.isnan(lane_segment.slope) or lane_segment.abs_d_y < MIN_DY or \
+                lane_segment.abs_slope < MIN_ABS_SLOPE or lane_segment.abs_slope > MAX_ABS_SLOPE:
+                continue
+            # Ignore segments that are on the wrong side of the screen based on slope
+            if (lane_segment.slope > 0 and lane_segment.min_x < MID_X) or \
+                (lane_segment.slope < 0 and lane_segment.max_x > MID_X):
+                print ("slope, max,min x", lane_segment.slope, lane_segment.max_x, lane_segment.min_x)
+                continue
+            valid_lane_lines.append(lane_segment)
+
+    for segment in valid_lane_lines:
+        cv2.line(img, (segment.px1, segment.py1), (segment.px2, segment.py2), color, thickness)
 
 def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
     """
@@ -94,11 +114,11 @@ def weighted_img(img, initial_img, α=0.8, β=1., λ=0.):
     """
     `img` is the output of the hough_lines(), An image with lines drawn on it.
     Should be a blank image (all black) with lines drawn on it.
-    
+
     `initial_img` should be the image before any processing.
-    
+
     The result image is computed as follows:
-    
+
     initial_img * α + img * β + λ
     NOTE: initial_img and img must be the same shape!
     """
@@ -118,17 +138,30 @@ HIGH_THRESHOLD=150
 RHO = 1 # distance resolution in pixels of the Hough grid
 THETA = np.pi/180 # angular resolution in radians of the Hough grid
 THRESHOLD = 10    # minimum number of votes (intersections in Hough grid cell)
-MIN_LINE_LENGTH = 30 #minimum number of pixels making up a line
+MIN_LINE_LENGTH = 20 #minimum number of pixels making up a line
 MAX_LINE_GAP = 10    # maximum gap in pixels between connectable line segments
+
+# Define expected image size
+XSIZE = 960
+YSIZE = 540
+
+# Define area of interest parameters
+DX1 = 60   # Pixels from left/right borders of bottom edge
+DX2 = 400  # Pixels from left/right borders of top edge
+DY = 300   # Pixels from top border of top edge
 
 import os
 test_images = os.listdir("test_images/")
 for test_image in test_images:
     # load in image
-    img = mpimg.imread('test_images/' + test_image)
+    initial_img = mpimg.imread('test_images/' + test_image)
+    xsize = image.shape[1]
+    ysize = image.shape[0]
+    if xsize != XSIZE or ysize != YSIZE:
+        raise Exception("Incorrect image size", xsize, ysize)
 
     # step 1: convert to grayscale
-    img = grayscale(img)
+    img = grayscale(initial_img)
 
     # step 2: blur
     img = gaussian_blur(img, KERNEL_SIZE)
@@ -139,12 +172,8 @@ for test_image in test_images:
     # step 4: calculate mask for region of interest
 
     # calculate vertices for region of interest
-    xsize = image.shape[1]
-    ysize = image.shape[0]
-    dx1 = 60
-    dx2 = 400
-    dy = 320
-    vertices = np.array([[(dx1, ysize), (dx2, dy), (xsize - dx2, dy), (xsize - dx1, ysize)]], dtype=np.int32)
+    vertices = np.array([[(DX1, YSIZE), (DX2, DY), (XSIZE - DX2, DY), (XSIZE - DX1, YSIZE)]],
+                        dtype=np.int32)
 
     # Next we'll create a masked edges image using cv2.fillPoly()
     mask = np.zeros_like(img)
@@ -155,10 +184,8 @@ for test_image in test_images:
 
     # step 5: apply Hough to find lines
     img = hough_lines(img, RHO, THETA, THRESHOLD, MIN_LINE_LENGTH, MAX_LINE_GAP)
-    
+
+    img = weighted_img(img, initial_img)
+
     # save to output
     mpimg.imsave("output/" + test_image, img)
-
-
-
-        
