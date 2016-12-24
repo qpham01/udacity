@@ -73,13 +73,14 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
     If you want to make the lines semi-transparent, think about combining
     this function with the weighted_img() function below
     """
-    MIN_DY = 5
-    MIN_ABS_SLOPE = 0.5
-    MAX_ABS_SLOPE = 3.0
+    left_lane_lines = []
+    right_lane_lines = []
 
-    MID_X = XSIZE / 2
-    print ("mid x", MID_X)
-    valid_lane_lines = []
+    left_top_x = 0
+    right_top_x = XSIZE
+    left_top_y = YSIZE
+    right_top_y = YSIZE
+
     for line in lines:
         for x1, y1, x2, y2 in line:
             lane_segment = LaneSegment(x1, y1, x2, y2)
@@ -87,14 +88,26 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
             if math.isnan(lane_segment.slope) or lane_segment.abs_d_y < MIN_DY or \
                 lane_segment.abs_slope < MIN_ABS_SLOPE or lane_segment.abs_slope > MAX_ABS_SLOPE:
                 continue
-            # Ignore segments that are on the wrong side of the screen based on slope
-            if (lane_segment.slope > 0 and lane_segment.min_x < MID_X) or \
-                (lane_segment.slope < 0 and lane_segment.max_x > MID_X):
-                print ("slope, max,min x", lane_segment.slope, lane_segment.max_x, lane_segment.min_x)
-                continue
-            valid_lane_lines.append(lane_segment)
-
-    for segment in valid_lane_lines:
+            if lane_segment.slope > 0:
+                if lane_segment.min_x < MID_X:
+                    # Ignore segments that are on the wrong side of the screen based on slope
+                    continue
+                if lane_segment.max_x > left_top_x and lane_segment.min_y < left_top_y:
+                    left_top_x = lane_segment.max_x
+                    left_top_y = lane_segment.min_y
+                left_lane_lines.append(lane_segment)
+            if lane_segment.slope < 0:
+                if lane_segment.max_x > MID_X:
+                    # Ignore segments that are on the wrong side of the screen based on slope
+                    continue
+                if lane_segment.min_x < right_top_x and lane_segment.min_y < right_top_y:
+                    right_top_x = lane_segment.min_x
+                    right_top_y = lane_segment.min_y
+                right_lane_lines.append(lane_segment)
+                
+    for segment in left_lane_lines:
+        cv2.line(img, (segment.px1, segment.py1), (segment.px2, segment.py2), color, thickness)
+    for segment in right_lane_lines:
         cv2.line(img, (segment.px1, segment.py1), (segment.px2, segment.py2), color, thickness)
 
 def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
@@ -105,7 +118,7 @@ def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
     """
     lines = cv2.HoughLinesP(img, rho, theta, threshold, np.array([]), minLineLength=min_line_len, maxLineGap=max_line_gap)
     line_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
-    draw_lines(line_img, lines)
+    draw_lines(line_img, lines, thickness=5)
     return line_img
 
 # Python 3 has support for cool math symbols.
@@ -144,11 +157,18 @@ MAX_LINE_GAP = 10    # maximum gap in pixels between connectable line segments
 # Define expected image size
 XSIZE = 960
 YSIZE = 540
+MID_X = XSIZE / 2
 
 # Define area of interest parameters
 DX1 = 60   # Pixels from left/right borders of bottom edge
 DX2 = 400  # Pixels from left/right borders of top edge
 DY = 300   # Pixels from top border of top edge
+
+# Lane filtering parameters
+MIN_DY = 5
+MIN_ABS_SLOPE = 0.5
+MAX_ABS_SLOPE = 3.0
+
 
 import os
 test_images = os.listdir("test_images/")
