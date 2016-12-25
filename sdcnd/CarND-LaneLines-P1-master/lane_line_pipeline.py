@@ -119,17 +119,6 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=2, filtering_lines=True,
             left1 = (longest_segment.px1, longest_segment.py1)
             left2 = (longest_segment.px2, longest_segment.py2)
 
-            """
-            # Calculate one pixel endpoint for each lane line side at the top
-            left_top = (left_max_x[0].max_x, left_max_x[0].min_y)
-
-            # Calculate two pixel endpoints for each lane line side at the bottom since
-            # at the bottom of the screen the lane width is substantial and should result
-            # in two edges detected, one for each side of the lane.
-            left_bottom1 = (left_max_y[1].min_x, left_max_y[1].max_y)
-            left_bottom2 = (left_max_y[0].min_x, left_max_y[0].max_y)
-            """
-
             # Extrapolate to top of image
             left_top = (int(extrapolate_x(left1, left2, dy)), dy)
 
@@ -154,17 +143,6 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=2, filtering_lines=True,
             longest_segment = longest_right[0]
             right1 = (longest_segment.px1, longest_segment.py1)
             right2 = (longest_segment.px2, longest_segment.py2)
-
-            """
-            # Calculate one pixel endpoint for each lane line side at the top
-            right_top = (right_min_x[0].min_x, right_min_x[0].min_y)
-
-            # Calculate two pixel endpoints for each lane line side at the bottom since
-            # at the bottom of the screen the lane width is substantial and should result
-            # in two edges detected, one for each side of the lane.
-            right_bottom1 = (right_max_y[1].max_x, right_max_y[1].max_y)
-            right_bottom2 = (right_max_y[0].max_x, right_max_y[0].max_y)
-            """
 
             # Extrapolate to top of image
             right_top = (int(extrapolate_x(right1, right2, dy)), dy)

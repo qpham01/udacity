@@ -14486,7 +14486,7 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[48]:</div>
+<div class="prompt input_prompt">In&nbsp;[62]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#importing some useful packages</span>
@@ -14534,7 +14534,7 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
         <span class="bp">self</span><span class="o">.</span><span class="n">max_x</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">px1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">px2</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_y</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">py1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">py2</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_y</span><span class="p">)</span>
-        
+
 <span class="k">def</span> <span class="nf">grayscale</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Applies the Grayscale transform</span>
 <span class="sd">    This will return an image with only one color channel</span>
@@ -14639,17 +14639,6 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
             <span class="n">left1</span> <span class="o">=</span> <span class="p">(</span><span class="n">longest_segment</span><span class="o">.</span><span class="n">px1</span><span class="p">,</span> <span class="n">longest_segment</span><span class="o">.</span><span class="n">py1</span><span class="p">)</span>
             <span class="n">left2</span> <span class="o">=</span> <span class="p">(</span><span class="n">longest_segment</span><span class="o">.</span><span class="n">px2</span><span class="p">,</span> <span class="n">longest_segment</span><span class="o">.</span><span class="n">py2</span><span class="p">)</span>
 
-            <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            # Calculate one pixel endpoint for each lane line side at the top</span>
-<span class="sd">            left_top = (left_max_x[0].max_x, left_max_x[0].min_y)</span>
-
-<span class="sd">            # Calculate two pixel endpoints for each lane line side at the bottom since</span>
-<span class="sd">            # at the bottom of the screen the lane width is substantial and should result</span>
-<span class="sd">            # in two edges detected, one for each side of the lane.</span>
-<span class="sd">            left_bottom1 = (left_max_y[1].min_x, left_max_y[1].max_y)</span>
-<span class="sd">            left_bottom2 = (left_max_y[0].min_x, left_max_y[0].max_y)</span>
-<span class="sd">            &quot;&quot;&quot;</span>
-
             <span class="c1"># Extrapolate to top of image</span>
             <span class="n">left_top</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">extrapolate_x</span><span class="p">(</span><span class="n">left1</span><span class="p">,</span> <span class="n">left2</span><span class="p">,</span> <span class="n">dy</span><span class="p">)),</span> <span class="n">dy</span><span class="p">)</span>
 
@@ -14674,17 +14663,6 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
             <span class="n">longest_segment</span> <span class="o">=</span> <span class="n">longest_right</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">right1</span> <span class="o">=</span> <span class="p">(</span><span class="n">longest_segment</span><span class="o">.</span><span class="n">px1</span><span class="p">,</span> <span class="n">longest_segment</span><span class="o">.</span><span class="n">py1</span><span class="p">)</span>
             <span class="n">right2</span> <span class="o">=</span> <span class="p">(</span><span class="n">longest_segment</span><span class="o">.</span><span class="n">px2</span><span class="p">,</span> <span class="n">longest_segment</span><span class="o">.</span><span class="n">py2</span><span class="p">)</span>
-
-            <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            # Calculate one pixel endpoint for each lane line side at the top</span>
-<span class="sd">            right_top = (right_min_x[0].min_x, right_min_x[0].min_y)</span>
-
-<span class="sd">            # Calculate two pixel endpoints for each lane line side at the bottom since</span>
-<span class="sd">            # at the bottom of the screen the lane width is substantial and should result</span>
-<span class="sd">            # in two edges detected, one for each side of the lane.</span>
-<span class="sd">            right_bottom1 = (right_max_y[1].max_x, right_max_y[1].max_y)</span>
-<span class="sd">            right_bottom2 = (right_max_y[0].max_x, right_max_y[0].max_y)</span>
-<span class="sd">            &quot;&quot;&quot;</span>
 
             <span class="c1"># Extrapolate to top of image</span>
             <span class="n">right_top</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">extrapolate_x</span><span class="p">(</span><span class="n">right1</span><span class="p">,</span> <span class="n">right2</span><span class="p">,</span> <span class="n">dy</span><span class="p">)),</span> <span class="n">dy</span><span class="p">)</span>
@@ -14807,11 +14785,6 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
     <span class="n">image_counter</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="k">return</span> <span class="n">img</span>
-
-<span class="c1">## Test on Images</span>
-
-<span class="n">Now</span> <span class="n">you</span> <span class="n">should</span> <span class="n">build</span> <span class="n">your</span> <span class="n">pipeline</span> <span class="n">to</span> <span class="n">work</span> <span class="n">on</span> <span class="n">the</span> <span class="n">images</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">directory</span> <span class="s2">&quot;test_images&quot;</span>  
-<span class="o">**</span><span class="n">You</span> <span class="n">should</span> <span class="n">make</span> <span class="n">sure</span> <span class="n">your</span> <span class="n">pipeline</span> <span class="n">works</span> <span class="n">well</span> <span class="n">on</span> <span class="n">these</span> <span class="n">images</span> <span class="n">before</span> <span class="n">you</span> <span class="k">try</span> <span class="n">the</span> <span class="n">videos</span><span class="o">.**</span>
 </pre></div>
 
 </div>
@@ -14845,7 +14818,7 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[46]:</div>
+<div class="prompt input_prompt">In&nbsp;[63]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
@@ -14860,7 +14833,7 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[46]:</div>
+<div class="output_area"><div class="prompt output_prompt">Out[63]:</div>
 
 
 <div class="output_text output_subarea output_execute_result">
@@ -14893,7 +14866,7 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[49]:</div>
+<div class="prompt input_prompt">In&nbsp;[64]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
@@ -14927,7 +14900,7 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[50]:</div>
+<div class="prompt input_prompt">In&nbsp;[65]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Import everything needed to edit/save/watch video clips</span>
@@ -14942,7 +14915,7 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[51]:</div>
+<div class="prompt input_prompt">In&nbsp;[66]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">process_image</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
@@ -15006,7 +14979,7 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[52]:</div>
+<div class="prompt input_prompt">In&nbsp;[67]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">white_output</span> <span class="o">=</span> <span class="s1">&#39;white.mp4&#39;</span>
@@ -15033,7 +15006,7 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stderr output_text">
-<pre>100%|█████████▉| 221/222 [00:12&lt;00:00, 15.13it/s]
+<pre>100%|█████████▉| 221/222 [00:12&lt;00:00, 17.02it/s]
 </pre>
 </div>
 </div>
@@ -15043,8 +15016,8 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 <pre>[MoviePy] Done.
 [MoviePy] &gt;&gt;&gt;&gt; Video ready: white.mp4 
 
-CPU times: user 2min 41s, sys: 7.06 s, total: 2min 48s
-Wall time: 13.1 s
+CPU times: user 2min 41s, sys: 7.58 s, total: 2min 49s
+Wall time: 13.4 s
 </pre>
 </div>
 </div>
@@ -15075,7 +15048,7 @@ Wall time: 13.1 s
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[53]:</div>
+<div class="prompt input_prompt">In&nbsp;[68]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
@@ -15093,7 +15066,7 @@ Wall time: 13.1 s
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[53]:</div>
+<div class="output_area"><div class="prompt output_prompt">Out[68]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 
@@ -15131,7 +15104,7 @@ Wall time: 13.1 s
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[54]:</div>
+<div class="prompt input_prompt">In&nbsp;[69]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">yellow_output</span> <span class="o">=</span> <span class="s1">&#39;yellow.mp4&#39;</span>
@@ -15158,7 +15131,7 @@ Wall time: 13.1 s
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stderr output_text">
-<pre>100%|█████████▉| 681/682 [00:38&lt;00:00, 17.73it/s]
+<pre>100%|█████████▉| 681/682 [00:39&lt;00:00, 17.18it/s]
 </pre>
 </div>
 </div>
@@ -15168,8 +15141,8 @@ Wall time: 13.1 s
 <pre>[MoviePy] Done.
 [MoviePy] &gt;&gt;&gt;&gt; Video ready: yellow.mp4 
 
-CPU times: user 8min 11s, sys: 22.2 s, total: 8min 33s
-Wall time: 39 s
+CPU times: user 8min 32s, sys: 22.7 s, total: 8min 55s
+Wall time: 40.2 s
 </pre>
 </div>
 </div>
@@ -15180,7 +15153,7 @@ Wall time: 39 s
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[55]:</div>
+<div class="prompt input_prompt">In&nbsp;[70]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
@@ -15198,7 +15171,7 @@ Wall time: 39 s
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[55]:</div>
+<div class="output_area"><div class="prompt output_prompt">Out[70]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 
@@ -15258,7 +15231,7 @@ Wall time: 39 s
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[56]:</div>
+<div class="prompt input_prompt">In&nbsp;[71]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">challenge_output</span> <span class="o">=</span> <span class="s1">&#39;extra.mp4&#39;</span>
@@ -15285,7 +15258,7 @@ Wall time: 39 s
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stderr output_text">
-<pre>100%|██████████| 251/251 [00:30&lt;00:00,  7.69it/s]
+<pre>100%|██████████| 251/251 [00:30&lt;00:00,  8.29it/s]
 </pre>
 </div>
 </div>
@@ -15295,7 +15268,7 @@ Wall time: 39 s
 <pre>[MoviePy] Done.
 [MoviePy] &gt;&gt;&gt;&gt; Video ready: extra.mp4 
 
-CPU times: user 5min, sys: 13.9 s, total: 5min 14s
+CPU times: user 4min 51s, sys: 12.8 s, total: 5min 4s
 Wall time: 31.2 s
 </pre>
 </div>
@@ -15307,7 +15280,7 @@ Wall time: 31.2 s
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[57]:</div>
+<div class="prompt input_prompt">In&nbsp;[72]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
@@ -15325,7 +15298,7 @@ Wall time: 31.2 s
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[57]:</div>
+<div class="output_area"><div class="prompt output_prompt">Out[72]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 
