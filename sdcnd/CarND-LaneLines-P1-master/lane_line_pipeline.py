@@ -75,40 +75,77 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
     """
     left_lane_lines = []
     right_lane_lines = []
+    #valid_segments = []
 
     for line in lines:
         for x1, y1, x2, y2 in line:
             lane_segment = LaneSegment(x1, y1, x2, y2)
             # Ignore segments that don't looks like lane lines in slope and length
-            if math.isnan(lane_segment.slope) or lane_segment.abs_d_y < MIN_DY or \
-                lane_segment.abs_slope < MIN_ABS_SLOPE or lane_segment.abs_slope > MAX_ABS_SLOPE:
-                continue
-            if lane_segment.slope > 0:
-                if lane_segment.min_x < MID_X:
-                    # Ignore segments that are on the wrong side of the screen based on slope
-                    continue
-                right_lane_lines.append(lane_segment)
-            if lane_segment.slope < 0:
-                if lane_segment.max_x > MID_X:
-                    # Ignore segments that are on the wrong side of the screen based on slope
-                    continue
-                left_lane_lines.append(lane_segment)
 
-    left_max_x = sorted(left_lane_lines, key=lambda x: x.max_x, reverse=True)
-    right_min_x = sorted(right_lane_lines, key=lambda x: x.min_x, reverse=False)
-    left_top = (left_max_x[0].max_x, left_max_x[0].min_y)
-    right_top = (right_min_x[0].min_x, right_min_x[0].min_y)
-    left_len = len(left_max_x)
-    right_len = len(right_min_x)
-    left_bottom1 = (left_max_x[left_len - 2].min_x, left_max_x[left_len - 2].max_y)
-    left_bottom2 = (left_max_x[left_len - 1].min_x, left_max_x[left_len - 1].max_y)
-    right_bottom1 = (right_min_x[right_len - 2].max_x, right_min_x[right_len - 2].max_y)
-    right_bottom2 = (right_min_x[right_len - 1].max_x, right_min_x[right_len - 1].max_y)
+            if True:
+                if math.isnan(lane_segment.slope) or lane_segment.abs_d_y < MIN_DY or \
+                    lane_segment.abs_slope < MIN_ABS_SLOPE or lane_segment.abs_slope > MAX_ABS_SLOPE:
+                    continue
+                if lane_segment.slope > 0:
+                    if lane_segment.min_x < MID_X:
+                        # Ignore segments that are on the wrong side of the screen based on slope
+                        continue
+                    right_lane_lines.append(lane_segment)
+                if lane_segment.slope < 0:
+                    if lane_segment.max_x > MID_X:
+                        # Ignore segments that are on the wrong side of the screen based on slope
+                        continue
+                    left_lane_lines.append(lane_segment)
 
-    cv2.line(img, left_bottom1, left_top, color, thickness)
-    cv2.line(img, left_bottom2, left_top, color, thickness)
-    cv2.line(img, right_bottom1, right_top, color, thickness)
-    cv2.line(img, right_bottom2, right_top, color, thickness)
+            #valid_segments.append(lane_segment)
+                
+    # for segment in valid_segments:
+    #    cv2.line(img, (segment.px1, segment.py1), (segment.px2, segment.py2), color, 2)
+
+    if len(left_lane_lines) > 1:
+        left_max_x = sorted(left_lane_lines, key=lambda x: x.max_x, reverse=True)
+        left_max_y = sorted(left_lane_lines, key=lambda x: x.max_y, reverse=True)
+
+        # Calculate one pixel endpoint for each lane line side at the top
+        left_top = (left_max_x[0].max_x, left_max_x[0].min_y)
+
+        # Calculate two pixel endpoints for each lane line side at the bottom since
+        # at the bottom of the screen the lane width is substantial and should result
+        # in two edges detected, one for each side of the lane.
+        left_bottom1 = (left_max_y[1].min_x, left_max_y[1].max_y)
+        left_bottom2 = (left_max_y[0].min_x, left_max_y[0].max_y)
+
+        # Extrapolate to bottom of image.
+        left_bottom1 = (int(extrapolate_x(left_top, left_bottom1, YSIZE)), YSIZE)
+        left_bottom2 = (int(extrapolate_x(left_top, left_bottom2, YSIZE)), YSIZE)
+
+        # Draw the four line segments from the bottom endpoints to the top endpoints
+        cv2.line(img, left_bottom1, left_top, color, thickness)
+        cv2.line(img, left_bottom2, left_top, color, thickness)
+    else:
+        print ("No left lane line found.")
+
+    if len(right_lane_lines) > 1:
+        right_min_x = sorted(right_lane_lines, key=lambda x: x.min_x, reverse=False)
+        right_max_y = sorted(right_lane_lines, key=lambda x: x.max_y, reverse=True)
+
+        # Calculate one pixel endpoint for each lane line side at the top
+        right_top = (right_min_x[0].min_x, right_min_x[0].min_y)
+
+        # Calculate two pixel endpoints for each lane line side at the bottom since
+        # at the bottom of the screen the lane width is substantial and should result
+        # in two edges detected, one for each side of the lane.
+        right_bottom1 = (right_max_y[1].max_x, right_max_y[1].max_y)
+        right_bottom2 = (right_max_y[0].max_x, right_max_y[0].max_y)
+
+        # Extrapolate to bottom of image.
+        right_bottom1 = (int(extrapolate_x(right_top, right_bottom1, YSIZE)), YSIZE)
+        right_bottom2 = (int(extrapolate_x(right_top, right_bottom2, YSIZE)), YSIZE)
+
+        cv2.line(img, right_bottom1, right_top, color, thickness)
+        cv2.line(img, right_bottom2, right_top, color, thickness)
+    else:
+        print ("No right lane line found.")
 
 def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
     """
@@ -137,6 +174,11 @@ def weighted_img(img, initial_img, α=0.8, β=1., λ=0.):
     """
     return cv2.addWeighted(initial_img, α, img, β, λ)
 
+def extrapolate_x(p1, p2, y):
+    slope = (p2[1] - p1[1]) / (p2[0] - p1[0])
+    y_intercept = p1[1] - slope * p1[0]    
+    return (y - y_intercept)/slope
+    
 # TODO: Build your pipeline that will draw lane lines on the test_images
 # then save them to the test_images directory.
 
@@ -161,27 +203,17 @@ MID_X = XSIZE / 2
 
 # Define area of interest parameters
 DX1 = 60   # Pixels from left/right borders of bottom edge
-DX2 = 400  # Pixels from left/right borders of top edge
-DY = 300   # Pixels from top border of top edge
+DX2 = 440  # Pixels from left/right borders of top edge
+DY = 320   # Pixels from top border of top edge
 
 # Lane filtering parameters
 MIN_DY = 5
 MIN_ABS_SLOPE = 0.5
 MAX_ABS_SLOPE = 3.0
 
-
-import os
-test_images = os.listdir("test_images/")
-for test_image in test_images:
-    # load in image
-    initial_img = mpimg.imread('test_images/' + test_image)
-    xsize = image.shape[1]
-    ysize = image.shape[0]
-    if xsize != XSIZE or ysize != YSIZE:
-        raise Exception("Incorrect image size", xsize, ysize)
-
+def process_image(image):
     # step 1: convert to grayscale
-    img = grayscale(initial_img)
+    img = grayscale(image)
 
     # step 2: blur
     img = gaussian_blur(img, KERNEL_SIZE)
@@ -205,7 +237,39 @@ for test_image in test_images:
     # step 5: apply Hough to find lines
     img = hough_lines(img, RHO, THETA, THRESHOLD, MIN_LINE_LENGTH, MAX_LINE_GAP)
 
-    img = weighted_img(img, initial_img)
+    img = weighted_img(img, image)
 
+    return img
+
+import os
+test_images = os.listdir("test_images/")
+for test_image in test_images:
+    # load in image
+    initial_img = mpimg.imread('test_images/' + test_image)
+    xsize = image.shape[1]
+    ysize = image.shape[0]
+    if xsize != XSIZE or ysize != YSIZE:
+        raise Exception("Incorrect image size", xsize, ysize)
+    img = process_image(initial_img)
     # save to output
     mpimg.imsave("output/" + test_image, img)
+
+# Import everything needed to edit/save/watch video clips
+from moviepy.editor import VideoFileClip
+from IPython.display import HTML
+
+white_output = 'white.mp4'
+clip1 = VideoFileClip("solidWhiteRight.mp4")
+white_clip = clip1.fl_image(process_image) #NOTE: this function expects color images!!
+white_clip.write_videofile(white_output, audio=False)
+
+yellow_output = 'yellow.mp4'
+clip2 = VideoFileClip('solidYellowLeft.mp4')
+yellow_clip = clip2.fl_image(process_image)
+yellow_clip.write_videofile(yellow_output, audio=False)
+"""
+challenge_output = 'extra.mp4'
+clip2 = VideoFileClip('challenge.mp4')
+challenge_clip = clip2.fl_image(process_image)
+challenge_clip.write_videofile(challenge_output, audio=False)
+"""
