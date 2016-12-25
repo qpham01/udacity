@@ -84,7 +84,8 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
 
             if True:
                 if math.isnan(lane_segment.slope) or lane_segment.abs_d_y < MIN_DY or \
-                    lane_segment.abs_slope < MIN_ABS_SLOPE or lane_segment.abs_slope > MAX_ABS_SLOPE:
+                    lane_segment.abs_slope < MIN_ABS_SLOPE or lane_segment.abs_slope > \
+                        MAX_ABS_SLOPE:
                     continue
                 if lane_segment.slope > 0:
                     if lane_segment.min_x < MID_X:
@@ -98,7 +99,7 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
                     left_lane_lines.append(lane_segment)
 
             #valid_segments.append(lane_segment)
-                
+
     # for segment in valid_segments:
     #    cv2.line(img, (segment.px1, segment.py1), (segment.px2, segment.py2), color, 2)
 
@@ -114,6 +115,9 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
         # in two edges detected, one for each side of the lane.
         left_bottom1 = (left_max_y[1].min_x, left_max_y[1].max_y)
         left_bottom2 = (left_max_y[0].min_x, left_max_y[0].max_y)
+
+        # Extrapolate to top of image
+        left_top = (int(extrapolate_x(left_bottom2, left_top, DY)), DY)
 
         # Extrapolate to bottom of image.
         left_bottom1 = (int(extrapolate_x(left_top, left_bottom1, YSIZE)), YSIZE)
@@ -137,6 +141,9 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
         # in two edges detected, one for each side of the lane.
         right_bottom1 = (right_max_y[1].max_x, right_max_y[1].max_y)
         right_bottom2 = (right_max_y[0].max_x, right_max_y[0].max_y)
+
+        # Extrapolate to top of image
+        right_top = (int(extrapolate_x(right_bottom2, right_top, DY)), DY)
 
         # Extrapolate to bottom of image.
         right_bottom1 = (int(extrapolate_x(right_top, right_bottom1, YSIZE)), YSIZE)
