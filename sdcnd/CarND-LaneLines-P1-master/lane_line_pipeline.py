@@ -76,11 +76,6 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
     left_lane_lines = []
     right_lane_lines = []
 
-    left_top_x = 0
-    right_top_x = XSIZE
-    left_top_y = YSIZE
-    right_top_y = YSIZE
-
     for line in lines:
         for x1, y1, x2, y2 in line:
             lane_segment = LaneSegment(x1, y1, x2, y2)
@@ -92,23 +87,28 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=2):
                 if lane_segment.min_x < MID_X:
                     # Ignore segments that are on the wrong side of the screen based on slope
                     continue
-                if lane_segment.max_x > left_top_x and lane_segment.min_y < left_top_y:
-                    left_top_x = lane_segment.max_x
-                    left_top_y = lane_segment.min_y
-                left_lane_lines.append(lane_segment)
+                right_lane_lines.append(lane_segment)
             if lane_segment.slope < 0:
                 if lane_segment.max_x > MID_X:
                     # Ignore segments that are on the wrong side of the screen based on slope
                     continue
-                if lane_segment.min_x < right_top_x and lane_segment.min_y < right_top_y:
-                    right_top_x = lane_segment.min_x
-                    right_top_y = lane_segment.min_y
-                right_lane_lines.append(lane_segment)
-                
-    for segment in left_lane_lines:
-        cv2.line(img, (segment.px1, segment.py1), (segment.px2, segment.py2), color, thickness)
-    for segment in right_lane_lines:
-        cv2.line(img, (segment.px1, segment.py1), (segment.px2, segment.py2), color, thickness)
+                left_lane_lines.append(lane_segment)
+
+    left_max_x = sorted(left_lane_lines, key=lambda x: x.max_x, reverse=True)
+    right_min_x = sorted(right_lane_lines, key=lambda x: x.min_x, reverse=False)
+    left_top = (left_max_x[0].max_x, left_max_x[0].min_y)
+    right_top = (right_min_x[0].min_x, right_min_x[0].min_y)
+    left_len = len(left_max_x)
+    right_len = len(right_min_x)
+    left_bottom1 = (left_max_x[left_len - 2].min_x, left_max_x[left_len - 2].max_y)
+    left_bottom2 = (left_max_x[left_len - 1].min_x, left_max_x[left_len - 1].max_y)
+    right_bottom1 = (right_min_x[right_len - 2].max_x, right_min_x[right_len - 2].max_y)
+    right_bottom2 = (right_min_x[right_len - 1].max_x, right_min_x[right_len - 1].max_y)
+
+    cv2.line(img, left_bottom1, left_top, color, thickness)
+    cv2.line(img, left_bottom2, left_top, color, thickness)
+    cv2.line(img, right_bottom1, right_top, color, thickness)
+    cv2.line(img, right_bottom2, right_top, color, thickness)
 
 def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
     """
