@@ -31,3 +31,4 @@ class LaneSegment:
         self.min_y = min(self.py1, self.py2)
         self.max_x = max(self.px1, self.px2)
         self.max_y = max(self.py1, self.py2)
+        self.length = math.sqrt(self.d_x * self.d_x + self.d_y * self.d_y)

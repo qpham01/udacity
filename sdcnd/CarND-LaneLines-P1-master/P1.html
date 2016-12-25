@@ -14486,7 +14486,7 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[36]:</div>
+<div class="prompt input_prompt">In&nbsp;[48]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#importing some useful packages</span>
@@ -14505,6 +14505,36 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 
 <span class="kn">import</span> <span class="nn">math</span>
 
+<span class="k">class</span> <span class="nc">LaneSegment</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Encapsultes a lane segment defined by a raster image</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">px1</span><span class="p">,</span> <span class="n">py1</span><span class="p">,</span> <span class="n">px2</span><span class="p">,</span> <span class="n">py2</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_endpoints</span><span class="p">(</span><span class="n">px1</span><span class="p">,</span> <span class="n">py1</span><span class="p">,</span> <span class="n">px2</span><span class="p">,</span> <span class="n">py2</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set_endpoints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">px1</span><span class="p">,</span> <span class="n">py1</span><span class="p">,</span> <span class="n">px2</span><span class="p">,</span> <span class="n">py2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set new endpoints for line segment.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">px1</span> <span class="o">=</span> <span class="n">px1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">py1</span> <span class="o">=</span> <span class="n">py1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">px2</span> <span class="o">=</span> <span class="n">px2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">py2</span> <span class="o">=</span> <span class="n">py2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_x</span> <span class="o">=</span> <span class="n">px2</span> <span class="o">-</span> <span class="n">px1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_y</span> <span class="o">=</span> <span class="n">py2</span> <span class="o">-</span> <span class="n">py1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">abs_d_y</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_y</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">abs_slope</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_y</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_x</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">abs_slope</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slope</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_x</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">px1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">px2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_y</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">py1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">py2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_x</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">px1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">px2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_y</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">py1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">py2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d_x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_y</span><span class="p">)</span>
+        
 <span class="k">def</span> <span class="nf">grayscale</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Applies the Grayscale transform</span>
 <span class="sd">    This will return an image with only one color channel</span>
@@ -14546,11 +14576,11 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
     <span class="n">masked_image</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">bitwise_and</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">masked_image</span>
 
-<span class="k">def</span> <span class="nf">draw_lines</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">thickness</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">draw_lines</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">thickness</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">filtering_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">draw_source_segment</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    NOTE: this is the function you might want to use as a starting point once you want to</span>
 <span class="sd">    average/extrapolate the line segments you detect to map out the full</span>
-<span class="sd">    extent of the lane (going from the result shown in raw-lines-example.mp4</span>
+<span class="sd">    extent of the lane (going from the result shown in raw-lines-example.</span>
 <span class="sd">    to that shown in P1_example.mp4).</span>
 
 <span class="sd">    Think about things like separating line segments by their</span>
@@ -14563,85 +14593,116 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 <span class="sd">    If you want to make the lines semi-transparent, think about combining</span>
 <span class="sd">    this function with the weighted_img() function below</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xsize</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">ysize</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">mid_x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">xsize</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">DY</span> <span class="o">*</span> <span class="n">ysize</span><span class="p">)</span>
+
     <span class="n">left_lane_lines</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">right_lane_lines</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="c1">#valid_segments = []</span>
+    <span class="n">valid_segments</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">filtering_lines</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">source_color</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">longest_color</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">]</span>
 
     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
             <span class="n">lane_segment</span> <span class="o">=</span> <span class="n">LaneSegment</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">)</span>
-            <span class="c1"># Ignore segments that don&#39;t looks like lane lines in slope and length</span>
 
-            <span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">filtering_lines</span><span class="p">:</span>
+                <span class="c1"># Ignore segments that don&#39;t looks like lane lines in slope and length</span>
                 <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">lane_segment</span><span class="o">.</span><span class="n">slope</span><span class="p">)</span> <span class="ow">or</span> <span class="n">lane_segment</span><span class="o">.</span><span class="n">abs_d_y</span> <span class="o">&lt;</span> <span class="n">MIN_DY</span> <span class="ow">or</span> \
-                    <span class="n">lane_segment</span><span class="o">.</span><span class="n">abs_slope</span> <span class="o">&lt;</span> <span class="n">MIN_ABS_SLOPE</span> <span class="ow">or</span> <span class="n">lane_segment</span><span class="o">.</span><span class="n">abs_slope</span> <span class="o">&gt;</span> <span class="n">MAX_ABS_SLOPE</span><span class="p">:</span>
+                    <span class="n">lane_segment</span><span class="o">.</span><span class="n">abs_slope</span> <span class="o">&lt;</span> <span class="n">MIN_ABS_SLOPE</span> <span class="ow">or</span> <span class="n">lane_segment</span><span class="o">.</span><span class="n">abs_slope</span> <span class="o">&gt;</span> \
+                        <span class="n">MAX_ABS_SLOPE</span><span class="p">:</span>
                     <span class="k">continue</span>
                 <span class="k">if</span> <span class="n">lane_segment</span><span class="o">.</span><span class="n">slope</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">lane_segment</span><span class="o">.</span><span class="n">min_x</span> <span class="o">&lt;</span> <span class="n">MID_X</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">lane_segment</span><span class="o">.</span><span class="n">min_x</span> <span class="o">&lt;</span> <span class="n">mid_x</span><span class="p">:</span>
                         <span class="c1"># Ignore segments that are on the wrong side of the screen based on slope</span>
                         <span class="k">continue</span>
                     <span class="n">right_lane_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lane_segment</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">lane_segment</span><span class="o">.</span><span class="n">slope</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">lane_segment</span><span class="o">.</span><span class="n">max_x</span> <span class="o">&gt;</span> <span class="n">MID_X</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">lane_segment</span><span class="o">.</span><span class="n">max_x</span> <span class="o">&gt;</span> <span class="n">mid_x</span><span class="p">:</span>
                         <span class="c1"># Ignore segments that are on the wrong side of the screen based on slope</span>
                         <span class="k">continue</span>
                     <span class="n">left_lane_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lane_segment</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">valid_segments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lane_segment</span><span class="p">)</span>
 
-            <span class="c1">#valid_segments.append(lane_segment)</span>
-                
-    <span class="c1"># for segment in valid_segments:</span>
-    <span class="c1">#    cv2.line(img, (segment.px1, segment.py1), (segment.px2, segment.py2), color, 2)</span>
+    <span class="k">if</span> <span class="n">filtering_lines</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">left_lane_lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># left_max_x = sorted(left_lane_lines, key=lambda x: x.max_x, reverse=True)</span>
+            <span class="c1"># left_max_y = sorted(left_lane_lines, key=lambda x: x.max_y, reverse=True)</span>
+            
+            <span class="n">longest_left</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">left_lane_lines</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">longest_segment</span> <span class="o">=</span> <span class="n">longest_left</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">left1</span> <span class="o">=</span> <span class="p">(</span><span class="n">longest_segment</span><span class="o">.</span><span class="n">px1</span><span class="p">,</span> <span class="n">longest_segment</span><span class="o">.</span><span class="n">py1</span><span class="p">)</span>
+            <span class="n">left2</span> <span class="o">=</span> <span class="p">(</span><span class="n">longest_segment</span><span class="o">.</span><span class="n">px2</span><span class="p">,</span> <span class="n">longest_segment</span><span class="o">.</span><span class="n">py2</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">left_lane_lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">left_max_x</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">left_lane_lines</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">max_x</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">left_max_y</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">left_lane_lines</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">max_y</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            # Calculate one pixel endpoint for each lane line side at the top</span>
+<span class="sd">            left_top = (left_max_x[0].max_x, left_max_x[0].min_y)</span>
 
-        <span class="c1"># Calculate one pixel endpoint for each lane line side at the top</span>
-        <span class="n">left_top</span> <span class="o">=</span> <span class="p">(</span><span class="n">left_max_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max_x</span><span class="p">,</span> <span class="n">left_max_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min_y</span><span class="p">)</span>
+<span class="sd">            # Calculate two pixel endpoints for each lane line side at the bottom since</span>
+<span class="sd">            # at the bottom of the screen the lane width is substantial and should result</span>
+<span class="sd">            # in two edges detected, one for each side of the lane.</span>
+<span class="sd">            left_bottom1 = (left_max_y[1].min_x, left_max_y[1].max_y)</span>
+<span class="sd">            left_bottom2 = (left_max_y[0].min_x, left_max_y[0].max_y)</span>
+<span class="sd">            &quot;&quot;&quot;</span>
 
-        <span class="c1"># Calculate two pixel endpoints for each lane line side at the bottom since</span>
-        <span class="c1"># at the bottom of the screen the lane width is substantial and should result</span>
-        <span class="c1"># in two edges detected, one for each side of the lane.</span>
-        <span class="n">left_bottom1</span> <span class="o">=</span> <span class="p">(</span><span class="n">left_max_y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">min_x</span><span class="p">,</span> <span class="n">left_max_y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">max_y</span><span class="p">)</span>
-        <span class="n">left_bottom2</span> <span class="o">=</span> <span class="p">(</span><span class="n">left_max_y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min_x</span><span class="p">,</span> <span class="n">left_max_y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max_y</span><span class="p">)</span>
+            <span class="c1"># Extrapolate to top of image</span>
+            <span class="n">left_top</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">extrapolate_x</span><span class="p">(</span><span class="n">left1</span><span class="p">,</span> <span class="n">left2</span><span class="p">,</span> <span class="n">dy</span><span class="p">)),</span> <span class="n">dy</span><span class="p">)</span>
 
-        <span class="c1"># Extrapolate to top of image</span>
-        <span class="n">left_top</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">extrapolate_x</span><span class="p">(</span><span class="n">left_bottom2</span><span class="p">,</span> <span class="n">left_top</span><span class="p">,</span> <span class="n">DY</span><span class="p">)),</span> <span class="n">DY</span><span class="p">)</span>
-        
-        <span class="c1"># Extrapolate to bottom of image.</span>
-        <span class="n">left_bottom1</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">extrapolate_x</span><span class="p">(</span><span class="n">left_top</span><span class="p">,</span> <span class="n">left_bottom1</span><span class="p">,</span> <span class="n">YSIZE</span><span class="p">)),</span> <span class="n">YSIZE</span><span class="p">)</span>
-        <span class="n">left_bottom2</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">extrapolate_x</span><span class="p">(</span><span class="n">left_top</span><span class="p">,</span> <span class="n">left_bottom2</span><span class="p">,</span> <span class="n">YSIZE</span><span class="p">)),</span> <span class="n">YSIZE</span><span class="p">)</span>
+            <span class="c1"># Extrapolate to bottom of image.</span>
+            <span class="n">left_bottom</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">extrapolate_x</span><span class="p">(</span><span class="n">left1</span><span class="p">,</span> <span class="n">left2</span><span class="p">,</span> <span class="n">ysize</span><span class="p">)),</span> <span class="n">ysize</span><span class="p">)</span>
 
-        <span class="c1"># Draw the four line segments from the bottom endpoints to the top endpoints</span>
-        <span class="n">cv2</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">left_bottom1</span><span class="p">,</span> <span class="n">left_top</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">thickness</span><span class="p">)</span>
-        <span class="n">cv2</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">left_bottom2</span><span class="p">,</span> <span class="n">left_top</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">thickness</span><span class="p">)</span>
+            <span class="c1"># Draw the four line segments from the bottom endpoints to the top endpoints</span>
+            <span class="n">cv2</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">left_bottom</span><span class="p">,</span> <span class="n">left_top</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">thickness</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">draw_source_segment</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">left_lane_lines</span><span class="p">:</span>
+                    <span class="n">cv2</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">px1</span><span class="p">,</span> <span class="n">segment</span><span class="o">.</span><span class="n">py1</span><span class="p">),</span> <span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">px2</span><span class="p">,</span> <span class="n">segment</span><span class="o">.</span><span class="n">py2</span><span class="p">),</span> <span class="n">source_color</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="n">cv2</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">left1</span><span class="p">,</span> <span class="n">left2</span><span class="p">,</span> <span class="n">longest_color</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No left lane line found.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">right_lane_lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1">#right_min_x = sorted(right_lane_lines, key=lambda x: x.min_x, reverse=False)</span>
+            <span class="c1">#right_max_y = sorted(right_lane_lines, key=lambda x: x.max_y, reverse=True)</span>
+
+            <span class="n">longest_right</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">right_lane_lines</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">longest_segment</span> <span class="o">=</span> <span class="n">longest_right</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">right1</span> <span class="o">=</span> <span class="p">(</span><span class="n">longest_segment</span><span class="o">.</span><span class="n">px1</span><span class="p">,</span> <span class="n">longest_segment</span><span class="o">.</span><span class="n">py1</span><span class="p">)</span>
+            <span class="n">right2</span> <span class="o">=</span> <span class="p">(</span><span class="n">longest_segment</span><span class="o">.</span><span class="n">px2</span><span class="p">,</span> <span class="n">longest_segment</span><span class="o">.</span><span class="n">py2</span><span class="p">)</span>
+
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            # Calculate one pixel endpoint for each lane line side at the top</span>
+<span class="sd">            right_top = (right_min_x[0].min_x, right_min_x[0].min_y)</span>
+
+<span class="sd">            # Calculate two pixel endpoints for each lane line side at the bottom since</span>
+<span class="sd">            # at the bottom of the screen the lane width is substantial and should result</span>
+<span class="sd">            # in two edges detected, one for each side of the lane.</span>
+<span class="sd">            right_bottom1 = (right_max_y[1].max_x, right_max_y[1].max_y)</span>
+<span class="sd">            right_bottom2 = (right_max_y[0].max_x, right_max_y[0].max_y)</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="c1"># Extrapolate to top of image</span>
+            <span class="n">right_top</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">extrapolate_x</span><span class="p">(</span><span class="n">right1</span><span class="p">,</span> <span class="n">right2</span><span class="p">,</span> <span class="n">dy</span><span class="p">)),</span> <span class="n">dy</span><span class="p">)</span>
+
+            <span class="c1"># Extrapolate to bottom of image.</span>
+            <span class="n">right_bottom</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">extrapolate_x</span><span class="p">(</span><span class="n">right1</span><span class="p">,</span> <span class="n">right2</span><span class="p">,</span> <span class="n">ysize</span><span class="p">)),</span> <span class="n">ysize</span><span class="p">)</span>
+
+            <span class="n">cv2</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">right_bottom</span><span class="p">,</span> <span class="n">right_top</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">thickness</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">draw_source_segment</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">right_lane_lines</span><span class="p">:</span>
+                    <span class="n">cv2</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">px1</span><span class="p">,</span> <span class="n">segment</span><span class="o">.</span><span class="n">py1</span><span class="p">),</span> <span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">px2</span><span class="p">,</span> <span class="n">segment</span><span class="o">.</span><span class="n">py2</span><span class="p">),</span> <span class="n">source_color</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="n">cv2</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">right1</span><span class="p">,</span> <span class="n">right2</span><span class="p">,</span> <span class="n">longest_color</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No right lane line found.&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;No left lane line found.&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">segment</span> <span class="ow">in</span> <span class="n">valid_segments</span><span class="p">:</span>
+            <span class="n">cv2</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">px1</span><span class="p">,</span> <span class="n">segment</span><span class="o">.</span><span class="n">py1</span><span class="p">),</span> <span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">px2</span><span class="p">,</span> <span class="n">segment</span><span class="o">.</span><span class="n">py2</span><span class="p">),</span> <span class="n">color</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">right_lane_lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">right_min_x</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">right_lane_lines</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">min_x</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">right_max_y</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">right_lane_lines</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">max_y</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-        <span class="c1"># Calculate one pixel endpoint for each lane line side at the top</span>
-        <span class="n">right_top</span> <span class="o">=</span> <span class="p">(</span><span class="n">right_min_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min_x</span><span class="p">,</span> <span class="n">right_min_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min_y</span><span class="p">)</span>
-
-        <span class="c1"># Calculate two pixel endpoints for each lane line side at the bottom since</span>
-        <span class="c1"># at the bottom of the screen the lane width is substantial and should result</span>
-        <span class="c1"># in two edges detected, one for each side of the lane.</span>
-        <span class="n">right_bottom1</span> <span class="o">=</span> <span class="p">(</span><span class="n">right_max_y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">max_x</span><span class="p">,</span> <span class="n">right_max_y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">max_y</span><span class="p">)</span>
-        <span class="n">right_bottom2</span> <span class="o">=</span> <span class="p">(</span><span class="n">right_max_y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max_x</span><span class="p">,</span> <span class="n">right_max_y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">max_y</span><span class="p">)</span>
-
-        <span class="c1"># Extrapolate to top of image</span>
-        <span class="n">right_top</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">extrapolate_x</span><span class="p">(</span><span class="n">right_bottom2</span><span class="p">,</span> <span class="n">right_top</span><span class="p">,</span> <span class="n">DY</span><span class="p">)),</span> <span class="n">DY</span><span class="p">)</span>
-
-        <span class="c1"># Extrapolate to bottom of image.</span>
-        <span class="n">right_bottom1</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">extrapolate_x</span><span class="p">(</span><span class="n">right_top</span><span class="p">,</span> <span class="n">right_bottom1</span><span class="p">,</span> <span class="n">YSIZE</span><span class="p">)),</span> <span class="n">YSIZE</span><span class="p">)</span>
-        <span class="n">right_bottom2</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">extrapolate_x</span><span class="p">(</span><span class="n">right_top</span><span class="p">,</span> <span class="n">right_bottom2</span><span class="p">,</span> <span class="n">YSIZE</span><span class="p">)),</span> <span class="n">YSIZE</span><span class="p">)</span>
-
-        <span class="n">cv2</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">right_bottom1</span><span class="p">,</span> <span class="n">right_top</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">thickness</span><span class="p">)</span>
-        <span class="n">cv2</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">right_bottom2</span><span class="p">,</span> <span class="n">right_top</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">thickness</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;No right lane line found.&quot;</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">hough_lines</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">min_line_len</span><span class="p">,</span> <span class="n">max_line_gap</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -14651,7 +14712,7 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">lines</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">HoughLinesP</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span> <span class="n">minLineLength</span><span class="o">=</span><span class="n">min_line_len</span><span class="p">,</span> <span class="n">maxLineGap</span><span class="o">=</span><span class="n">max_line_gap</span><span class="p">)</span>
     <span class="n">line_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
-    <span class="n">draw_lines</span><span class="p">(</span><span class="n">line_img</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+    <span class="n">draw_lines</span><span class="p">(</span><span class="n">line_img</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">draw_source_segment</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">line_img</span>
 
 <span class="c1"># Python 3 has support for cool math symbols.</span>
@@ -14679,35 +14740,37 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 <span class="c1"># then save them to the test_images directory.</span>
 
 <span class="c1"># define blur parameters</span>
-<span class="n">KERNEL_SIZE</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">KERNEL_SIZE</span> <span class="o">=</span> <span class="mi">1</span>
 
 <span class="c1"># Define the canny parameters</span>
-<span class="n">LOW_THRESHOLD</span><span class="o">=</span><span class="mi">50</span>
+<span class="n">LOW_THRESHOLD</span><span class="o">=</span><span class="mi">30</span>
 <span class="n">HIGH_THRESHOLD</span><span class="o">=</span><span class="mi">150</span>
 
 <span class="c1"># Define the Hough transform parameters</span>
 <span class="n">RHO</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># distance resolution in pixels of the Hough grid</span>
 <span class="n">THETA</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span> <span class="c1"># angular resolution in radians of the Hough grid</span>
 <span class="n">THRESHOLD</span> <span class="o">=</span> <span class="mi">10</span>    <span class="c1"># minimum number of votes (intersections in Hough grid cell)</span>
-<span class="n">MIN_LINE_LENGTH</span> <span class="o">=</span> <span class="mi">20</span> <span class="c1">#minimum number of pixels making up a line</span>
+<span class="n">MIN_LINE_LENGTH</span> <span class="o">=</span> <span class="mi">10</span> <span class="c1">#minimum number of pixels making up a line</span>
 <span class="n">MAX_LINE_GAP</span> <span class="o">=</span> <span class="mi">10</span>    <span class="c1"># maximum gap in pixels between connectable line segments</span>
 
-<span class="c1"># Define expected image size</span>
-<span class="n">XSIZE</span> <span class="o">=</span> <span class="mi">960</span>
-<span class="n">YSIZE</span> <span class="o">=</span> <span class="mi">540</span>
-<span class="n">MID_X</span> <span class="o">=</span> <span class="n">XSIZE</span> <span class="o">/</span> <span class="mi">2</span>
-
 <span class="c1"># Define area of interest parameters</span>
-<span class="n">DX1</span> <span class="o">=</span> <span class="mi">60</span>   <span class="c1"># Pixels from left/right borders of bottom edge</span>
-<span class="n">DX2</span> <span class="o">=</span> <span class="mi">440</span>  <span class="c1"># Pixels from left/right borders of top edge</span>
-<span class="n">DY</span> <span class="o">=</span> <span class="mi">320</span>   <span class="c1"># Pixels from top border of top edge</span>
+<span class="n">DX1</span> <span class="o">=</span> <span class="mf">0.0625</span>   <span class="c1"># Pixels from left/right borders of bottom edge</span>
+<span class="n">DX2</span> <span class="o">=</span> <span class="mf">0.46</span>  <span class="c1"># Pixels from left/right borders of top edge</span>
+<span class="n">DY</span> <span class="o">=</span> <span class="mf">0.6</span>   <span class="c1"># Pixels from top border of top edge</span>
 
 <span class="c1"># Lane filtering parameters</span>
 <span class="n">MIN_DY</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="n">MIN_ABS_SLOPE</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">MIN_ABS_SLOPE</span> <span class="o">=</span> <span class="mf">0.55</span>
 <span class="n">MAX_ABS_SLOPE</span> <span class="o">=</span> <span class="mf">3.0</span>
 
+<span class="n">image_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
 <span class="k">def</span> <span class="nf">process_image</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">image_counter</span>
+
+    <span class="n">xsize</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">ysize</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
     <span class="c1"># step 1: convert to grayscale</span>
     <span class="n">img</span> <span class="o">=</span> <span class="n">grayscale</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
 
@@ -14718,9 +14781,13 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
     <span class="n">img</span> <span class="o">=</span> <span class="n">canny</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">LOW_THRESHOLD</span><span class="p">,</span> <span class="n">HIGH_THRESHOLD</span><span class="p">)</span>
 
     <span class="c1"># step 4: calculate mask for region of interest</span>
+    <span class="c1"># calculate mask parameters</span>
+    <span class="n">dx1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">DX1</span> <span class="o">*</span> <span class="n">xsize</span><span class="p">)</span>
+    <span class="n">dx2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">DX2</span> <span class="o">*</span> <span class="n">xsize</span><span class="p">)</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">DY</span> <span class="o">*</span> <span class="n">ysize</span><span class="p">)</span>
 
     <span class="c1"># calculate vertices for region of interest</span>
-    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[(</span><span class="n">DX1</span><span class="p">,</span> <span class="n">YSIZE</span><span class="p">),</span> <span class="p">(</span><span class="n">DX2</span><span class="p">,</span> <span class="n">DY</span><span class="p">),</span> <span class="p">(</span><span class="n">XSIZE</span> <span class="o">-</span> <span class="n">DX2</span><span class="p">,</span> <span class="n">DY</span><span class="p">),</span> <span class="p">(</span><span class="n">XSIZE</span> <span class="o">-</span> <span class="n">DX1</span><span class="p">,</span> <span class="n">YSIZE</span><span class="p">)]],</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[(</span><span class="n">dx1</span><span class="p">,</span> <span class="n">ysize</span><span class="p">),</span> <span class="p">(</span><span class="n">dx2</span><span class="p">,</span> <span class="n">dy</span><span class="p">),</span> <span class="p">(</span><span class="n">xsize</span> <span class="o">-</span> <span class="n">dx2</span><span class="p">,</span> <span class="n">dy</span><span class="p">),</span> <span class="p">(</span><span class="n">xsize</span> <span class="o">-</span> <span class="n">dx1</span><span class="p">,</span> <span class="n">ysize</span><span class="p">)]],</span>
                         <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
 
     <span class="c1"># Next we&#39;ll create a masked edges image using cv2.fillPoly()</span>
@@ -14735,7 +14802,16 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 
     <span class="n">img</span> <span class="o">=</span> <span class="n">weighted_img</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">image</span><span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">image_counter</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">mpimg</span><span class="o">.</span><span class="n">imsave</span><span class="p">(</span><span class="s2">&quot;output/&quot;</span> <span class="o">+</span> <span class="s2">&quot;frame&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">image_counter</span><span class="p">),</span> <span class="n">img</span><span class="p">)</span>
+    <span class="n">image_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
     <span class="k">return</span> <span class="n">img</span>
+
+<span class="c1">## Test on Images</span>
+
+<span class="n">Now</span> <span class="n">you</span> <span class="n">should</span> <span class="n">build</span> <span class="n">your</span> <span class="n">pipeline</span> <span class="n">to</span> <span class="n">work</span> <span class="n">on</span> <span class="n">the</span> <span class="n">images</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">directory</span> <span class="s2">&quot;test_images&quot;</span>  
+<span class="o">**</span><span class="n">You</span> <span class="n">should</span> <span class="n">make</span> <span class="n">sure</span> <span class="n">your</span> <span class="n">pipeline</span> <span class="n">works</span> <span class="n">well</span> <span class="n">on</span> <span class="n">these</span> <span class="n">images</span> <span class="n">before</span> <span class="n">you</span> <span class="k">try</span> <span class="n">the</span> <span class="n">videos</span><span class="o">.**</span>
 </pre></div>
 
 </div>
@@ -14762,15 +14838,14 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Test-on-Images">Test on Images<a class="anchor-link" href="#Test-on-Images">&#182;</a></h2><p>Now you should build your pipeline to work on the images in the directory "test_images"<br>
-<strong>You should make sure your pipeline works well on these images before you try the videos.</strong></p>
+<p><strong>Note:</strong> In the hough_lines method, look for the draw_line call.  Change the draw_source_segment parameter to True to see the segments from canny/hough processing in green and the segment used as the lane line in blue.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[37]:</div>
+<div class="prompt input_prompt">In&nbsp;[46]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
@@ -14785,17 +14860,19 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[37]:</div>
+<div class="output_area"><div class="prompt output_prompt">Out[46]:</div>
 
 
 <div class="output_text output_subarea output_execute_result">
 <pre>[&#39;solidYellowCurve.jpg&#39;,
+ &#39;challenge3.jpg&#39;,
  &#39;solidYellowCurve2.jpg&#39;,
  &#39;solidYellowLeft.jpg&#39;,
  &#39;solidWhiteCurve.jpg&#39;,
  &#39;whiteCarLaneSwitch.jpg&#39;,
  &#39;challenge1.jpg&#39;,
- &#39;solidWhiteRight.jpg&#39;]</pre>
+ &#39;solidWhiteRight.jpg&#39;,
+ &#39;challenge2.jpg&#39;]</pre>
 </div>
 
 </div>
@@ -14816,48 +14893,21 @@ SCONNFKg/wER7tXwK5admQAAAABJRU5ErkJggg==
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[38]:</div>
+<div class="prompt input_prompt">In&nbsp;[49]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># TODO: Build your pipeline that will draw lane lines on the test_images</span>
-<span class="c1"># then save them to the test_images directory.</span>
-
-<span class="kn">import</span> <span class="nn">os</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="n">test_images</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="s2">&quot;test_images/&quot;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">test_image</span> <span class="ow">in</span> <span class="n">test_images</span><span class="p">:</span>
     <span class="c1"># load in image</span>
     <span class="n">initial_img</span> <span class="o">=</span> <span class="n">mpimg</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="s1">&#39;test_images/&#39;</span> <span class="o">+</span> <span class="n">test_image</span><span class="p">)</span>
-    <span class="n">xsize</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">ysize</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">xsize</span> <span class="o">!=</span> <span class="n">XSIZE</span> <span class="ow">or</span> <span class="n">ysize</span> <span class="o">!=</span> <span class="n">YSIZE</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Incorrect image size&quot;</span><span class="p">,</span> <span class="n">xsize</span><span class="p">,</span> <span class="n">ysize</span><span class="p">)</span>
-    <span class="n">img</span> <span class="o">=</span> <span class="n">process_image</span><span class="p">(</span><span class="n">initial_img</span><span class="p">)</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Processed&#39;</span><span class="p">,</span> <span class="n">test_image</span><span class="p">)</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">process_image</span><span class="p">(</span><span class="n">initial_img</span><span class="p">)</span>
+    <span class="c1"># save to output</span>
     <span class="n">mpimg</span><span class="o">.</span><span class="n">imsave</span><span class="p">(</span><span class="s2">&quot;output/&quot;</span> <span class="o">+</span> <span class="n">test_image</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Processed solidYellowCurve.jpg
-Processed solidYellowCurve2.jpg
-Processed solidYellowLeft.jpg
-Processed solidWhiteCurve.jpg
-Processed whiteCarLaneSwitch.jpg
-Processed challenge1.jpg
-Processed solidWhiteRight.jpg
-</pre>
-</div>
-</div>
-
 </div>
 </div>
 
@@ -14877,7 +14927,7 @@ Processed solidWhiteRight.jpg
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[39]:</div>
+<div class="prompt input_prompt">In&nbsp;[50]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Import everything needed to edit/save/watch video clips</span>
@@ -14892,10 +14942,15 @@ Processed solidWhiteRight.jpg
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="prompt input_prompt">In&nbsp;[51]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">process_image</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">image_counter</span>
+
+    <span class="n">xsize</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">ysize</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
     <span class="c1"># step 1: convert to grayscale</span>
     <span class="n">img</span> <span class="o">=</span> <span class="n">grayscale</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
 
@@ -14906,9 +14961,13 @@ Processed solidWhiteRight.jpg
     <span class="n">img</span> <span class="o">=</span> <span class="n">canny</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">LOW_THRESHOLD</span><span class="p">,</span> <span class="n">HIGH_THRESHOLD</span><span class="p">)</span>
 
     <span class="c1"># step 4: calculate mask for region of interest</span>
+    <span class="c1"># calculate mask parameters</span>
+    <span class="n">dx1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">DX1</span> <span class="o">*</span> <span class="n">xsize</span><span class="p">)</span>
+    <span class="n">dx2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">DX2</span> <span class="o">*</span> <span class="n">xsize</span><span class="p">)</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">DY</span> <span class="o">*</span> <span class="n">ysize</span><span class="p">)</span>
 
     <span class="c1"># calculate vertices for region of interest</span>
-    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[(</span><span class="n">DX1</span><span class="p">,</span> <span class="n">YSIZE</span><span class="p">),</span> <span class="p">(</span><span class="n">DX2</span><span class="p">,</span> <span class="n">DY</span><span class="p">),</span> <span class="p">(</span><span class="n">XSIZE</span> <span class="o">-</span> <span class="n">DX2</span><span class="p">,</span> <span class="n">DY</span><span class="p">),</span> <span class="p">(</span><span class="n">XSIZE</span> <span class="o">-</span> <span class="n">DX1</span><span class="p">,</span> <span class="n">YSIZE</span><span class="p">)]],</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[(</span><span class="n">dx1</span><span class="p">,</span> <span class="n">ysize</span><span class="p">),</span> <span class="p">(</span><span class="n">dx2</span><span class="p">,</span> <span class="n">dy</span><span class="p">),</span> <span class="p">(</span><span class="n">xsize</span> <span class="o">-</span> <span class="n">dx2</span><span class="p">,</span> <span class="n">dy</span><span class="p">),</span> <span class="p">(</span><span class="n">xsize</span> <span class="o">-</span> <span class="n">dx1</span><span class="p">,</span> <span class="n">ysize</span><span class="p">)]],</span>
                         <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
 
     <span class="c1"># Next we&#39;ll create a masked edges image using cv2.fillPoly()</span>
@@ -14922,6 +14981,10 @@ Processed solidWhiteRight.jpg
     <span class="n">img</span> <span class="o">=</span> <span class="n">hough_lines</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">RHO</span><span class="p">,</span> <span class="n">THETA</span><span class="p">,</span> <span class="n">THRESHOLD</span><span class="p">,</span> <span class="n">MIN_LINE_LENGTH</span><span class="p">,</span> <span class="n">MAX_LINE_GAP</span><span class="p">)</span>
 
     <span class="n">img</span> <span class="o">=</span> <span class="n">weighted_img</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">image</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">image_counter</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">mpimg</span><span class="o">.</span><span class="n">imsave</span><span class="p">(</span><span class="s2">&quot;output/&quot;</span> <span class="o">+</span> <span class="s2">&quot;frame&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">image_counter</span><span class="p">),</span> <span class="n">img</span><span class="p">)</span>
+    <span class="n">image_counter</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="k">return</span> <span class="n">img</span>
 </pre></div>
@@ -14943,7 +15006,7 @@ Processed solidWhiteRight.jpg
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[41]:</div>
+<div class="prompt input_prompt">In&nbsp;[52]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">white_output</span> <span class="o">=</span> <span class="s1">&#39;white.mp4&#39;</span>
@@ -14970,7 +15033,7 @@ Processed solidWhiteRight.jpg
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stderr output_text">
-<pre>100%|█████████▉| 221/222 [00:11&lt;00:00, 14.60it/s]
+<pre>100%|█████████▉| 221/222 [00:12&lt;00:00, 15.13it/s]
 </pre>
 </div>
 </div>
@@ -14980,8 +15043,8 @@ Processed solidWhiteRight.jpg
 <pre>[MoviePy] Done.
 [MoviePy] &gt;&gt;&gt;&gt; Video ready: white.mp4 
 
-CPU times: user 2min 44s, sys: 7.5 s, total: 2min 52s
-Wall time: 12.2 s
+CPU times: user 2min 41s, sys: 7.06 s, total: 2min 48s
+Wall time: 13.1 s
 </pre>
 </div>
 </div>
@@ -15012,7 +15075,7 @@ Wall time: 12.2 s
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[42]:</div>
+<div class="prompt input_prompt">In&nbsp;[53]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
@@ -15030,7 +15093,7 @@ Wall time: 12.2 s
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[42]:</div>
+<div class="output_area"><div class="prompt output_prompt">Out[53]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 
@@ -15068,7 +15131,7 @@ Wall time: 12.2 s
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[43]:</div>
+<div class="prompt input_prompt">In&nbsp;[54]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">yellow_output</span> <span class="o">=</span> <span class="s1">&#39;yellow.mp4&#39;</span>
@@ -15095,7 +15158,7 @@ Wall time: 12.2 s
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stderr output_text">
-<pre>100%|█████████▉| 681/682 [00:38&lt;00:00, 17.66it/s]
+<pre>100%|█████████▉| 681/682 [00:38&lt;00:00, 17.73it/s]
 </pre>
 </div>
 </div>
@@ -15105,8 +15168,8 @@ Wall time: 12.2 s
 <pre>[MoviePy] Done.
 [MoviePy] &gt;&gt;&gt;&gt; Video ready: yellow.mp4 
 
-CPU times: user 8min 47s, sys: 23 s, total: 9min 10s
-Wall time: 39.1 s
+CPU times: user 8min 11s, sys: 22.2 s, total: 8min 33s
+Wall time: 39 s
 </pre>
 </div>
 </div>
@@ -15117,7 +15180,7 @@ Wall time: 39.1 s
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="prompt input_prompt">In&nbsp;[55]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
@@ -15135,7 +15198,7 @@ Wall time: 39.1 s
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[35]:</div>
+<div class="output_area"><div class="prompt output_prompt">Out[55]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 
@@ -15195,7 +15258,7 @@ Wall time: 39.1 s
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[56]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">challenge_output</span> <span class="o">=</span> <span class="s1">&#39;extra.mp4&#39;</span>
@@ -15208,10 +15271,43 @@ Wall time: 39.1 s
 </div>
 </div>
 
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[MoviePy] &gt;&gt;&gt;&gt; Building video extra.mp4
+[MoviePy] Writing video extra.mp4
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>100%|██████████| 251/251 [00:30&lt;00:00,  7.69it/s]
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>[MoviePy] Done.
+[MoviePy] &gt;&gt;&gt;&gt; Video ready: extra.mp4 
+
+CPU times: user 5min, sys: 13.9 s, total: 5min 14s
+Wall time: 31.2 s
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="prompt input_prompt">In&nbsp;[57]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
@@ -15219,6 +15315,38 @@ Wall time: 39.1 s
 <span class="s2">  &lt;source src=&quot;</span><span class="si">{0}</span><span class="s2">&quot;&gt;</span>
 <span class="s2">&lt;/video&gt;</span>
 <span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">challenge_output</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[57]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+
+<video width="960" height="540" controls>
+  <source src="extra.mp4">
+</video>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span> 
 </pre></div>
 
 </div>
