@@ -39,18 +39,31 @@ class TestMiniflow(unittest.TestCase):
 
         self.assertEqual(200, output)
 
-"""
-    def test_isupper(self):
-        self.assertTrue('FOO'.isupper())
-        self.assertFalse('Foo'.isupper())
+    def test_linear(self):
+        x, y, z = Input(), Input(), Input()
+        inputs = [x, y, z]
 
-    def test_split(self):
-        s = 'hello world'
-        self.assertEqual(s.split(), ['hello', 'world'])
-        # check that s.split fails when the separator is not a string
-        with self.assertRaises(TypeError):
-            s.split(2)
-"""
+        weight_x, weight_y, weight_z = Input(), Input(), Input()
+        weights = [weight_x, weight_y, weight_z]
+
+        bias = Input()
+
+        f = Linear(inputs, weights, bias)
+
+        feed_dict = {
+            x: 6,
+            y: 14,
+            z: 3,
+            weight_x: 0.5,
+            weight_y: 0.25,
+            weight_z: 1.4,
+            bias: 2
+        }
+
+        graph = topological_sort(feed_dict)
+        output = forward_pass(f, graph)
+
+        self.assertEqual(12.7, output)
 
 if __name__ == '__main__':
     unittest.main()

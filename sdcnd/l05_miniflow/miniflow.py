@@ -6,9 +6,11 @@ import operator
 from functools import reduce
 
 class Neuron:
-    def __init__(self, inbound_neurons=[]):
+    def __init__(self, inputs=[]):
+        #self.label = label
+
         # Neuron from which this Neuron receives values
-        self.inbound_neurons = inbound_neurons
+        self.inbound_neurons = inputs
         # Neuron to which this Neuron passes values
         self.outbound_neurons = []
         # A calculated value
@@ -71,6 +73,28 @@ class Mul(Neuron):
         values = [x.value for x in self.inbound_neurons]
         self.value = reduce(operator.mul, values, 1)
 
+class Linear(Neuron):
+    def __init__(self, inputs, weights, bias):
+        Neuron.__init__(self, inputs)
+
+        # NOTE: The weights and bias properties here are not
+        # numbers, but rather references to other neurons.
+        # The weight and bias values are stored within the
+        # respective neurons.
+        self.weights = weights
+        self.bias = bias
+
+    def forward(self):
+        """
+        Set self.value to the value of the linear function output.
+
+        Your code goes here!
+        """
+        inputs = [i.value for i in self.inbound_neurons]
+        weights = [w.value for w in self.weights]
+
+        values = zip(inputs, weights)
+        self.value = math.fsum([v[0] * v[1] for v in values]) + self.bias.value
 
 """
 No need to change anything below here!
