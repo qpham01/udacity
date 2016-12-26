@@ -3,129 +3,97 @@ Encapsulates a neuron in a neural network
 """
 import math
 import operator
+import numpy as np
 from functools import reduce
 
-class Neuron:
-    def __init__(self, inputs=[]):
-        #self.label = label
+"""
+Modify Linear#forward so that it linearly transforms
+input matrices, weights matrices and a bias vector to
+an output.
+"""
 
-        # Neuron from which this Neuron receives values
-        self.inbound_neurons = inputs
-        # Neuron to which this Neuron passes values
-        self.outbound_neurons = []
-        # A calculated value
+class Layer:
+    """
+    A layer in a neural network
+    """
+    def __init__(self, inbound_layers=[]):
+        self.inbound_layers = inbound_layers
         self.value = None
-        # Add this node as an outbound node on its inputs.
-        for n in self.inbound_neurons:
-            n.outbound_neurons.append(self)
+        self.outbound_layers = []
+        for layer in inbound_layers:
+            layer.outbound_layers.append(self)
 
     def forward(self):
         """
-        Forward propagation.
-
-        Compute the output value based on `inbound_neurons` and
-        store the result in self.value.
+        Forward propagate a neural network layer
         """
         raise NotImplementedError
 
-    def backward(self):
-        """
-        Backward propagation.
 
-        You'll compute this later.
-        """
-        raise NotImplementedError
+class Input(Layer):
+    """
+    While it may be strange to consider an input a layer when
+    an input is only an individual node in a layer, for the sake
+    of simpler code we'll still use Layer as the base class.
 
-class Input(Neuron):
+    Think of Input as collating many individual input nodes into
+    a Layer.
+    """
     def __init__(self):
-        # An Input neuron has no inbound neurons,
-        # so no need to pass anything to the Neuron instantiator.
-        Neuron.__init__(self)
+        # An Input layer has no inbound layers,
+        # so no need to pass anything to the Layer instantiator
+        Layer.__init__(self)
 
-    # NOTE: Input neuron is the only node where the value
-    # may be passed as an argument to forward().
-    #
-    # All other neuron implementations should get the value
-    # of the previous neuron from self.inbound_neurons
-    #
-    # Example:
-    # val0 = self.inbound_neurons[0].value
-    def forward(self, value=None):
-        # Overwrite the value if one is passed in.
-        if value is not None:
-            self.value = value
+    def forward(self):
+        # Do nothing because nothing is calculated.
+        pass
 
-class Add(Neuron):
+
+class Linear(Layer):
+    def __init__(self, inbound_layer, weights, bias):
+        # Notice the ordering of the input layers passed to the
+        # Layer constructor.
+        Layer.__init__(self, [inbound_layer, weights, bias])
 
     def forward(self):
         """
-        You'll be writing code here in the next quiz!
-        """
-        values = [x.value for x in self.inbound_neurons]
-        self.value = math.fsum(values)
-
-class Mul(Neuron):
-
-    def forward(self):
-        """
-        You'll be writing code here in the next quiz!
-        """
-        values = [x.value for x in self.inbound_neurons]
-        self.value = reduce(operator.mul, values, 1)
-
-class Linear(Neuron):
-    def __init__(self, inputs, weights, bias):
-        Neuron.__init__(self, inputs)
-
-        # NOTE: The weights and bias properties here are not
-        # numbers, but rather references to other neurons.
-        # The weight and bias values are stored within the
-        # respective neurons.
-        self.weights = weights
-        self.bias = bias
-
-    def forward(self):
-        """
-        Set self.value to the value of the linear function output.
+        Set the value of this layer to the linear transform output.
 
         Your code goes here!
         """
-        inputs = [i.value for i in self.inbound_neurons]
-        weights = [w.value for w in self.weights]
+        inputs = self.inbound_layers[0]
+        weights = self.inbound_layers[1]
+        bias = self.inbound_layers[2]
 
-        values = zip(inputs, weights)
-        self.value = math.fsum([v[0] * v[1] for v in values]) + self.bias.value
+        self.value = bias.value + np.matmul(inputs.value, weights.value)
 
-"""
-No need to change anything below here!
-"""
 def topological_sort(feed_dict):
     """
-    Sort generic nodes in topological order using Kahn's Algorithm.
+    Sort the layers in topological order using Kahn's Algorithm.
 
-    `feed_dict`: A dictionary where the key is a `Input` node and the value is the respective
-    value feed to that node.
+    `feed_dict`: A dictionary where the key is a `Input` Layer and the value is the respective
+    value feed to that Layer.
 
-    Returns a list of sorted nodes.
+    Returns a list of sorted layers.
     """
 
-    input_neurons = [n for n in feed_dict.keys()]
+    input_layers = [n for n in feed_dict.keys()]
 
     G = {}
-    neurons = [n for n in input_neurons]
-    while len(neurons) > 0:
-        n = neurons.pop(0)
+    layers = [n for n in input_layers]
+    while len(layers) > 0:
+        n = layers.pop(0)
         if n not in G:
             G[n] = {'in': set(), 'out': set()}
-        for m in n.outbound_neurons:
+        for m in n.outbound_layers:
             if m not in G:
                 G[m] = {'in': set(), 'out': set()}
             G[n]['out'].add(m)
             G[m]['in'].add(n)
-            neurons.append(m)
+            layers.append(m)
 
     L = []
-    S = set(input_neurons)
+    S = set(input_layers)
     while len(S) > 0:
         n = S.pop()
 
@@ -133,7 +101,7 @@ def topological_sort(feed_dict):
             n.value = feed_dict[n]
 
         L.append(n)
-        for m in n.outbound_neurons:
+        for m in n.outbound_layers:
             G[n]['out'].remove(m)
             G[m]['in'].remove(n)
             # if no other incoming edges add to S
@@ -142,20 +110,19 @@ def topological_sort(feed_dict):
     return L
 
 
-def forward_pass(output_neuron, sorted_neurons):
+def forward_pass(output_layer, sorted_layers):
     """
-    Performs a forward pass through a list of sorted neurons.
+    Performs a forward pass through a list of sorted Layers.
 
     Arguments:
 
-        `output_neuron`: A neuron in the graph, should be the output neuron (have no outgoing
-             edges).
-        `sorted_neurons`: a topologically sorted list of neurons.
+        `output_layer`: A Layer in the graph, should be the output layer (have no outgoing edges).
+        `sorted_layers`: a topologically sorted list of layers.
 
-    Returns the output neuron's value
+    Returns the output layer's value
     """
 
-    for n in sorted_neurons:
+    for n in sorted_layers:
         n.forward()
 
-    return output_neuron.value
+    return output_layer.value
