@@ -67,6 +67,68 @@ class Linear(Layer):
 
         self.value = bias.value + np.matmul(inputs.value, weights.value)
 
+class Sigmoid(Layer):
+    """
+    You need to fix the `_sigmoid` and `forward` methods.
+    """
+    def __init__(self, layer):
+        Layer.__init__(self, [layer])
+
+    def _sigmoid(self, x):
+        """
+        This method is separate from `forward` because it
+        will be used with `backward` as well.
+
+        `x`: A numpy array-like object.
+
+        Return the result of the sigmoid function.
+
+        Your code here!
+        """
+        return 1. / (1. + np.exp(-x))
+
+    def forward(self):
+        """
+        Set the value of this layer to the result of the
+        sigmoid function, `_sigmoid`.
+
+        Your code here!
+        """
+        # This is a dummy value to prevent numpy errors
+        # if you test without changing this method.
+        inputs = self.inbound_layers[0].value
+        self.value = self._sigmoid(inputs)
+
+
+class MSE(Layer):
+    def __init__(self, y, a):
+        """
+        The mean squared error cost function.
+        Should be used as the last layer for a network.
+        """
+        # Call the base class' constructor.
+        Layer.__init__(self, [y, a])
+
+    def forward(self):
+        """
+        Calculates the mean squared error.
+        """
+        # NOTE: We reshape these to avoid possible matrix/vector broadcast
+        # errors.
+        #
+        # For example, if we subtract an array of shape (3,) from an array of shape
+        # (3,1) we get an array of shape(3,3) as the result when we want
+        # an array of shape (3,1) instead.
+        #
+        # Making both arrays (3,1) insures the result is (3,1) and does
+        # an elementwise subtraction as expected.
+        y = self.inbound_layers[0].value.reshape(-1, 1)
+        a = self.inbound_layers[1].value.reshape(-1, 1)
+        m = y.shape[0]
+
+        diff = y - a
+        self.value = np.mean(diff**2)
+
 def topological_sort(feed_dict):
     """
     Sort the layers in topological order using Kahn's Algorithm.
@@ -109,6 +171,17 @@ def topological_sort(feed_dict):
                 S.add(m)
     return L
 
+def forward_pass_graph(graph):
+    """
+    Performs a forward pass through a list of sorted Layers.
+
+    Arguments:
+
+        `graph`: The result of calling `topological_sort`.
+    """
+    # Forward pass
+    for n in graph:
+        n.forward()
 
 def forward_pass(output_layer, sorted_layers):
     """
