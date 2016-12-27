@@ -20,6 +20,7 @@ class Layer:
         self.inbound_layers = inbound_layers
         self.value = None
         self.outbound_layers = []
+        self.gradients = {}
         for layer in inbound_layers:
             layer.outbound_layers.append(self)
 
@@ -29,6 +30,12 @@ class Layer:
         """
         raise NotImplementedError
 
+    def backward(self):
+        """
+        Every layer that uses this class as a base class will
+        need to define its own `backward` method.
+        """
+        raise NotImplementedError
 
 class Input(Layer):
     """
@@ -48,6 +55,16 @@ class Input(Layer):
         # Do nothing because nothing is calculated.
         pass
 
+    def backward(self):
+        # An Input layer has no inputs so the gradient (derivative)
+        # is zero.
+        # The key, `self`, is reference to this object.
+        self.gradients = {self: 0}
+        # Weights and bias may be inputs, so you need to sum
+        # the gradient from output gradients.
+        for n in self.outbound_layers:
+            grad_cost = n.gradients[self]
+            self.gradients[self] += grad_cost * 1
 
 class Linear(Layer):
     def __init__(self, inbound_layer, weights, bias):
@@ -66,6 +83,26 @@ class Linear(Layer):
         bias = self.inbound_layers[2]
 
         self.value = bias.value + np.matmul(inputs.value, weights.value)
+
+    def backward(self):
+        """
+        Calculates the gradient based on the output values.
+        """
+        # Initialize a partial for each of the inbound_layers.
+        self.gradients = {n: np.zeros_like(n.value) for n in self.inbound_layers}
+        # Cycle through the outputs. The gradient will change depending
+        # on each output, so the gradients are summed over all outputs.
+        for n in self.outbound_layers:
+            # Get the partial of the cost with respect to this layer.
+            grad_cost = n.gradients[self]
+            # Set the partial of the loss with respect to this layer's inputs.
+            self.gradients[self.inbound_layers[0]] += np.dot(grad_cost, \
+                self.inbound_layers[1].value.T)
+            # Set the partial of the loss with respect to this layer's weights.
+            self.gradients[self.inbound_layers[1]] += np.dot(self.inbound_layers[0].value.T, \
+                grad_cost)
+            # Set the partial of the loss with respect to this layer's bias.
+            self.gradients[self.inbound_layers[2]] += np.sum(grad_cost, axis=0, keepdims=False)
 
 class Sigmoid(Layer):
     """
@@ -99,8 +136,46 @@ class Sigmoid(Layer):
         inputs = self.inbound_layers[0].value
         self.value = self._sigmoid(inputs)
 
+    def backward(self):
+        """
+        Calculates the gradient using the derivative of
+        the sigmoid function.
+        """
+        # Initialize the gradients to 0.
+        self.gradients = {n: np.zeros_like(n.value) for n in self.inbound_layers}
+
+        # Cycle through the outputs. The gradient will change depending
+        # on each output, so the gradients are summed over all outputs.
+        for n in self.outbound_layers:
+            # Get the partial derivative of the cost with respect to this layer.
+            grad_cost = n.gradients[self]
+            """
+            TODO: Your code goes here!
+
+            Set the gradients property to the gradients with respect to each input.
+
+            NOTE: See the Linear layer and MSE layer for examples.
+            """
+
+            # Calculate the sigmoid of input X as assign to self.value
+            # Note: this is already done in the forward pass, but is included here for reference.
+            # X = self.inbound_layers[0].value
+            # z = self._sigmoid(X)
+
+            # Calculate the derivative of the sigmoid.
+            ds = self.value * (1. - self.value)
+
+            # Apply recursive chain rule of iteratively multiplying partial derivatives
+            # for this layer
+            dx = grad_cost * ds
+
+            # add gradient
+            self.gradients[self.inbound_layers[0]] += dx
 
 class MSE(Layer):
+    """
+    Encapsulate means square EOFError
+    """
     def __init__(self, y, a):
         """
         The mean squared error cost function.
@@ -108,6 +183,9 @@ class MSE(Layer):
         """
         # Call the base class' constructor.
         Layer.__init__(self, [y, a])
+
+        self.m = None
+        self.diff = None
 
     def forward(self):
         """
@@ -124,10 +202,20 @@ class MSE(Layer):
         # an elementwise subtraction as expected.
         y = self.inbound_layers[0].value.reshape(-1, 1)
         a = self.inbound_layers[1].value.reshape(-1, 1)
-        m = y.shape[0]
+        self.m = y.shape[0]
 
-        diff = y - a
-        self.value = np.mean(diff**2)
+        self.diff = y - a
+        self.value = np.mean(self.diff**2)
+
+    def backward(self):
+        """
+        Calculates the gradient of the cost.
+
+        This is the final layer of the network so outbound layers
+        are not a concern.
+        """
+        self.gradients[self.inbound_layers[0]] = (2 / self.m) * self.diff
+        self.gradients[self.inbound_layers[1]] = (-2 / self.m) * self.diff
 
 def topological_sort(feed_dict):
     """
@@ -199,3 +287,38 @@ def forward_pass(output_layer, sorted_layers):
         n.forward()
 
     return output_layer.value
+
+def forward_and_backward(graph):
+    """
+    Performs a forward pass and a backward pass through a list of sorted Layers.
+
+    Arguments:
+
+        `graph`: The result of calling `topological_sort`.
+    """
+    # Forward pass
+    for n in graph:
+        n.forward()
+
+    # Backward pass
+    # see: https://docs.python.org/2.3/whatsnew/section-slices.html
+    for n in graph[::-1]:
+        n.backward()
+
+def sgd_update(trainables, learning_rate=0.01):
+    """
+    Updates the value of each trainable with SGD.
+
+    Arguments:
+
+        `trainables`: A list of `Input` Layers representing weights/biases.
+        `learning_rate`: The learning rate.
+    """
+    # TODO: update all the `trainables` with SGD
+    # You can access and assign the value of a trainable with `value` attribute.
+    # Example:
+    # for t in trainables:
+    #   t.value = your implementation here
+    for t in trainables:
+        t.value = t.value - learning_rate * t.gradients[t]
+
