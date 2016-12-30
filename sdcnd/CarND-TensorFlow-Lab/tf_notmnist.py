@@ -97,7 +97,7 @@ is_correct_prediction = tf.equal(tf.argmax(prediction, 1), tf.argmax(labels, 1))
 accuracy = tf.reduce_mean(tf.cast(is_correct_prediction, tf.float32))
 
 print('Accuracy function created.')
-# TODO: Find the best parameters for each configuration
+# Find the best parameters for each configuration
 epochs = 3
 batch_size = 50
 learning_rate = 0.05
