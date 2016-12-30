@@ -1,5 +1,5 @@
 """
-Scripts for working with notMNIST data set.
+Scripts for downloading, normalizing, and pickling notMNIST data set.
 """
 import hashlib
 import os
