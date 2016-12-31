@@ -11,7 +11,7 @@ from tqdm import tqdm
 import matplotlib
 matplotlib.use("svg")
 from matplotlib import pyplot as plt
-import dldata.dllog as log
+from dldata import dllog as log
 
 # Reload the data
 pickle_file = 'notMNIST.pickle'
@@ -117,13 +117,13 @@ loss_batch = []
 train_acc_batch = []
 valid_acc_batch = []
 
-dl_user = ('Quoc', 'Pham')
+dl_run = "TensorFlow Lab Run"
 dl_network = 'One-Layer Linear Softmax'
-dl_data = ('Udacity notMNIST', 'validation')
+dl_data = ('Udacity notMNIST', 'Validation')
 dl_environment = 'Default'
 hyper_dict = { 'epochs' : epochs, 'batch size' : batch_size, 'learning_rate' : learning_rate }
 
-run_id = log.dl_run_start(dl_network, dl_data, hyper_dict)
+run_id = log.dl_run_start(dl_run, dl_network, dl_data, hyper_dict)
 
 with tf.Session() as session:
     session.run(init)
@@ -180,7 +180,7 @@ plt.show()
 print('Validation accuracy at {}'.format(validation_accuracy))
 
 # TODO: Set the epochs, batch_size, and learning_rate with the best parameters from problem 3
-epochs = 3
+epochs = 2
 batch_size = 50
 learning_rate = 0.05
 
@@ -188,19 +188,19 @@ learning_rate = 0.05
 # The accuracy measured against the test set
 test_accuracy = 0.0
 
-dl_data = ('Udacity notMNIST', 'test')
-run_id = log.dl_run_start(dl_network, dl_data, hyper_dict)
+dl_data = ('Udacity notMNIST', 'Test')
+run_id = log.dl_run_start(dl_run, dl_network, dl_data, hyper_dict)
 
 with tf.Session() as session:
-    
+
     session.run(init)
     batch_count = int(math.ceil(len(train_features)/batch_size))
 
     for epoch_i in range(epochs):
-        
+
         # Progress bar
         batches_pbar = tqdm(range(batch_count), desc='Epoch {:>2}/{}'.format(epoch_i+1, epochs), unit='batches')
-        
+
         # The training cycle
         for batch_i in batches_pbar:
             # Get a batch of training features and labels
@@ -213,9 +213,8 @@ with tf.Session() as session:
 
         # Check accuracy against Test data
         test_accuracy = session.run(accuracy, feed_dict=test_feed_dict)
-
+log.dl_run_end(run_id, test_accuracy)
 
 assert test_accuracy >= 0.80, 'Test accuracy at {}, should be equal to or greater than 0.80'.format(test_accuracy)
 print('Nice Job! Test Accuracy is {}'.format(test_accuracy))
 
-log.dl_run_end(run_id, test_accuracy)
