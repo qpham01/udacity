@@ -11,6 +11,7 @@ from tqdm import tqdm
 import matplotlib
 matplotlib.use("svg")
 from matplotlib import pyplot as plt
+import dldata.dllog as log
 
 # Reload the data
 pickle_file = 'notMNIST.pickle'
@@ -116,6 +117,14 @@ loss_batch = []
 train_acc_batch = []
 valid_acc_batch = []
 
+dl_user = ('Quoc', 'Pham')
+dl_network = 'One-Layer Linear Softmax'
+dl_data = ('Udacity notMNIST', 'validation')
+dl_environment = 'Default'
+hyper_dict = { 'epochs' : epochs, 'batch size' : batch_size, 'learning_rate' : learning_rate }
+
+run_id = log.dl_run_start(dl_network, dl_data, hyper_dict)
+
 with tf.Session() as session:
     session.run(init)
     batch_count = int(math.ceil(len(train_features)/batch_size))
@@ -152,6 +161,7 @@ with tf.Session() as session:
 
         # Check accuracy against Validation data
         validation_accuracy = session.run(accuracy, feed_dict=valid_feed_dict)
+log.dl_run_end(run_id, validation_accuracy)
 
 loss_plot = plt.subplot(211)
 loss_plot.set_title('Loss')
@@ -177,6 +187,9 @@ learning_rate = 0.05
 ### DON'T MODIFY ANYTHING BELOW ###
 # The accuracy measured against the test set
 test_accuracy = 0.0
+
+dl_data = ('Udacity notMNIST', 'test')
+run_id = log.dl_run_start(dl_network, dl_data, hyper_dict)
 
 with tf.Session() as session:
     
@@ -204,3 +217,5 @@ with tf.Session() as session:
 
 assert test_accuracy >= 0.80, 'Test accuracy at {}, should be equal to or greater than 0.80'.format(test_accuracy)
 print('Nice Job! Test Accuracy is {}'.format(test_accuracy))
+
+log.dl_run_end(run_id, test_accuracy)
