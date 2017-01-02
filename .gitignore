@@ -14,7 +14,9 @@
 *.exe
 *.pkl
 *.pickle
-
+*.ckpt*
+*.swp
+checkpoint
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
