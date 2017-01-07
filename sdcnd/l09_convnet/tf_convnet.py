@@ -7,11 +7,12 @@ from time import time
 mnist = input_data.read_data_sets(".", one_hot=True, reshape=False)
 
 import tensorflow as tf
+from dldata import dllog as log
 
 # Parameters
 learning_rate = 0.001
 batch_size = 128
-training_epochs = 30
+training_epochs = 3
 
 n_classes = 10  # MNIST total classes (0-9 digits)
 
@@ -97,10 +98,22 @@ optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)\
 # Initializing the variables
 init = tf.initialize_all_variables()
 
+dl_run = "Lesson 09 Test Runs"
+dl_network = 'Lesson 09 Convnet'
+dl_model_file_path = 'tf_convnet.py'
+dl_data = ('TF_MNIST', 'Test')
+dl_environment = 'Default'
+hyper_dict = { 'epochs' : training_epochs, 'batch size' : batch_size, 'learning rate' : \
+    learning_rate }
+
+
 # Launch the graph
 t0 = time()
 with tf.Session() as sess:
     sess.run(init)
+
+    run_id = log.dl_run_start(dl_run, dl_network, dl_model_file_path, dl_data, hyper_dict)
+
     # Training cycle
     for epoch in range(training_epochs):
         t1 = time()
@@ -117,11 +130,13 @@ with tf.Session() as sess:
     print("Optimization Finished!")
     print("Total training time:", "{:.2f}".format(time() - t0)) 
 
+
     # Test model
     correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(y, 1))
     # Calculate accuracy
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-    print(
-        "Accuracy:",
-        accuracy.eval({x: mnist.test.images, y: mnist.test.labels}))
-    
+    test_accuracy = accuracy.eval({x: mnist.test.images, y: mnist.test.labels})
+
+    print("Accuracy:", test_accuracy)
+
+    log.dl_run_end(run_id, test_accuracy)
