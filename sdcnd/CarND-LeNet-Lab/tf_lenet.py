@@ -65,9 +65,9 @@ def LeNet(x):
     # Layer 5: Fully Connected. Input = 84. Output = 10.
     l5_weights = tf.Variable(tf.truncated_normal((84, 10), mean=mu, stddev=sigma))
     l5_bias = tf.Variable(tf.zeros(10))
-    l5_linear = tf.add(tf.matmul(l4_relu, l5_weights), l5_bias)
+    logits = tf.add(tf.matmul(l4_relu, l5_weights), l5_bias)
 
-    logits = tf.nn.tanh(l5_linear)
+    # logits = tf.nn.tanh(l5_linear)
 
     return logits
 
