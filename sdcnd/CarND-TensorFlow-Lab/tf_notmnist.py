@@ -99,7 +99,7 @@ accuracy = tf.reduce_mean(tf.cast(is_correct_prediction, tf.float32))
 
 print('Accuracy function created.')
 # Find the best parameters for each configuration
-epochs = 3
+epochs = 2
 batch_size = 50
 learning_rate = 0.05
 
@@ -119,11 +119,12 @@ valid_acc_batch = []
 
 dl_run = "TensorFlow Lab Run"
 dl_network = 'One-Layer Linear Softmax'
+dl_model_file_path = 'tf_notmnist.py'
 dl_data = ('Udacity notMNIST', 'Validation')
 dl_environment = 'Default'
 hyper_dict = { 'epochs' : epochs, 'batch size' : batch_size, 'learning_rate' : learning_rate }
 
-run_id = log.dl_run_start(dl_run, dl_network, dl_data, hyper_dict)
+run_id = log.dl_run_start(dl_run, dl_network, dl_model_file_path, dl_data, hyper_dict)
 
 with tf.Session() as session:
     session.run(init)
@@ -189,7 +190,7 @@ learning_rate = 0.05
 test_accuracy = 0.0
 
 dl_data = ('Udacity notMNIST', 'Test')
-run_id = log.dl_run_start(dl_run, dl_network, dl_data, hyper_dict)
+run_id = log.dl_run_start(dl_run, dl_network, dl_model_file_path, dl_data, hyper_dict)
 
 with tf.Session() as session:
 
