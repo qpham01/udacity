@@ -12,7 +12,7 @@ from traffic_sign_log import log_run_start, log_run_end
 
 # Set up hyper parameters
 
-EPOCHS = [100, 100, 100]
+EPOCHS = [50, 50, 50, 50 , 50, 100, 100, 100, 100, 100]
 BATCH_SIZES = [64]
 LEARNING_RATE = 0.0001
 BETA = 0.01
@@ -104,4 +104,3 @@ for epochs in EPOCHS:
 
         # A delay to make sure there's a second of difference between timestamps of runs
         sleep(1.5)
-
