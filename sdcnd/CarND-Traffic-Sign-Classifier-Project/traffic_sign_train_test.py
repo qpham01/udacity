@@ -5,16 +5,16 @@ from time import sleep
 import tensorflow as tf
 from sklearn.utils import shuffle
 from traffic_sign_model import LeNetTraffic, version_description, l2_reg_strength, \
-    l3_weights, l4_weights, l5_weights, mu, sigma
+    l1_weights, l2_weights, l3_weights, l4_weights, l5_weights, mu, sigma
 from traffic_sign_data import X_train, X_validation, X_test, y_train, y_validation, y_test, \
     train_validate_ratio
 from traffic_sign_log import log_run_start, log_run_end
 
 # Set up hyper parameters
 
-EPOCHS = [100]
+EPOCHS = [100, 100, 100]
 BATCH_SIZES = [64]
-LEARNING_RATE = 0.0002
+LEARNING_RATE = 0.0001
 BETA = 0.01
 
 # Features and labels
