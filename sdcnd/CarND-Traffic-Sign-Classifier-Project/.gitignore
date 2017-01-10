@@ -12,3 +12,4 @@ objectdb
 *.pyc
 *.index
 checkpoint
+*.bmp

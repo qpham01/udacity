@@ -3,7 +3,7 @@ Logging of traffic sign model execution results
 """
 from dldata import dllog as log
 
-DATASET_NAME = 'German Traffic Sign Dataset'
+DATASET_NAME = 'German Traffic Sign Dataset - Grayscale'
 DL_RUN = "Traffic Sign Classification"
 DL_NETWORK = 'Lenet Variation for Traffic Sign'
 DL_MODEL_FILE_PATH = 'traffic_sign_model.py'

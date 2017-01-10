@@ -1,8 +1,10 @@
 """
 TensorFlow implementation of the LeNet neural network
 """
+import numpy as np
 import tensorflow as tf
 from tensorflow.contrib.layers import flatten
+from traffic_sign_data import use_grayscale
 
 version_description = 'Added drop out, expanded network to 24 and 72 convolution depth, Adam optimizer with l2_reg_strength 1.0'
 
@@ -12,13 +14,18 @@ l2_reg_strength = 1.0
 mu = 0
 sigma = 0.1
 
+# Define color depth
+color_depth = 3
+if use_grayscale:
+    color_depth = 1
+
 # Weights and biases
-# Layer 1: Input = 32x32x3. Output = 28x28x24.
+# Layer 1: Input = 32x32xcolor_depth. Output = 28x28x24.
 # truncated_normal inputs: (height, width, input_depth, output_depth)
 # height and width (5, 5, ...) are patch dimensions
 l1_depth = 24
-l1_weights = tf.Variable(tf.truncated_normal((5, 5, 3, l1_depth), mean=mu, stddev=sigma), \
-    name='w1')
+l1_weights = tf.Variable(tf.truncated_normal((5, 5, color_depth, l1_depth), \
+    mean=mu, stddev=sigma), name='w1')
 l1_bias = tf.Variable(tf.zeros(l1_depth), name='b1')
 
 # Layer 2: Convolutional. Output = 10x10x72.
@@ -98,3 +105,55 @@ def LeNetTraffic(x, keep_prob):
 
     return logits
 
+
+# Set up hyper parameters
+
+EPOCHS = [10]
+BATCH_SIZES = [64]
+LEARNING_RATE = 0.0001
+BETA = 0.01
+
+# Features and labels
+
+x = tf.placeholder(tf.float32, (None, 32, 32, color_depth))
+y = tf.placeholder(tf.int32, (None))
+one_hot_y = tf.one_hot(y, 43)
+
+# Training pipeline
+
+keep_prob = tf.placeholder(tf.float32)
+logits = LeNetTraffic(x, keep_prob)
+softmax = tf.nn.softmax(logits)
+cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits, one_hot_y)
+loss_operation = tf.reduce_mean(cross_entropy + l2_reg_strength * BETA * \
+    (tf.nn.l2_loss(l3_weights) + tf.nn.l2_loss(l4_weights) + tf.nn.l2_loss(l5_weights)))
+optimizer = tf.train.AdamOptimizer(learning_rate = LEARNING_RATE)
+training_operation = optimizer.minimize(loss_operation)
+
+# Model evaluation
+
+correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(one_hot_y, 1))
+accuracy_operation = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
+def evaluate(X_data, y_data, batch_size):
+    num_examples = len(X_data)
+    total_accuracy = 0
+    sess = tf.get_default_session()
+    for offset in range(0, num_examples, batch_size):
+        batch_x, batch_y = X_data[offset:offset + batch_size], y_data[offset:offset + batch_size]
+        accuracy = sess.run(accuracy_operation, feed_dict={x: batch_x, y: batch_y, keep_prob: 1.0})
+        total_accuracy += (accuracy * len(batch_x))
+    return total_accuracy / num_examples
+
+def evaluate_extra(X_data, y_data, batch_size):
+    num_examples = len(X_data)
+    total_accuracy = 0
+    sess = tf.get_default_session()
+    for offset in range(0, num_examples, batch_size):
+        batch_x, batch_y = X_data[offset:offset + batch_size], y_data[offset:offset + batch_size]
+        softmax_out = sess.run(softmax, feed_dict={x: batch_x, y: batch_y, keep_prob: 1.0})
+        print("Extra softmax:", softmax_out)
+        print("Extra softmax max index:", np.argmax(softmax_out, axis=1))
+        accuracy = sess.run(accuracy_operation, feed_dict={x: batch_x, y: batch_y, keep_prob: 1.0})
+        total_accuracy += (accuracy * len(batch_x))
+    return total_accuracy / num_examples
