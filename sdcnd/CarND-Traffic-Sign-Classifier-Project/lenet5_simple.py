@@ -5,7 +5,7 @@ from math import ceil
 import tensorflow as tf
 from tensorflow.contrib.layers import flatten
 
-VERSION_DESCRIPTION = 'minimum network for traffic sign classification'
+VERSION_DESCRIPTION = 'small network for traffic sign classification, l1 depth 25, l2 size 2500'
 
 # Define color depth
 COLOR_DEPTH = 1
@@ -30,7 +30,7 @@ LEARNING_RATE = 0.0001
 # truncated_normal inputs: (height, width, input_depth, output_depth)
 # height and width (5, 5, ...) are patch dimensions
 L1_IN_DIM = 32
-L1_DEPTH = 5
+L1_DEPTH = 25
 L1_CONV_KERNEL = 5
 L1_CONV_STRIDE = 1.
 L1_POOL_KERNEL = 2
@@ -46,7 +46,7 @@ L1_W = tf.Variable(tf.truncated_normal((L1_CONV_KERNEL, L1_CONV_KERNEL, COLOR_DE
 L1_B = tf.Variable(tf.zeros(L1_DEPTH), name='b1')
 
 # Layer 2: Fully Connected. Input = 14x14xL1_DEPTH. Output = 400.
-L2_SIZE = 500
+L2_SIZE = 2500
 L2_W = tf.Variable(tf.truncated_normal((L1_SIZE, L2_SIZE), mean=MU, \
     stddev=SIGMA), name='w2')
 L2_B = tf.Variable(tf.zeros(L2_SIZE), name='b2')
