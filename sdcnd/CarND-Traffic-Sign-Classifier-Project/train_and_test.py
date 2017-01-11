@@ -24,7 +24,7 @@ from traffic_sign_data import X_TRAIN, X_VALID, X_TEST, Y_TRAIN, Y_VALID, \
     Y_TEST, TRAIN_RATIO, USE_GRAYSCALE, rgb_to_gray
 
 # Model imports ... change this to change the model used.
-from lenet3_simple import TRAIN_OPERATION, LOSS_OPERATION
+from lenet3_simple import TRAIN_OPERATION, LOSS_OPERATION, LOGITS, SOFTMAX
 
 SAVE_FILE = 'lenet5_simple.ckpt'
 SAVER = tf.train.Saver()
@@ -61,7 +61,8 @@ for batch_size in BATCH_SIZES:
                         feed_dict={FEATURES: batch_x, LABELS: batch_y, KEEP_PROB: 0.5})
 
                 if TRAIN_RATIO < 1.0:
-                    _, validation_accuracy = evaluate(X_VALID, Y_VALID, batch_size)
+                    _, validation_accuracy = evaluate(X_VALID, Y_VALID, LOGITS, SOFTMAX, \
+                        batch_size)
                 else:
                     validation_accuracy = None
                 print("EPOCH {} ...".format(i+1))
@@ -88,7 +89,7 @@ for batch_size in BATCH_SIZES:
 
         run_id = log_run_start('Test', hyper_dict, VERSION_DESCRIPTION,)
 
-        _, TEST_ACCURACY = evaluate(X_TEST, Y_TEST, batch_size)
+        _, TEST_ACCURACY = evaluate(X_TEST, Y_TEST, LOGITS, SOFTMAX, batch_size)
         print("Test Accuracy = {:.3f}".format(TEST_ACCURACY))
 
         log_run_end(run_id, TEST_ACCURACY, 0.0)
@@ -139,7 +140,7 @@ SAVER = tf.train.Saver()
 with tf.Session() as sess:
     SAVER.restore(sess, tf.train.latest_checkpoint('.'))
 
-    (SOFTMAX_PROB, TEST_ACCURACY) = evaluate(X_EXTRA, Y_EXTRA, len(Y_EXTRA))
+    (SOFTMAX_PROB, TEST_ACCURACY) = evaluate(X_EXTRA, Y_EXTRA, LOGITS, SOFTMAX, len(Y_EXTRA))
     print("Extra image test accuracy = {:.3f}".format(TEST_ACCURACY))
 
     ROW_COUNT = 2
@@ -169,7 +170,8 @@ for i in range(0, len(SELECT_LIST)):
 with tf.Session() as sess:
     SAVER.restore(sess, tf.train.latest_checkpoint('.'))
 
-    (SOFTMAX_PROB_TEST, SELECT_ACCURACY) = evaluate(X_select, Y_SELECT, len(Y_SELECT))
+    (SOFTMAX_PROB_TEST, SELECT_ACCURACY) = evaluate(X_select, Y_SELECT, LOGITS, SOFTMAX, \
+        len(Y_SELECT))
     print("Extra image test accuracy = {:.3f}".format(SELECT_ACCURACY))
 
 # plot_images(X_select, 5, c_map)
