@@ -108,7 +108,7 @@ def LeNetTraffic(x, keep_prob):
 
 # Set up hyper parameters
 
-EPOCHS = [10]
+EPOCHS = [50]
 BATCH_SIZES = [64]
 LEARNING_RATE = 0.0001
 BETA = 0.01
