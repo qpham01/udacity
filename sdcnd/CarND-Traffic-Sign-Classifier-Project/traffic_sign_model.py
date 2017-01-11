@@ -4,19 +4,19 @@ TensorFlow implementation of the LeNet neural network
 import numpy as np
 import tensorflow as tf
 from tensorflow.contrib.layers import flatten
-from traffic_sign_data import use_grayscale
+from traffic_sign_data import USE_GRAYSCALE
 
-version_description = 'Added drop out, expanded network to 24 and 72 convolution depth, Adam optimizer with l2_reg_strength 1.0'
+VERSION_DESCRIPTION = 'Added drop out, expanded network to 24 and 72 convolution depth, Adam optimizer with l2_reg_strength 1.0'
 
-l2_reg_strength = 1.0
+L2_REG_STREGTH = 1.0
 
 # Hyperparameters
-mu = 0
-sigma = 0.1
+MU = 0
+SIGMA = 0.1
 
 # Define color depth
 color_depth = 3
-if use_grayscale:
+if USE_GRAYSCALE:
     color_depth = 1
 
 # Weights and biases
@@ -25,7 +25,7 @@ if use_grayscale:
 # height and width (5, 5, ...) are patch dimensions
 l1_depth = 24
 l1_weights = tf.Variable(tf.truncated_normal((5, 5, color_depth, l1_depth), \
-    mean=mu, stddev=sigma), name='w1')
+    mean=MU, stddev=SIGMA), name='w1')
 l1_bias = tf.Variable(tf.zeros(l1_depth), name='b1')
 
 # Layer 2: Convolutional. Output = 10x10x72.
@@ -33,25 +33,25 @@ l1_bias = tf.Variable(tf.zeros(l1_depth), name='b1')
 # height and width (5, 5, ...) are patch dimensions
 l2_depth = 72
 l2_size = 5 * 5 * l2_depth
-l2_weights = tf.Variable(tf.truncated_normal((5, 5, l1_depth, l2_depth), mean=mu, \
-    stddev=sigma), name='w2')
+l2_weights = tf.Variable(tf.truncated_normal((5, 5, l1_depth, l2_depth), mean=MU, \
+    stddev=SIGMA), name='w2')
 l2_bias = tf.Variable(tf.zeros(l2_depth), name='b2')
 
 # Layer 3: Fully Connected. Input = 5x5x72 = 1800. Output = 1000.
 l3_size = 1000
-l3_weights = tf.Variable(tf.truncated_normal((l2_size, l3_size), mean=mu, \
-    stddev=sigma), name='w3')
+l3_weights = tf.Variable(tf.truncated_normal((l2_size, l3_size), mean=MU, \
+    stddev=SIGMA), name='w3')
 l3_bias = tf.Variable(tf.zeros(l3_size), name='b3')
 
 # Layer 4: Fully Connected. Input = 1000. Output = 500.
 l4_size = 500
-l4_weights = tf.Variable(tf.truncated_normal((l3_size, l4_size), mean=mu, stddev=sigma), \
+l4_weights = tf.Variable(tf.truncated_normal((l3_size, l4_size), mean=MU, stddev=SIGMA), \
     name='w4')
 l4_bias = tf.Variable(tf.zeros(l4_size), name='b4')
 
 # Layer 5: Fully Connected. Input = 500. Output = 43.
 l5_size = 43
-l5_weights = tf.Variable(tf.truncated_normal((l4_size, l5_size), mean=mu, stddev=sigma), \
+l5_weights = tf.Variable(tf.truncated_normal((l4_size, l5_size), mean=MU, stddev=SIGMA), \
     name='w5')
 l5_bias = tf.Variable(tf.zeros(l5_size), name='b5')
 
@@ -125,7 +125,7 @@ keep_prob = tf.placeholder(tf.float32)
 logits = LeNetTraffic(x, keep_prob)
 softmax = tf.nn.softmax(logits)
 cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits, one_hot_y)
-loss_operation = tf.reduce_mean(cross_entropy + l2_reg_strength * BETA * \
+loss_operation = tf.reduce_mean(cross_entropy + L2_REG_STREGTH * BETA * \
     (tf.nn.l2_loss(l3_weights) + tf.nn.l2_loss(l4_weights) + tf.nn.l2_loss(l5_weights)))
 optimizer = tf.train.AdamOptimizer(learning_rate = LEARNING_RATE)
 training_operation = optimizer.minimize(loss_operation)
