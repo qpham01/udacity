@@ -9,13 +9,22 @@ import matplotlib
 matplotlib.use('svg')
 from matplotlib import image as mpimg
 from sklearn.utils import shuffle
-from lenet5_simple import VERSION_DESCRIPTION, L2_REG_STRENGTH, MU, SIGMA, \
-    LEARNING_RATE, EPOCHS, BATCH_SIZES, BETA, FEATURES, LABELS, TRAIN_OPERATION, \
-    LOSS_OPERATION, KEEP_PROB, evaluate
-from traffic_sign_data import X_TRAIN, X_VALID, X_TEST, Y_TRAIN, Y_VALID, \
-    Y_TEST, TRAIN_RATIO, USE_GRAYSCALE, rgb_to_gray
 from traffic_sign_log import log_run_start, log_run_end
 from plots import plot_images, plot_probabilities
+
+# Model evaluation
+from evaluation import evaluate
+
+# Hyper param imports
+from lenet_hyper import VERSION_DESCRIPTION, LEARNING_RATE, EPOCHS, BATCH_SIZES, \
+    L2_REG_STRENGTH, MU, SIGMA, BETA, FEATURES, LABELS, KEEP_PROB
+
+# Data imports ... change this for importing new data.
+from traffic_sign_data import X_TRAIN, X_VALID, X_TEST, Y_TRAIN, Y_VALID, \
+    Y_TEST, TRAIN_RATIO, USE_GRAYSCALE, rgb_to_gray
+
+# Model imports ... change this to change the model used.
+from lenet3_simple import TRAIN_OPERATION, LOSS_OPERATION
 
 SAVE_FILE = 'lenet5_simple.ckpt'
 SAVER = tf.train.Saver()
@@ -28,15 +37,17 @@ for batch_size in BATCH_SIZES:
             sess.run(tf.global_variables_initializer())
             num_examples = len(X_TRAIN)
 
-            print("Training...")
-            print()
-
             # Setup run logging
             hyper_dict = {'epochs' : epochs, 'batch size' : batch_size, 'learning rate' : \
                 LEARNING_RATE, 'train validate ratio' : TRAIN_RATIO, 'l2 strength': \
                 L2_REG_STRENGTH, 'beta': BETA, 'mu': MU, 'sigma': SIGMA}
 
             run_id = log_run_start('Train', hyper_dict, VERSION_DESCRIPTION)
+
+            print()
+            print("Training...")
+            print()
+
             epoch_train_time_list = []
             training_losses = []
             validate_accuracies = []
