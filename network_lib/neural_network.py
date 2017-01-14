@@ -59,16 +59,17 @@ class NeuralNetwork:
             self.last_layer = layer
         self.outputs = self.last_layer.outputs
 
-    def optimize_softmax_cross_entropy(self, learning_rate, optimizer):
+    def define_operations(self, learning_rate, optimizer):
         """
-        Define cost softmax as cross-entropy
+        Define various computations and operations for the network.
 
         Parameters:
         * learning_rate: The learning rate to use when optimizing for lower cost
         * optimizer:  The optimizer to use; must be in ['adam', 'gradient_descent']
         """
-        if optimizer not in ['gradient_descent', 'adam']:
-            raise ValueError("optimizer must be in ['gradient_descent', 'adam]")
+        optimizer_list = ['gradient_descent', 'adam']
+        if optimizer not in optimizer_list:
+            raise ValueError("optimizer must be in", optimizer_list)
         self.learning_rate = learning_rate
         self.cross_entropy = tf.nn.softmax_cross_entropy_with_logits(self.last_layer.outputs, \
             self.one_hot)

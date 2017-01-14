@@ -96,7 +96,7 @@ class TestNeuralNetwork(unittest.TestCase):
         network.define_network()
 
         learning_rate = 0.001
-        network.optimize_softmax_cross_entropy(learning_rate, 'gradient_descent')
+        network.define_operations(learning_rate, 'gradient_descent')
 
         epochs = 10
         batch_size = 128
@@ -171,7 +171,7 @@ class TestNeuralNetwork(unittest.TestCase):
         network.define_network()
 
         learning_rate = 0.001
-        network.optimize_softmax_cross_entropy(learning_rate, 'adam')
+        network.define_operations(learning_rate, 'adam')
 
         # Prepare data
         (train_inputs, train_labels, valid_inputs, valid_labels, test_inputs, test_labels) = \
