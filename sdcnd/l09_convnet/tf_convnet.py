@@ -12,7 +12,7 @@ from dldata import dllog as log
 # Parameters
 learning_rate = 0.001
 batch_size = 128
-training_epochs = 3
+training_epochs = 5
 
 n_classes = 10  # MNIST total classes (0-9 digits)
 
@@ -112,7 +112,7 @@ t0 = time()
 with tf.Session() as sess:
     sess.run(init)
 
-    run_id = log.dl_run_start(dl_run, dl_network, dl_model_file_path, dl_data, hyper_dict)
+    #run_id = log.dl_run_start(dl_run, dl_network, dl_model_file_path, dl_data, hyper_dict)
 
     # Training cycle
     for epoch in range(training_epochs):
@@ -126,9 +126,9 @@ with tf.Session() as sess:
         # Display logs per epoch step
         c = sess.run(cost, feed_dict={x: batch_x, y: batch_y})
         print("Epoch:", '%04d' % (epoch+1), "cost=", "{:.9f}".format(c))
-        print("Time elapsed:", "{:.2f}".format(time() - t1)) 
+        print("Time elapsed:", "{:.2f}".format(time() - t1))
     print("Optimization Finished!")
-    print("Total training time:", "{:.2f}".format(time() - t0)) 
+    print("Total training time:", "{:.2f}".format(time() - t0))
 
 
     # Test model
@@ -139,4 +139,4 @@ with tf.Session() as sess:
 
     print("Accuracy:", test_accuracy)
 
-    log.dl_run_end(run_id, test_accuracy)
+    #log.dl_run_end(run_id, test_accuracy)

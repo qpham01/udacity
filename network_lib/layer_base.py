@@ -8,6 +8,7 @@ class BaseLayer:
     an output shape.
     """
     def __init__(self, name):
+        self.type = 'base'
         self.name = name
         self.input_shape = None
         self.output_shape = None

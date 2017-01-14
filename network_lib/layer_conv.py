@@ -7,7 +7,7 @@ from layer_base import BaseLayer
 
 class ConvolutionalLayer(BaseLayer):
     """
-    Encapsulates a ConvolutionalLayer in a neural network
+    Encapsulates a convolutional layer in a neural network
 
     Parameters:
     * input_shape: the tuple (input width, input height, input depth)
@@ -15,11 +15,12 @@ class ConvolutionalLayer(BaseLayer):
     * kernel_stride_shape: the tuple (stride width, stride height)
     * kernel_padding_shape: the tuple (padding width, padding height)
     * kernel_padding_type: either 'SAME' or 'VALID'
-    * activation_type: can only be 'relu' right now
+    * activation_type: can only be 'relu' right now or None
     """
     def __init__(self, name, input_shape, kernel_shape, kernel_stride_shape, kernel_padding_shape, \
         kernel_padding_type, activation_type='relu'):
         super(ConvolutionalLayer, self).__init__(name)
+        self.type = 'convolutional'
         self.input_shape = input_shape
         self.kernel_shape = kernel_shape
         self.kernel_stride = [1, kernel_stride_shape[0], kernel_stride_shape[1], 1]
@@ -36,8 +37,8 @@ class ConvolutionalLayer(BaseLayer):
         self.pool = None
 
         # Activation
-        if activation_type != 'relu':
-            raise ValueError("activation_type must be 'relu' for now")
+        if activation_type not in [None, 'relu']:
+            raise ValueError("activation_type must be in [None, 'relu']")
         self.activation_type = activation_type
 
         self.pool_type = None
@@ -85,10 +86,10 @@ class ConvolutionalLayer(BaseLayer):
         * pool_kernel_shape: the tuple (pool kernel width, pool kernel height)
         * pool_stride_shape: the tuple (pool stride width, pool stride height)
         """
-        if pool_type != 'max' and pool_type != 'avg':
+        if pool_type not in ['max', 'avg']:
             raise ValueError("pool_type must be 'max' or 'avg'.")
 
-        if pool_pad_type != 'VALID' and pool_pad_type != 'SAME':
+        if pool_pad_type not in ['VALID', 'SAME']:
             raise ValueError("pool_pad_type must be 'VALID' or 'SAME'.")
 
         self.pool_type = pool_type
@@ -97,17 +98,21 @@ class ConvolutionalLayer(BaseLayer):
         self.pool_pad_type = pool_pad_type
         self.output_shape = self.pool_output_shape()
 
-    def init_weights_and_biases(self, mean, stddev):
+    def init_weights_and_biases(self, mean=0.0, stddev=1.0):
         """
         Randomly initialize weights and biases.  Weights will be initialized randomly
         from a truncated normal distribution. Biases will be initialized to zeros.
+
+        Parameters:
+        * mean: The mean of the normal distribution from which random weights will be drawn from
+        * stddev: The standard deviation of the above normal distribution.
         """
         self.mean = mean
         self.stddev = stddev
         self.weights = tf.Variable(tf.truncated_normal((self.kernel_shape[0], \
             self.kernel_shape[1], self.input_shape[2], self.kernel_shape[2]), \
-            mean, stddev), name='w_' + self.name)
-        self.biases = tf.Variable(tf.zeros(self.kernel_shape[2]), name='b_' + self.name)
+            mean, stddev), name=self.name + '_w')
+        self.biases = tf.Variable(tf.zeros(self.kernel_shape[2]), name=self.name + '_b')
 
     def init_layer(self, inputs):
         """
@@ -116,9 +121,8 @@ class ConvolutionalLayer(BaseLayer):
 
         Parameters:
         * inputs: The data inputs into the layer
-        * mean: The mean of the truncated normal distribution to seed weights
-        * stddev: The standard deviation of the truncated normal distribution to seed weights
         """
+        print("layer name:", self.name, "self.inputs", self.inputs)
         self.inputs = inputs
         self.conv = tf.nn.bias_add(tf.nn.conv2d(self.inputs, self.weights, self.kernel_stride, \
             self.kernel_padding_type), self.biases)
