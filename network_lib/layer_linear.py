@@ -18,9 +18,9 @@ class LinearLayer(BaseLayer):
         self.type = 'linear'
         self.input_size = input_size
         self.output_size = output_size
-
-        if activation_type not in [None, 'tanh']:
-            raise ValueError("activation type must be in ['tanh'].")
+        self.good_activation_types = [None, 'relu', 'tanh']
+        if activation_type not in self.good_activation_types:
+            raise ValueError("activation type must be in", self.good_activation_types)
         self.activation_type = activation_type
 
         # Weights and biases
@@ -49,6 +49,8 @@ class LinearLayer(BaseLayer):
         """
         self.inputs = inputs
         self.outputs = tf.add(tf.matmul(self.inputs, self.weights), self.biases)
+        if self.activation_type == 'relu':
+            self.outputs = tf.nn.relu(self.outputs)
         if self.activation_type == 'tanh':
             self.outputs = tf.nn.tanh(self.outputs)
         

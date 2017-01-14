@@ -2,111 +2,135 @@
 Represents a neural network
 """
 from time import time
+from sklearn.utils import shuffle
 import tensorflow as tf
 
 class NeuralNetwork:
     """
     Encapsulates a neural network
     """
-    def __init__(self, name):
+    def __init__(self, name, input_shape, output_count):
         self.name = name
         self.layers = []
         self.last_layer = None
         self.learning_rate = None
-        self.cost = None
+        self.cross_entropy = None
+        self.loss_operation = None
+        self.train_operation = None
         self.optimizer = None
+        self.correct_prediction = None
+        self.accuracy_operation = None
         self.inputs = None
         self.outputs = None
         self.labels = None
+        input_dims = [None]
+        for _, dim in enumerate(input_shape):
+            input_dims.append(dim)
+        self.input_placeholder = tf.placeholder(tf.float32, input_dims)
+        self.label_placeholder = tf.placeholder(tf.int32, (None))
+        self.output_count = output_count
+        self.one_hot = tf.one_hot(self.label_placeholder, 10)
 
-    def add_layer(self, layer):
+    def add_layer(self, layer, mean, stddev):
         """
         Add a neural network layer
+
+        Parameters:
+        * layer: The layer to add to the network
+        * mean: The mean of the normal distribution from which random weights will be drawn from
+        * stddev: The standard deviation of the above normal distribution.
         """
+        layer.init_weights_and_biases(mean, stddev)
         self.layers.append(layer)
 
-    def define_network(self, inputs):
+    def define_network(self):
         """
         Initialize every layer with inputs and outputs
         """
         self.last_layer = None
 
+        inputs = self.input_placeholder
         for layer in self.layers:
             if self.last_layer is not None:
                 inputs = self.last_layer.outputs
-                print("inputs", inputs)
             if layer.type == 'linear' and self.last_layer.type == 'convolutional':
                 inputs = tf.reshape(inputs, [-1, layer.input_size])
-                print("flattened inputs", inputs)
             layer.init_layer(inputs)
             self.last_layer = layer
         self.outputs = self.last_layer.outputs
 
-    def optimize_softmax_cross_entropy(self, learning_rate, optimizer, label_placeholder):
+    def optimize_softmax_cross_entropy(self, learning_rate, optimizer):
         """
         Define cost softmax as cross-entropy
+
+        Parameters:
+        * learning_rate: The learning rate to use when optimizing for lower cost
+        * optimizer:  The optimizer to use; must be in ['adam', 'gradient_descent']
         """
         if optimizer not in ['gradient_descent', 'adam']:
             raise ValueError("optimizer must be in ['gradient_descent', 'adam]")
         self.learning_rate = learning_rate
-        self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits( \
-            self.last_layer.outputs, label_placeholder))
+        self.cross_entropy = tf.nn.softmax_cross_entropy_with_logits(self.last_layer.outputs, \
+            self.one_hot)
+        self.loss_operation = tf.reduce_mean(self.cross_entropy)
         if optimizer == 'gradient_descent':
-            self.optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate) \
-                .minimize(self.cost)
+            self.optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
         if optimizer == 'adam':
-            self.optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(self.cost)
+            self.optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+        self.train_operation = self.optimizer.minimize(self.loss_operation)
+        self.correct_prediction = tf.equal(tf.argmax(self.outputs, 1), tf.argmax(self.one_hot, 1))
+        self.accuracy_operation = tf.reduce_mean(tf.cast(self.correct_prediction, tf.float32))
 
-    def train(self, training_epochs, next_batch, data_size, batch_size, input_placeholder, \
-        label_placeholder, save_file):
+    def train_in_batches(self, sess, train_inputs, train_labels, batch_size):
         """
-        Run the network
+        Train network in batches of data
         """
-        # Launch the graph
-        # Initializing the variables
-        init = tf.initialize_all_variables()
+        train_inputs, train_labels = shuffle(train_inputs, train_labels)
+        num_examples = len(train_inputs)
+        for offset in range(0, num_examples, batch_size):
+            end = offset + batch_size
+            batch_x, batch_y = train_inputs[offset:end], train_labels[offset:end]
+            sess.run(self.train_operation, feed_dict={self.input_placeholder: batch_x, \
+                self.label_placeholder: batch_y})
+        # Return cost of the last batch
+        cost = sess.run(self.loss_operation, feed_dict={self.input_placeholder: batch_x, \
+            self.label_placeholder: batch_y})
+        return cost
 
-        saver = tf.train.Saver()
+    def evaluate_in_batches(self, sess, inputs, labels, batch_size):
+        """
+        Evaluate inputs in batches
+        """
+        num_examples = len(inputs)
+        total_accuracy = 0
+
+        for offset in range(0, num_examples, batch_size):
+            batch_x, batch_y = inputs[offset:offset + batch_size], labels[offset:offset + \
+                batch_size]
+            accuracy = sess.run(self.accuracy_operation, \
+                feed_dict={self.input_placeholder: batch_x, self.label_placeholder: batch_y})
+            total_accuracy += (accuracy * len(batch_x))
+        return total_accuracy / num_examples
+
+    def train_with_validate(self, sess, train_inputs, train_labels, valid_inputs, valid_labels, \
+        train_epochs, batch_size):
+        """
+        Train the network with validation
+        """
+
+        print("Training...")
+        print()
 
         time0 = time()
+        for i in range(train_epochs):
+            time1 = time()
+            cost = self.train_in_batches(sess, train_inputs, train_labels, batch_size)
 
-        with tf.Session() as sess:
-            sess.run(init)
+            print("Epoch:", '%04d' % (i), "Cost =", "{:.9f}".format(cost), \
+                "Time elapsed: {:.2f}".format(time() - time1))
 
-            # run_id = log.dl_run_start(dl_run, dl_network, dl_model_file_path, dl_data, hyper_dict)
-
-            # Training cycle
-            for epoch in range(training_epochs):
-                time1 = time()
-                total_batch = int(data_size / batch_size)
-                # Loop over all batches
-                for i in range(total_batch):
-                    batch_x, batch_y = next_batch(batch_size)
-                    # Run optimization op (backprop) and cost op (to get loss value)
-                    sess.run(self.optimizer, feed_dict={input_placeholder: batch_x, \
-                        label_placeholder: batch_y})
-                # Display logs per epoch step
-                cost = sess.run(self.cost, feed_dict={input_placeholder: batch_x, \
-                    label_placeholder: batch_y})
-                print("Epoch:", '%04d' % (epoch+1), "cost=", "{:.9f}".format(cost))
-                print("Time elapsed:", "{:.2f}".format(time() - time1))
-            saver.save(sess, save_file)
-            print("Training Finished!")
-            print("Total training time:", "{:.2f}".format(time() - time0))
-            return saver
-
-    def evaluate(self, saver, test_inputs, test_labels, input_placeholder, label_placeholder):
-        """
-        Evaluate accuracy with test data.
-        """
-        with tf.Session() as sess:
-            saver.restore(sess, tf.train.latest_checkpoint('.'))
-
-            # Test model
-            correct_prediction = tf.equal(tf.argmax(self.outputs, 1), tf.argmax(test_labels, 1))
-            # Calculate accuracy
-            accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-            test_accuracy  = sess.run(accuracy, feed_dict={input_placeholder: test_inputs, \
-                label_placeholder: test_labels})
-
-            print("Accuracy:", test_accuracy)
+            valid_accuracy = self.evaluate_in_batches(sess, valid_inputs, valid_labels, batch_size)
+            print("Validation Accuracy = {:.3f}".format(valid_accuracy))
+            print()
+        print("Training Finished!")
+        print("Total training time:", "{:.2f}".format(time() - time0))

@@ -122,7 +122,6 @@ class ConvolutionalLayer(BaseLayer):
         Parameters:
         * inputs: The data inputs into the layer
         """
-        print("layer name:", self.name, "self.inputs", self.inputs)
         self.inputs = inputs
         self.conv = tf.nn.bias_add(tf.nn.conv2d(self.inputs, self.weights, self.kernel_stride, \
             self.kernel_padding_type), self.biases)
