@@ -67,21 +67,18 @@ class TestNeuralNetwork(unittest.TestCase):
         after_pool_output_shapes = [(14, 14, depths[0]), (7, 7, depths[1]), (4, 4, depths[2])]
 
         # Create convolutional layers
-        conv_layers = []
+        conv = None
         for i in range(conv_layer_count):
             name = 'l{:d}'.format(i)
             if i > 0:
-                input_shape = conv_layers[i - 1].output_shape
+                input_shape = conv.output_shape
             conv = ConvolutionalLayer(name, input_shape, kernel_shapes[i], conv_stride_shape, \
                 conv_pad_shape, conv_pad_type, activation)
             self.assertEqual(after_conv_output_shapes[i], conv.output_shape)
             conv.add_pooling('max', pool_shape, pool_stride_shape, pool_pad_type)
             self.assertEqual(after_pool_output_shapes[i], conv.output_shape)
             conv.init_weights_and_biases(mean, stddev)
-            conv_layers.append(conv)
-
-        for i in range(conv_layer_count):
-            network.add_layer(conv_layers[i])
+            network.add_layer(conv)
 
         # Create linear layers
 
@@ -90,16 +87,12 @@ class TestNeuralNetwork(unittest.TestCase):
         linear_output_sizes = [512, 10]
         linear_activations = ['tanh', None]
 
-        linear_layers = []
         for i, input_size in enumerate(linear_input_sizes):
             layer_index = i + conv_layer_count
             name = 'l{:d}'.format(layer_index)
             linear = LinearLayer(name, input_size, linear_output_sizes[i], linear_activations[i])
             linear.init_weights_and_biases(mean, stddev)
-            linear_layers.append(linear)
-
-        for _, layer in enumerate(linear_layers):
-            network.add_layer(layer)
+            network.add_layer(linear)
 
         # MNIST classify 10 digits
         n_classes = 10
