@@ -1,0 +1,15 @@
+data
+.ipynb_checkpoints
+*.h5
+models
+*.swp
+*.p
+signs
+objectdb
+*ckpt*
+*data*
+*meta*
+*.pyc
+*.index
+checkpoint
+*.bmp

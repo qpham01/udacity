@@ -105,7 +105,7 @@ class TestNeuralNetwork(unittest.TestCase):
             get_mnist_data()
 
         with tf.Session() as sess:
-            sess.run(tf.global_variables_initializer())
+            sess.run(tf.initialize_all_variables())
 
             network.train_with_validate(sess, train_inputs, train_labels, valid_inputs, \
                 valid_labels, epochs, batch_size)
@@ -182,7 +182,7 @@ class TestNeuralNetwork(unittest.TestCase):
         saver = tf.train.Saver()
 
         with tf.Session() as sess:
-            sess.run(tf.global_variables_initializer())
+            sess.run(tf.initialize_all_variables())
 
             network.train_with_validate(sess, train_inputs, train_labels, valid_inputs, \
                 valid_labels, epochs, batch_size)
