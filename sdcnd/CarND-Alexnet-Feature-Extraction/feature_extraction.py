@@ -17,7 +17,12 @@ fc7 = AlexNet(resized, feature_extract=True)
 # TODO: Define a new fully connected layer followed by a softmax activation to classify
 # the traffic signs. Assign the result of the softmax activation to `probs` below.
 shape = (fc7.get_shape().as_list()[-1], nb_classes)  # use this shape for the weight matrix
-probs = ...
+mu = 0.0
+sigma = 0.01
+fc8W = tf.Variable(tf.truncated_normal(shape, mean=mu, stddev=sigma))
+fc8b = tf.Variable(tf.zeros(shape[1]))
+logits = tf.nn.xw_plus_b(fc7, fc8W, fc8b)
+probs = tf.nn.softmax(logits)
 
 init = tf.initialize_all_variables()
 sess = tf.Session()
