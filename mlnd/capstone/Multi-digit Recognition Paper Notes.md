@@ -24,3 +24,7 @@ At test time, we predict s = (l,s1,...,sl) = argmax (L,S1,...,SL) log P(S|X)
 This  argmax  can  be  computed  in  linear  time.   The  argmax  for  each  character  can  be  computed independently.   We then incrementally add up the log probabilities for each character.   For each length l, the complete log probability is given by this running sum of character log probabilities, plus log P(l|x). The total runtime is thus O(N).
 
 We preprocess by subtracting the mean of each image.  We do not use any whitening (_Hyv̈arinen et al., 2001)_, local contrast normalization (_Sermanet et al., 2012_)
+
+#### Pooling Description
+
+Image-based convolutional networks typically use a pooling layer which summarizes the activations of many adjacent filters with a single response. Such pooling layers may summarize the activations of groups of units with a function such as their maximum, mean, or L2 norm. These pooling layers help the network be robust to small translations of the input.
