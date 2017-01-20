@@ -1,0 +1,3 @@
+Multi-digit Number Recognition from Street View Imagery using Deep Convolutional Neural Networks
+Ian J. Goodfellow, Yaroslav Bulatov, Julian Ibarz, Sacha Arnoud, Vinay Shet
+Google Inc., Mountain View, CA

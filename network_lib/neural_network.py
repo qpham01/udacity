@@ -27,9 +27,9 @@ class NeuralNetwork:
         for _, dim in enumerate(input_shape):
             input_dims.append(dim)
         self.input_placeholder = tf.placeholder(tf.float32, input_dims)
-        self.label_placeholder = tf.placeholder(tf.int32, (None))
+        self.label_placeholder = tf.placeholder(tf.int64, (None))
         self.output_count = output_count
-        self.one_hot = tf.one_hot(self.label_placeholder, 10)
+        self.one_hot = tf.one_hot(self.label_placeholder, output_count)
 
     def add_layer(self, layer, mean, stddev):
         """
@@ -71,15 +71,18 @@ class NeuralNetwork:
         if optimizer not in optimizer_list:
             raise ValueError("optimizer must be in", optimizer_list)
         self.learning_rate = learning_rate
-        self.cross_entropy = tf.nn.softmax_cross_entropy_with_logits(self.last_layer.outputs, \
-            self.one_hot)
+        # self.cross_entropy = tf.nn.softmax_cross_entropy_with_logits(self.outputs, self.one_hot)
+        # Using sparse_softmax... means no need to use one_hot with logits, just the labels directly
+        self.cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(self.outputs, \
+            self.label_placeholder)
         self.loss_operation = tf.reduce_mean(self.cross_entropy)
         if optimizer == 'gradient_descent':
             self.optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
         if optimizer == 'adam':
             self.optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
         self.train_operation = self.optimizer.minimize(self.loss_operation)
-        self.correct_prediction = tf.equal(tf.argmax(self.outputs, 1), tf.argmax(self.one_hot, 1))
+        # self.correct_prediction = tf.equal(tf.argmax(self.outputs, 1), tf.argmax(self.one_hot, 1))
+        self.correct_prediction = tf.equal(tf.argmax(self.outputs, 1), self.label_placeholder)
         self.accuracy_operation = tf.reduce_mean(tf.cast(self.correct_prediction, tf.float32))
 
     def train_in_batches(self, sess, train_inputs, train_labels, batch_size):
@@ -112,6 +115,26 @@ class NeuralNetwork:
                 feed_dict={self.input_placeholder: batch_x, self.label_placeholder: batch_y})
             total_accuracy += (accuracy * len(batch_x))
         return total_accuracy / num_examples
+
+    def train(self, sess, train_inputs, train_labels, train_epochs, batch_size):
+        """
+        Train the network with validation
+        """
+
+        print("Training...")
+        print()
+
+        time0 = time()
+        for i in range(train_epochs):
+            time1 = time()
+            cost = self.train_in_batches(sess, train_inputs, train_labels, batch_size)
+
+            print("Epoch:", '%04d' % (i), "Cost =", "{:.9f}".format(cost), \
+                "Time elapsed: {:.2f}".format(time() - time1))
+            print()
+
+        print("Training Finished!")
+        print("Total training time:", "{:.2f}".format(time() - time0))
 
     def train_with_validate(self, sess, train_inputs, train_labels, valid_inputs, valid_labels, \
         train_epochs, batch_size):

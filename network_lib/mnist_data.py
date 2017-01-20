@@ -24,6 +24,7 @@ def get_mnist_data(padding=(0, 0)):
     print("Training Set:   {} samples".format(len(train_inputs)))
     print("Validation Set: {} samples".format(len(valid_inputs)))
     print("Test Set:       {} samples".format(len(test_inputs)))
+    print("Test Label Shape: {}".format(test_labels.shape))
 
     # Pad images with 0s
     train_inputs = np.pad(train_inputs, ((0, 0), padding, padding, (0, 0)), 'constant')
