@@ -43,22 +43,16 @@ def output_file_name(name, param_key, threshold, image_file_name):
         '_' + image_file_name
 
 # Edit this function to create your own pipeline.
-def pipeline(img, name, test_params, file_name):
+def pipeline(img, name, test_params, img_file_name=None):
     """
     An image processing pipeline that acts on a dictionary of test parameters,
     saving an output image for each processing step in the pipeline to a file
     named after the parameters that was applied to the input image.
     """
-    global calibration_matrix, distortion_params
-    if calibration_matrix is None:
-        calibration_matrix, distortion_params = load_camera_calibration()
-
     output_dir = 'output_images/' + name
     if not os.path.isdir(output_dir):
         os.mkdir(output_dir)
 
-    # Undistort input image as first step.
-    img = cv2.undistort(img, calibration_matrix, distortion_params, None, calibration_matrix)
     parameters = test_params.items()
     img_layers = dict()
 
@@ -118,29 +112,32 @@ def pipeline(img, name, test_params, file_name):
             combine = value
 
         # Save the file
-        if layer is not None:
-            output_name = output_file_name(name, key, value, file_name)
+        if img_file_name is not None and layer is not None:
+            output_name = output_file_name(name, key, value, img_file_name)
             mpimg.imsave(output_name, layer, cmap="gray")
-
+    
     if single is not None:
         binary = img_layers[single]
-        output_name = output_file_name(name, 'single', (0, 0), file_name)
-        mpimg.imsave(output_name, binary, cmap="gray")
+        prefix = 'single'
+        thresh_output = (0, 0)
 
     # Stack the layers specified
     if stack is not None:
         binary = np.dstack((np.zeros_like(img_layers[stack[0]]), img_layers[stack[0]], \
             img_layers[stack[1]]))
-        output_name = output_file_name(name, 'stack', stack, file_name)
-        mpimg.imsave(output_name, binary, cmap="gray")
+        prefix = 'stack'
+        thresh_output = stack
 
     if combine is not None:
         binary = np.zeros_like(img_layers[combine[0][0]])
         binary[((img_layers[combine[0][0]] == 1) & (img_layers[combine[0][1]] == 1)) |\
             ((img_layers[combine[1][0]] == 1) & (img_layers[combine[1][1]] == 1))] = 1
-        output_name = output_file_name(name, 'combine', (0, 0), file_name)
-        mpimg.imsave(output_name, binary, cmap="gray")
+        prefix = 'combine'
+        thresh_output = (0, 0)
 
+    if img_file_name is not None:
+        output_name = output_file_name(name, prefix, thresh_output, img_file_name)
+        mpimg.imsave(output_name, binary, cmap="gray")
     return binary
 """
 for i, param in enumerate(test_parameters):
