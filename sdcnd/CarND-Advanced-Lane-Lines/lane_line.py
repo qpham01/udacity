@@ -3,13 +3,13 @@ Define a class to receive the characteristics of each line detection
 """
 import numpy as np
 from detect_lane import make_topdown_binary, convert_pixel_to_world, fit_lane_line, curve_radius, \
-    create_lane_histogram_data
+    create_lane_histogram_data, YM_PER_PIX
 
 class LaneLine():
     """
     Encapsulates a lane line
     """
-    def __init__(self, box_half_width=50, box_height=60, side_margin=100):
+    def __init__(self, box_half_width=50, box_height=60):
         """
         :param box_half_width: half the width of the detection area box.
         :param box_height: heigth of the detection area box.
@@ -44,10 +44,10 @@ class LaneLine():
         self.box_half_width = box_half_width
         # sliding detection box height
         self.box_height = box_height
-        # side margin
-        self.side_margin = side_margin
         # length of moving average lists
         self.list_length = 5
+        # pixel distance
+        self.pixel_pos = None
 
     def detect_lane_line(self, image, region):
         """
@@ -60,25 +60,29 @@ class LaneLine():
         :return None
         """
         binary, _ = make_topdown_binary(image)
+        base = binary.shape[0] * YM_PER_PIX
 
         # Extract lane box_half_width, box_height, side_margin
         self.get_lane_pixels(binary, region)
 
         if self.detected:
-            # Convert to world coordinates
-            self.allx, self.ally = convert_pixel_to_world(self.allx, self.ally)
             if len(self.allx) == 0:
                 self.detected = False
                 return
 
+            # Convert to world coordinates
+            allx, ally = convert_pixel_to_world(self.allx, self.ally)
+
             # Polynomial fit
-            fit, fit_x = fit_lane_line(self.allx, self.ally)
+            fit, fit_x = fit_lane_line(allx, ally)
             diff = fit - self.current_fit
             # First coefficient varies by more than 1 means detection failure so
             # ignore current detection.
-            if len(self.current_fit) == 3 and abs(diff[0][0]) > 1.0 or abs(diff[0][1]) > 2.0:
+            if len(self.current_fit) == 3 and len(diff) == 1 and \
+                (abs(diff[0][0]) > 1.0 or abs(diff[0][1]) > 2.0):
                 self.detected = False
             else:
+                self.line_base_pos = fit[0]*base**2 + fit[1]*base + fit[2]
                 self.current_fit = fit
                 self.fit_x = fit_x
                 self.recent_xfitted.append(fit_x)
@@ -124,7 +128,7 @@ class LaneLine():
             self.detected = True
             lane += left
 
-        self.line_base_pos = (image_height, self.bestx)
+        self.pixel_pos = lane
 
         while box_top >= 0:
             # Find lane line maximum value when box is slide up.  Will use for new lane line
@@ -132,26 +136,29 @@ class LaneLine():
             histogram_values = create_lane_histogram_data(binary, box_top, box_top + \
                 self.box_height, 0, image_width)
 
-            # Left lane
-            box_left = max(0, lane - self.box_half_width)
-            box_right = min(image_width, lane + self.box_half_width - 1)
-            box_bottom = box_top + self.box_height
-            for row in range(box_top, box_bottom):
-                for col in range(box_left, box_right):
-                    if binary[row, col] > 0:
-                        self.allx.append(col)
-                        self.ally.append(row)
-            # Slide left box to center of bright pixels
-            last_lane = lane
-            lane = histogram_values[box_left:box_right].argmax()
-            if lane == 0:
-                lane = last_lane
-            else:
-                lane += box_left
+            try:
+                # Left lane
+                box_left = max(0, lane - self.box_half_width)
+                box_right = min(image_width, lane + self.box_half_width - 1)
+                box_bottom = box_top + self.box_height
+                for row in range(box_top, box_bottom):
+                    for col in range(box_left, box_right):
+                        if binary[row, col] > 0:
+                            self.allx.append(col)
+                            self.ally.append(row)
+                # Slide left box to center of bright pixels
+                last_lane = lane
+                lane = histogram_values[box_left:box_right].argmax()
+                if lane == 0:
+                    lane = last_lane
+                else:
+                    lane += box_left
 
-            # If new lane x coordinate is too far away, don't use it.
-            if abs(lane - last_lane) > self.box_half_width:
-                lane = last_lane
+                # If new lane x coordinate is too far away, don't use it.
+                if abs(lane - last_lane) > self.box_half_width:
+                    lane = last_lane
+            except TypeError:
+                self.detected = False
 
             # Slide box up
             box_top -= self.box_height

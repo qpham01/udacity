@@ -200,18 +200,7 @@ def clean_lane_points(lane_points):
         cleaned_points.append((int(point[0]), int(point[1])))
     return cleaned_points
 
-def sample_lane_points(points, point_count):
-    """
-    Uniformly sample the specified point count from a long list of points.
-    """
-    interval = floor(len(points) / point_count)
-    sample = []
-    for index in range(point_count):
-        sample.append(points[index * interval])
-    return sample
-
-def draw_lane_polygon(image, fit_x_left, y_left, fit_x_right, y_right, p_inv, lane_color, \
-    line_color, thickness):
+def draw_lane_polygon(image, left_fit, right_fit, p_inv, lane_color, line_color, thickness):
     """
     Draw the lane polygon onto an image.
     """
@@ -219,19 +208,17 @@ def draw_lane_polygon(image, fit_x_left, y_left, fit_x_right, y_right, p_inv, la
     lane_image = np.zeros_like(image).astype(np.uint8)
     #color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
 
-    # There are often too many lane points so we'll just uniformly sample n lane_points for
-    # visualization
-    sampled_lx = fit_x_left # sample_lane_points(fit_x_left, 100) #
-    sampled_ly = y_left # sample_lane_points(y_left, 100) #
+    yvals = np.array([y for y in range(floor(image.shape[0] * 0.5), image.shape[0], 3)])
+    _, yvals = convert_pixel_to_world(np.array([0]), yvals)
+    ya = np.array(yvals)
+    draw_left_x = left_fit[0]*ya**2 + left_fit[1]*ya + left_fit[2]
+    draw_right_x = right_fit[0]*ya**2 + right_fit[1]*ya + right_fit[2]
 
-    sampled_rx = fit_x_right # sample_lane_points(fit_x_right, 100) # 
-    sampled_ry = y_right # sample_lane_points(y_right, 100) # 
-
-    # Recast the x and y points into usable format for cv2.fillPoly() and transform back to
+    # Recast the x and y points into usable format for cv2.fillPoly() and transform back to 
     # pixel coords.
-    pts_left = np.array([np.transpose(np.vstack([sampled_lx, sampled_ly]))]) /\
-        np.array([XM_PER_PIX, YM_PER_PIX])
-    pts_right = np.array([np.flipud(np.transpose(np.vstack([sampled_rx, sampled_ry])))]) / \
+    pts_left = np.array([np.transpose(np.vstack([draw_left_x, yvals]))]) / np.array([XM_PER_PIX, \
+        YM_PER_PIX])
+    pts_right = np.array([np.flipud(np.transpose(np.vstack([draw_right_x, yvals])))]) / \
         np.array([XM_PER_PIX, YM_PER_PIX])
     pts = np.hstack((pts_left, pts_right))
 
@@ -269,6 +256,10 @@ def draw_curvature_text(image, left_radius, right_radius, text_color):
     draw_text(image, left_radius_text, (700, 50), text_color)
     draw_text(image, right_radius_text, (700, 90), text_color)
 
+def draw_center_distance_text(image, distance, text_color):
+    distance_text = "Distance From Center:   {:.2f} m".format(distance)
+    draw_text(image, distance_text, (700, 130), text_color)
+
 # Draw parameters
 TEXT_COLOR = (255, 255, 128)
 LANE_COLOR = (0, 255, 0)
@@ -295,11 +286,32 @@ def find_and_draw_lanes(image, pipeline_index, box_half_width, box_height, side_
     right_curverad = curve_radius(right_y, right_fit)
 
     # Draw lane data on image and show
-    output = draw_lane_polygon(image, left_fit_x, left_y, right_fit_x, right_y, M_INV, \
-        LANE_COLOR, LINE_COLOR, THICKNESS)
+    output = draw_lane_polygon(image, left_fit, right_fit, M_INV, LANE_COLOR, LINE_COLOR, \
+        THICKNESS)
     draw_curvature_text(output, left_curverad, right_curverad, TEXT_COLOR)
 
     return output, binary
+
+def draw_lane_image(image, left, right, left_region, right_region):
+    """
+    Given an undistorted image, detect lane lines in it, and draw the lane lines and
+    radius of curvature on an output image.abs
+    """
+    width = image.shape[1]
+
+    left.detect_lane_line(image, left_region)
+
+    right.detect_lane_line(image, right_region)
+
+    output = draw_lane_polygon(image, left.current_fit, right.current_fit, \
+        M_INV, LANE_COLOR, LINE_COLOR, THICKNESS)
+    draw_curvature_text(output, left.radius_of_curvature, right.radius_of_curvature, TEXT_COLOR)
+    center = image.shape[1] / 2.0 * XM_PER_PIX
+    distance_from_center = (right.line_base_pos - left.line_base_pos) / 2.0 + left.line_base_pos - \
+        center
+    draw_center_distance_text(output, distance_from_center, TEXT_COLOR)
+
+    return output
 
 # The index into the LANE_PARAMETERS of the thresholding method to use.
 PIPELINE_INDEX = 8
@@ -311,8 +323,9 @@ SIDE_MARGIN = 100
 BOX_HALF_WIDTH = 50
 BOX_HEIGHT = 60
 
-NAME = "test6.jpg"
-UNDIST = undistort(mpimg.imread('test_images/' + NAME))
-OUTPUT, _ = find_and_draw_lanes(UNDIST, PIPELINE_INDEX, BOX_HALF_WIDTH, BOX_HEIGHT, \
-    SIDE_MARGIN)
-mpimg.imsave('output_images/' + NAME.replace(NAME, 'output_' + NAME), OUTPUT)
+if False:
+    NAME = "test2.jpg"
+    UNDIST = undistort(mpimg.imread('test_images/' + NAME))
+    OUTPUT, _ = find_and_draw_lanes(UNDIST, PIPELINE_INDEX, BOX_HALF_WIDTH, BOX_HEIGHT, \
+        SIDE_MARGIN)
+    mpimg.imsave('output_images/' + NAME.replace(NAME, 'output_' + NAME), OUTPUT)
