@@ -41,7 +41,7 @@ TOPDOWN_COORDS = np.float32([[200, 0], [1080, 0], [1080, 670], [200, 670]])
 M = cv2.getPerspectiveTransform(FORWARD_COORDS, TOPDOWN_COORDS)
 M_INV = cv2.getPerspectiveTransform(TOPDOWN_COORDS, FORWARD_COORDS)
 
-def make_topdown_binary(undistorted_image, index):
+def make_topdown_binary(undistorted_image, index=8):
     """
     Make a binary image using the index of thresholding method in the LANE_PARAMETERS list.
     """
@@ -88,7 +88,7 @@ def get_lane_pixels(binary_topdown_image, box_half_width, box_height, side_margi
 
     # right lane line pixel column.
     right_lane = histogram_values[border:image_width - side_margin].argmax() + border
-
+    
     while box_top >= 0:
         # Find lane line maximum value when box is slide up.  Will use for new lane line
         # centerseach iteration.
@@ -155,8 +155,8 @@ def convert_pixel_to_world(x, y):
     """
     Convert pixel coordinates from world coordinates.
     """
-    y = y * YM_PER_PIX
-    x = x * XM_PER_PIX
+    y = [y_el * YM_PER_PIX for y_el in y]
+    x = [x_el * XM_PER_PIX for x_el in x]
     return x, y
 
 def fit_lane_line(x, y):
@@ -164,7 +164,7 @@ def fit_lane_line(x, y):
     Fit a second order polynomial to each fake lane line
     """
     fit = np.polyfit(y, x, 2)
-    fitx = fit[0]*y**2 + fit[1]*y + fit[2]
+    fitx = [fit[0]*y_el**2 + fit[1]*y_el + fit[2] for y_el in y]
     return fit, fitx
 
 # Calculate curve radius
@@ -224,8 +224,8 @@ def draw_lane_polygon(image, fit_x_left, y_left, fit_x_right, y_right, p_inv, la
     sampled_lx = fit_x_left # sample_lane_points(fit_x_left, 100) #
     sampled_ly = y_left # sample_lane_points(y_left, 100) #
 
-    sampled_rx = sample_lane_points(fit_x_right, 100) # fit_x_right #
-    sampled_ry = sample_lane_points(y_right, 100) # y_right #
+    sampled_rx = fit_x_right # sample_lane_points(fit_x_right, 100) # 
+    sampled_ry = y_right # sample_lane_points(y_right, 100) # 
 
     # Recast the x and y points into usable format for cv2.fillPoly() and transform back to
     # pixel coords.
@@ -311,7 +311,7 @@ SIDE_MARGIN = 100
 BOX_HALF_WIDTH = 50
 BOX_HEIGHT = 60
 
-NAME = "test2.jpg"
+NAME = "test6.jpg"
 UNDIST = undistort(mpimg.imread('test_images/' + NAME))
 OUTPUT, _ = find_and_draw_lanes(UNDIST, PIPELINE_INDEX, BOX_HALF_WIDTH, BOX_HEIGHT, \
     SIDE_MARGIN)
