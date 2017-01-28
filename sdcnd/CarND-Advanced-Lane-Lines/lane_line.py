@@ -2,6 +2,7 @@
 Define a class to receive the characteristics of each line detection
 """
 import numpy as np
+import matplotlib.image as mpimg
 from detect_lane import make_topdown_binary, convert_pixel_to_world, fit_lane_line, curve_radius, \
     create_lane_histogram_data, YM_PER_PIX
 
@@ -45,11 +46,11 @@ class LaneLine():
         # sliding detection box height
         self.box_height = box_height
         # length of moving average lists
-        self.list_length = 5
+        self.list_length = 10
         # pixel distance
         self.pixel_pos = None
 
-    def detect_lane_line(self, image, region):
+    def detect_lane_line(self, image, region, index, binary_name=None):
         """
         Detect lane line within an undistorted image and initial region within the image.  This
         method updates data members of the LaneLine class with new detection data from the provided
@@ -59,7 +60,10 @@ class LaneLine():
         :param region: a tuple (left, right) bounding the starting horizontal detection area.
         :return None
         """
-        binary, _ = make_topdown_binary(image)
+        binary, _ = make_topdown_binary(image, index)
+        if binary_name is not None:
+            mpimg.imsave("output_images/" + binary_name, binary, cmap="gray")
+
         base = binary.shape[0] * YM_PER_PIX
 
         # Extract lane box_half_width, box_height, side_margin
@@ -75,13 +79,20 @@ class LaneLine():
 
             # Polynomial fit
             fit, fit_x = fit_lane_line(allx, ally)
-            diff = fit - self.current_fit
+            self.diffs = fit - self.current_fit
             # First coefficient varies by more than 1 means detection failure so
             # ignore current detection.
-            if len(self.current_fit) == 3 and len(diff) == 1 and \
-                (abs(diff[0][0]) > 1.0 or abs(diff[0][1]) > 2.0):
+            self.detected = True
+            coeff0_threshold = 0.5
+            coeff1_threshold = 0.5
+            fit_len = len(self.current_fit)
+            dif_len = len(self.diffs)
+            if fit_len == 3 and dif_len == 3 and (abs(self.diffs[0]) > coeff0_threshold or \
+                abs(self.diffs[1]) > coeff1_threshold):
+                print(self.diffs, "Fit changed too much, detected = false")
                 self.detected = False
-            else:
+
+            if self.detected:
                 self.line_base_pos = fit[0]*base**2 + fit[1]*base + fit[2]
                 self.current_fit = fit
                 self.fit_x = fit_x
@@ -96,9 +107,12 @@ class LaneLine():
                 #print("Current fit", self.current_fit)
                 # Calculate best fit as average of last N fits
                 self.best_fit = sum(self.recent_fits) / len(self.recent_fits)
+                #print(self.best_fit, self.current_fit)
 
                 #print("Best fit", self.best_fit)
-                self.radius_of_curvature = curve_radius(self.ally, self.current_fit)
+                self.radius_of_curvature = curve_radius(self.ally, self.best_fit)
+
+        return binary
 
     def get_lane_pixels(self, binary, region):
         """

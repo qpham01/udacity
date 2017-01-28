@@ -34,11 +34,23 @@ def draw_lane_test_image(image_name):
     """
     Draw lane lines on a test image
     """
+    index = 8
     undist = undistort(mpimg.imread('test_images/' + image_name))
     left, right, left_region, right_region = init_lane_lines()
-    output = draw_lane_image(undist, left, right, left_region, right_region)
+    output, _ = draw_lane_image(undist, left, right, left_region, right_region, index)
     mpimg.imsave('output_images/' + image_name.replace(image_name, 'output_' + image_name), output)
     return output
+
+def draw_image(image_name, binary_name, left, right, left_region, right_region):
+    """
+    Draw lane lines on a test image
+    """
+    index = 0
+    undist = undistort(mpimg.imread(image_name))
+    output, binary = draw_lane_image(undist, left, right, left_region, right_region, index, \
+        binary_name)
+    mpimg.imsave('output_images/' + image_name.replace(image_name, 'output_' + image_name), output)
+    return output, binary
 
 def process_movie(movie_name):
     """
@@ -47,14 +59,15 @@ def process_movie(movie_name):
     global LEFT, RIGHT, LEFT_REGION, RIGHT_REGION
     LEFT, RIGHT, LEFT_REGION, RIGHT_REGION = init_lane_lines()
     clip1 = VideoFileClip(movie_name)
-    output = clip1.fl_image(process_image) 
+    output = clip1.fl_image(process_image)
     output_name = 'output_' + movie_name
     print("Writing movie file", output_name)
     output.write_videofile(output_name, audio=False)
 
 def process_image(image):
     global LEFT, RIGHT, LEFT_REGION, RIGHT_REGION
-    output = draw_lane_image(image, LEFT, RIGHT, LEFT_REGION, RIGHT_REGION)
+    index = 8
+    output, _ = draw_lane_image(image, LEFT, RIGHT, LEFT_REGION, RIGHT_REGION, index)
     # LEFT_REGION = (LEFT.pixel_pos - LEFT.box_half_width, LEFT.line_base_pos + \
     #    LEFT.box_half_width)
     # RIGHT_REGION = (RIGHT.pixel_pos - RIGHT.box_half_width, RIGHT.line_base_pos + \
@@ -72,14 +85,27 @@ if PROCESS_TEST_IMAGES:
     for name in IMAGE_NAMES:
         draw_lane_test_image(name)
 
+PROCESS_FAILURE_02 = False
+if PROCESS_FAILURE_02:
+    left1, right1, left_region1, right_region1 = init_lane_lines()
+    for index in range(1,19):
+        file_name = "Failure02_{}.png".format(index)
+        binary_name = file_name.replace("Failure", "Failure_output")
+        print("Processing", file_name)
+        draw_image(file_name, binary_name, left1, right1, left_region1, right_region1)
+
+PROCESS_FAILURE01 = False
+if PROCESS_FAILURE01:
+    process_movie('Failure01.mp4')
+
 PROCESS_PROJECT_MOVIE = False
 if PROCESS_PROJECT_MOVIE:
     process_movie('project_video.mp4')
 
-PROCESS_CHALLENGE_MOVIE = True
+PROCESS_CHALLENGE_MOVIE = False
 if PROCESS_CHALLENGE_MOVIE:
     process_movie('challenge_video.mp4')
 
-PROCESS_HARDER_MOVIE = False
+PROCESS_HARDER_MOVIE = True
 if PROCESS_HARDER_MOVIE:
     process_movie('harder_challenge_video.mp4')
