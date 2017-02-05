@@ -78,6 +78,8 @@ The fourth argument `run1` is the directory to save the images seen by the agent
 ```sh
 ls run1
 
+Saved video link: https://youtu.be/24irMlIBAvc
+
 [2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_424.jpg
 [2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_451.jpg
 [2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_477.jpg
