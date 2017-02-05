@@ -3,15 +3,15 @@ Reads in and process the image data for training
 """
 import os
 from pathlib import Path
-from time import time
 import pickle
 import numpy as np
 import cv2
 import matplotlib.image as mpimg
 import tensorflow as tf
 from image_util import rgb_to_gray
+from time import time
 
-SIM_DIR = 'Simulator/Training06'
+SIM_DIR = 'Simulator/Training02'
 
 flags = tf.app.flags
 FLAGS = flags.FLAGS
@@ -47,20 +47,24 @@ def read_drive_data(images, labels, fnames, drive_log, zero_angle_keep_interval=
     neg_count = 0
     pos_count = 0
     skip_count = 0
+    t0 = time()
     for line in lines:
         if 'center' not in line:
             continue
+        count += 1
+        if count % update_interval == 0:
+            print("{} lines out of {} processed in {:.2f} s".format(count, line_count, time() - t0))
+            t0 = time()
         fname, angle = parse_drive_log_line(line)
-
         if (FLAGS.small_images and fname.startswith('img')) or \
             (not FLAGS.small_images and fname.startswith('IMG')):
             fname = os.path.join(FLAGS.sim_dir, fname)
+
         if fname in fnames:
             skip_count += 1
             if skip_count % update_interval == 0:
                 print("Skipped {} lines".format(skip_count))
-            continue
-
+                continue
         # Decide to whether throw out or keep zero steering angle data.
         if angle == 0.0 and keep_index != zero_angle_keep_interval:
             keep_index += 1
@@ -68,11 +72,8 @@ def read_drive_data(images, labels, fnames, drive_log, zero_angle_keep_interval=
         if angle == 0.0 and keep_index == zero_angle_keep_interval:
             keep_index = 0
 
-        count += 1
-        if count % update_interval == 0:
-            print("{} lines out of {} processed".format(count, line_count))
-
         img_file = Path(fname)
+
         if img_file.is_file():
             # file exists
             # img = cv2.imread(fname)
@@ -85,17 +86,6 @@ def read_drive_data(images, labels, fnames, drive_log, zero_angle_keep_interval=
                 images = np.append(images, img, axis=0)
             labels.append(angle)
             fnames.append(fname)
-            if angle < 0:
-                neg_count += 1
-            if angle > 0:
-                pos_count += 1
-        else:
-            not_found_count += 1
-            print("Could not file file", fname)
-    print("Could not find {} file".format(not_found_count))
-    print("Positive Count", pos_count)
-    print("Negative Count", neg_count)
-    return images, labels, fnames
 
 def main(_):
     print("Inputs:", FLAGS.sim_dir, FLAGS.pickle_name, FLAGS.keep_interval)
@@ -111,13 +101,7 @@ def main(_):
         labels = data_pickle['labels']
         fnames = data_pickle['fnames']
 
-    images, labels, fnames = read_drive_data(images, labels, fnames, drive_log, FLAGS.keep_interval)
-    print("Shape of training images", images.shape)
-    data_pickle = {}
-    data_pickle["images"] = images
-    data_pickle["labels"] = labels
-    data_pickle["fnames"] = fnames
-    pickle.dump(data_pickle, open(FLAGS.pickle_name, "wb"))
+    read_drive_data(images, labels, fnames, drive_log, FLAGS.keep_interval)
 
 if __name__ == '__main__':
     tf.app.run()

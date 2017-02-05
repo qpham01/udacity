@@ -1,6 +1,9 @@
+driving*
 .vscode
 *.p
+*.p.*
 *checkpoint*
 Training*
 Simulator
 *.h5
+*.json
