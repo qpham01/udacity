@@ -19,7 +19,7 @@ Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/4
 My project includes the following files:
 * model.py containing the script to create and train the model
 * drive.py for driving the car in autonomous mode
-* model.h5 containing a trained convolution neural network 
+* model.h5 containing a trained convolution neural network (uploaded to Udacity as a zip submission file)
 * writeup_report.md summarizing the results (this file)
 * video of autonomous driving around track 1 at https://youtu.be/vdmylbJaUyY
 
@@ -113,4 +113,4 @@ I found that it was most time efficient to pickle the training data once process
 
 The track 1 video is here: https://youtu.be/vdmylbJaUyY
 
-The model.h5 file is over 320 MB.
+The model.h5 file is over 320 MB and was uploaded to Udacity as a zip submission file.
