@@ -949,10 +949,4 @@ Displaying various parameters related to lane detection on the forward-looking v
 
 ### Summary
 
-This is a very interesting project.  However, manually working through the various binary thresholding options was very time consuming.  The intuition provided in the project was helpful, but there are many numeric parameters to play with in addition to the various techniques.  I probably need to invest some time in the computer vision course to have more experience with how these techniques work, particularly the color thresholding techniques.
-
-
-
-```python
-
-```
+This is a very interesting project.  However, manually working through the various binary thresholding options was very time consuming.  The intuition provided in the project was helpful, but there are many numeric parameters to play with in addition to the various techniques.  I probably need to invest some time in the computer vision course to have more experience with how these techniques work, particularly the color thresholding techniques.  I would welcome any helpful hints on approaching the proper distinction between lighter marks and darker marks on the road.
