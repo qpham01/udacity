@@ -16,7 +16,7 @@ FLAGS = flags.FLAGS
 
 flags.DEFINE_string('data_dir', 'Simulator/Training04', "Name of training data pickle file")
 flags.DEFINE_string('model_name', 'model', "File name of the output model file")
-flags.DEFINE_integer('epochs', 5, 'Training epoch count')
+flags.DEFINE_integer('epochs', 6, 'Training epoch count')
 flags.DEFINE_boolean('small_images', False, 'If true, use half-size images in img folder')
 flags.DEFINE_integer('keep_interval', 5, 'The interval of zero angle data point to keep')
 flags.DEFINE_string('train_data', 'train.p', 'Pickle file containing training data')

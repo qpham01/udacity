@@ -17,7 +17,7 @@ def add_conv_type1(model, depth, input_shape=None):
             input_shape=input_shape))
     else:
         model.add(Convolution2D(depth, 5, 5, subsample=(2, 2), \
-            activation='relu', W_regularizer=l2(0.03)))
+            activation='relu', W_regularizer=l2(0.05)))
 
 def add_conv_type2(model, depth):
     """
