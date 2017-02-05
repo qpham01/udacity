@@ -114,3 +114,7 @@ I found that it was most time efficient to pickle the training data once process
 The track 1 video is here: https://youtu.be/vdmylbJaUyY
 
 The model.h5 file is over 320 MB and was uploaded to Udacity as a zip submission file.
+
+### References
+
+**End to End Learning For Self-Driving Cars**, Mariusz Bojarski, Davide Del Testa, Daniel Dworakowski,Bernhard Firner, Beat Flepp, Prasoon Goyal, Lawrence D. Jackel, Mathew Monfort, Urs Muller, Jiakai Zhang, Xin Zhang, Jake Zhao, Karol Zieba, 2016
