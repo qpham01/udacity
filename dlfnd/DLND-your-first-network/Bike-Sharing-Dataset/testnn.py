@@ -2,13 +2,14 @@
 
 import unittest
 import numpy as np
+from fnn import NeuralNetwork
 from snn import SampleNeuralNetwork
 
 class TestNeuralNetworks(unittest.TestCase):
     '''
     Test neural networks
     '''
-    def test_train(self):
+    def test_train_snn(self):
         ''' Test training '''
         learning_rate = 0.5
 
@@ -37,7 +38,6 @@ class TestNeuralNetworks(unittest.TestCase):
         self.assertAlmostEqual(0.1218322, snn.output_errors, 5)
         self.assertAlmostEqual(0.00304394, snn.hidden_errors[0], 3)
         # self.assertEqual('foo'.upper(), 'FOO')
-
-
+        
 if __name__ == '__main__':
     unittest.main()
