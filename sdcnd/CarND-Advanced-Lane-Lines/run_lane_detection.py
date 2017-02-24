@@ -64,15 +64,35 @@ def process_movie(movie_name):
     print("Writing movie file", output_name)
     output.write_videofile(output_name, audio=False)
 
+def process_binary_movie(movie_name):
+    """
+    Detect lane lines in a movie outputing the topdown binary image.
+    """
+    global LEFT, RIGHT, LEFT_REGION, RIGHT_REGION
+    LEFT, RIGHT, LEFT_REGION, RIGHT_REGION = init_lane_lines()    
+    clip1 = VideoFileClip(movie_name)
+    output = clip1.fl_image(process_binary)
+    output_name = 'binary_' + movie_name
+    print("Writing movie file", output_name)
+    output.write_videofile(output_name, audio=False)
+
 def process_image(image):
     global LEFT, RIGHT, LEFT_REGION, RIGHT_REGION
     index = 8
     output, _ = draw_lane_image(image, LEFT, RIGHT, LEFT_REGION, RIGHT_REGION, index)
-    # LEFT_REGION = (LEFT.pixel_pos - LEFT.box_half_width, LEFT.line_base_pos + \
-    #    LEFT.box_half_width)
-    # RIGHT_REGION = (RIGHT.pixel_pos - RIGHT.box_half_width, RIGHT.line_base_pos + \
-    #    RIGHT.box_half_width)
     return output
+
+image_count=0
+
+def process_binary(image):
+    """ Process the topdown binary image """
+    global LEFT, RIGHT, LEFT_REGION, RIGHT_REGION, image_count
+    index = 8
+    _, binary = draw_lane_image(image, LEFT, RIGHT, LEFT_REGION, RIGHT_REGION, index)
+    file_name = 'binary/binary_image{0:04d}.png'.format(image_count)
+    image_count += 1
+    mpimg.imsave(file_name, binary, cmap='gray')
+    return binary
 
 PROCESS_ONE_IMAGE = False
 if PROCESS_ONE_IMAGE:
@@ -85,8 +105,8 @@ if PROCESS_TEST_IMAGES:
     for name in IMAGE_NAMES:
         draw_lane_test_image(name)
 
-PROCESS_FAILURE_02 = False
-if PROCESS_FAILURE_02:
+PROCESS_FAILURE_01 = False
+if PROCESS_FAILURE_01:
     left1, right1, left_region1, right_region1 = init_lane_lines()
     for index in range(1,19):
         file_name = "Failure02_{}.png".format(index)
@@ -94,9 +114,9 @@ if PROCESS_FAILURE_02:
         print("Processing", file_name)
         draw_image(file_name, binary_name, left1, right1, left_region1, right_region1)
 
-PROCESS_FAILURE01 = False
-if PROCESS_FAILURE01:
-    process_movie('Failure01.mp4')
+PROCESS_FAILURE02 = True
+if PROCESS_FAILURE02:
+    process_binary_movie('Failure02.mp4')
 
 PROCESS_PROJECT_MOVIE = False
 if PROCESS_PROJECT_MOVIE:
@@ -106,6 +126,6 @@ PROCESS_CHALLENGE_MOVIE = False
 if PROCESS_CHALLENGE_MOVIE:
     process_movie('challenge_video.mp4')
 
-PROCESS_HARDER_MOVIE = True
+PROCESS_HARDER_MOVIE = False
 if PROCESS_HARDER_MOVIE:
     process_movie('harder_challenge_video.mp4')

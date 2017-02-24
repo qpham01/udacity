@@ -279,6 +279,7 @@ def distance_from_center(image, left_fit, right_fit):
 TEXT_COLOR = (255, 255, 128)
 LANE_COLOR = (0, 255, 0)
 LINE_COLOR = (255, 0, 0)
+BOX_COLOR = (255, 128, 255)
 THICKNESS = 50
 
 def find_and_draw_lanes(image, pipeline_index, box_half_width, box_height, side_margin):
@@ -307,6 +308,17 @@ def find_and_draw_lanes(image, pipeline_index, box_half_width, box_height, side_
 
     return output, binary
 
+
+def draw_lane_boxes(image, left, right, color):
+    """
+    Draw lane boxes
+    """
+    for (key, box) in left.lane_boxes.items():
+        cv2.rectangle(image, (box.left, box.top), (box.right, box.bottom), color, 3)
+    for (key, box) in right.lane_boxes.items():
+        cv2.rectangle(image, (box.left, box.top), (box.right, box.bottom), color, 3)
+    return image
+
 def draw_lane_stats(image, left, right):
     pos_x = 50
     pos_y = 50
@@ -331,16 +343,16 @@ def draw_lane_stats(image, left, right):
             draw_text(image, diff_str_l, (pos_x, pos_y), TEXT_COLOR)
             draw_text(image, diff_str_r, (pos_x + delta_x, pos_y), TEXT_COLOR)
             pos_y += delta_y
-    
+
     draw_text(image, "Detected: {}".format(left.detected), (pos_x, pos_y), TEXT_COLOR)
     draw_text(image, "Detected: {}".format(left.detected), (pos_x + delta_x, pos_y), TEXT_COLOR)
-    
+
 def draw_lane_image(image, left, right, left_region, right_region, index, binary_name=None):
     """
     Given an undistorted image, detect lane lines in it, and draw the lane lines and
     radius of curvature on an output image.abs
     """
-    width = image.shape[1]
+    # width = image.shape[1]
 
     binary = left.detect_lane_line(image, left_region, index, binary_name)
 
@@ -348,6 +360,7 @@ def draw_lane_image(image, left, right, left_region, right_region, index, binary
 
     output = draw_lane_polygon(image, left.best_fit, right.best_fit, \
         M_INV, LANE_COLOR, LINE_COLOR, THICKNESS)
+    binary = draw_lane_boxes(binary, left, right, BOX_COLOR)
     draw_curvature_text(output, left.radius_of_curvature, right.radius_of_curvature, TEXT_COLOR)
     center_distance = distance_from_center(output, left.best_fit, right.best_fit)
     draw_center_distance_text(output, center_distance, TEXT_COLOR)

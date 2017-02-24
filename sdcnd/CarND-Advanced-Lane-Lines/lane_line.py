@@ -6,11 +6,21 @@ import matplotlib.image as mpimg
 from detect_lane import make_topdown_binary, convert_pixel_to_world, fit_lane_line, curve_radius, \
     create_lane_histogram_data, YM_PER_PIX
 
+class PixelBox():
+    """
+    Box used for identifying lane pixels
+    """
+    def __init__(self, top, bottom, left, right):
+        self.top = top
+        self.bottom = bottom
+        self.left = left
+        self.right = right
+
 class LaneLine():
     """
     Encapsulates a lane line
     """
-    def __init__(self, box_half_width=50, box_height=60):
+    def __init__(self, box_half_width=80, box_height=80):
         """
         :param box_half_width: half the width of the detection area box.
         :param box_height: heigth of the detection area box.
@@ -49,6 +59,8 @@ class LaneLine():
         self.list_length = 10
         # pixel distance
         self.pixel_pos = None
+        # boxes used for lane detection
+        self.lane_boxes = {}
 
     def detect_lane_line(self, image, region, index, binary_name=None):
         """
@@ -129,7 +141,16 @@ class LaneLine():
         # start with a border at the middle of the image... will adjust when lane lines found.
         left, right = region
 
-        histogram_values = create_lane_histogram_data(binary, 0, image_height, 0, image_width)
+        '''
+        if box_top in self.lane_boxes:
+            box = self.lane_boxes[box_top]
+            histogram_values = create_lane_histogram_data(binary, box.top, box.bottom, box.left,        box.right)
+        else:
+            histogram_values = create_lane_histogram_data(binary, 0, image_height, 0, image_width)
+        if len(histogram_values[left:right]) == 0:
+        '''
+        histogram_values = create_lane_histogram_data(binary, image_height - self.box_height, \
+            image_height, 0, image_width)
 
         # pixel column of left lane line.
         lane = histogram_values[left:right].argmax()
@@ -155,6 +176,7 @@ class LaneLine():
                 box_left = max(0, lane - self.box_half_width)
                 box_right = min(image_width, lane + self.box_half_width - 1)
                 box_bottom = box_top + self.box_height
+                self.lane_boxes[box_top] = PixelBox(box_top, box_bottom, box_left, box_right)
                 for row in range(box_top, box_bottom):
                     for col in range(box_left, box_right):
                         if binary[row, col] > 0:
@@ -162,15 +184,20 @@ class LaneLine():
                             self.ally.append(row)
                 # Slide left box to center of bright pixels
                 last_lane = lane
-                lane = histogram_values[box_left:box_right].argmax()
+                lane = 0
+                if len(histogram_values[box_left:box_right]) > 50:
+                    lane = histogram_values[box_left:box_right].argmax()
+                if lane == 0:
+                    lane = histogram_values[region[0]:region[1]].argmax()
+                    #    print("box top", box_top, "region", region, "lane", lane)
                 if lane == 0:
                     lane = last_lane
                 else:
                     lane += box_left
 
                 # If new lane x coordinate is too far away, don't use it.
-                if abs(lane - last_lane) > self.box_half_width:
-                    lane = last_lane
+                # if abs(lane - last_lane) > self.box_half_width:
+                #    lane = last_lane
             except TypeError:
                 self.detected = False
 

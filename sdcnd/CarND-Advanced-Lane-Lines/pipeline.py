@@ -188,3 +188,5 @@ ax2.set_title('Pipeline Result', fontsize=40)
 plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
 """
 # mpimg.imsave("result.png", result)
+
+# def filter_combine()
