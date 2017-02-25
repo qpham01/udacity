@@ -62,6 +62,11 @@ def pipeline(img, name, test_params, img_file_name=None):
     l_channel = hls[:, :, 1]
     s_channel = hls[:, :, 2]
 
+    hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV).astype(np.float)
+    h1_channel = hsv[:, :, 0]
+    s1_channel = hsv[:, :, 1]
+    v1_channel = hsv[:, :, 2]
+
     binary = None
     single = None
     stack = None
@@ -92,12 +97,24 @@ def pipeline(img, name, test_params, img_file_name=None):
             layer[(s_channel >= value[0]) & (s_channel <= value[1])] = 1
 
         if key == 'color_l':
-            layer = np.zeros_like(s_channel)
+            layer = np.zeros_like(l_channel)
             layer[(l_channel >= value[0]) & (l_channel <= value[1])] = 1
 
         if key == 'color_h':
-            layer = np.zeros_like(s_channel)
+            layer = np.zeros_like(h_channel)
             layer[(h_channel >= value[0]) & (h_channel <= value[1])] = 1
+
+        if key == 'color_h1':
+            layer = np.zeros_like(h1_channel)
+            layer[(h1_channel >= value[0]) & (h1_channel <= value[1])] = 1
+
+        if key == 'color_s1':
+            layer = np.zeros_like(s1_channel)
+            layer[(s1_channel >= value[0]) & (s1_channel <= value[1])] = 1
+
+        if key == 'color_v1':
+            layer = np.zeros_like(v1_channel)
+            layer[(v1_channel >= value[0]) & (v1_channel <= value[1])] = 1
 
         if layer is not None:
             img_layers[key] = layer
@@ -147,10 +164,10 @@ for i, param in enumerate(test_parameters):
 """
 
 test_parameters = [\
-    {'color_s': (170, 255), 'sobel_abs_x_l': (50, 150, 5), 'stack': ['color_s', 'sobel_abs_x_l']},\
-    {'color_s': (170, 255), 'sobel_mag_b_l': (40, 100, 9), 'stack': ['color_s', 'sobel_mag_b_l']},\
-    {'color_s': (170, 255), 'sobel_mag_x_l': (40, 100, 9), 'stack': ['color_s', 'sobel_mag_x_l']},\
-    {'color_s': (170, 255), 'sobel_dir_l': (0.7, 1.2, 15), 'stack': ['color_s', 'sobel_dir_l']},\
+    {'color_s': (180, 255), 'sobel_abs_x_l': (50, 150, 5), 'stack': ['color_s', 'sobel_abs_x_l']},\
+    {'color_s': (180, 255), 'sobel_mag_b_l': (40, 100, 9), 'stack': ['color_s', 'sobel_mag_b_l']},\
+    {'color_s': (180, 255), 'sobel_mag_x_l': (40, 100, 9), 'stack': ['color_s', 'sobel_mag_x_l']},\
+    {'color_s': (180, 255), 'sobel_dir_l': (0.7, 1.2, 15), 'stack': ['color_s', 'sobel_dir_l']},\
     {'sobel_abs_x_l': (20, 100, 3), 'sobel_abs_y_l': (20, 100, 3), 'sobel_mag_x_l': (40, 100, 9),\
         'sobel_dir_l': (0.7, 1.2, 15), 'combine': [['sobel_abs_x_l', 'sobel_abs_y_l'],\
         ['sobel_mag_x_l', 'sobel_dir_l']]},
@@ -166,7 +183,7 @@ test_parameters = [\
     {'sobel_abs_y_l': (20,100, 3), 'single': 'sobel_abs_y_l'},
     {'sobel_mag_b_l': (20,100, 3), 'single': 'sobel_mag_b_l'},
     {'sobel_dir_l': (0.7, 1.2, 15), 'single': 'sobel_dir_l'},
-    {'color_s': (170, 255), 'sobel_dir_l': (0.7, 1.2, 15), 'sobel_mag_x_l': (50, 150, 5),\
+    {'color_s': (180, 255), 'sobel_dir_l': (0.7, 1.2, 15), 'sobel_mag_x_l': (50, 150, 5),\
         'combine': [['color_s', 'sobel_dir_l'],['sobel_mag_x_l', 'sobel_mag_x_l']]}
     ]
 

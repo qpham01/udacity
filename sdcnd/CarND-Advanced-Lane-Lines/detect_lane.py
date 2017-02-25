@@ -21,7 +21,7 @@ def undistort(image):
     return cv2.undistort(image, CALIBRATION_MATRIX, DISTORTION_PARAMS, None, CALIBRATION_MATRIX)
 
 LANE_PARAMETERS = [ \
-    {'color_s': (140, 255), 'sobel_abs_x_l': (25, 100, 9), 'sobel_abs_y_l': (25, 100, 5), \
+    {'color_s': (180, 255), 'sobel_abs_x_l': (25, 100, 9), 'sobel_abs_y_l': (25, 100, 5), \
        'combine': [['color_s', 'color_s'], ['sobel_abs_x_l', 'sobel_abs_x_l']]},
     {'color_s': (180, 255), 'single': 'color_s'}, \
     {'color_h': (0, 100), 'single': 'color_h'}, \
@@ -30,7 +30,7 @@ LANE_PARAMETERS = [ \
     {'sobel_abs_y_l': (25, 100, 9), 'single': 'sobel_abs_y_l'}, \
     {'sobel_mag_b_l': (50, 100, 9), 'single': 'sobel_mag_b_l'}, \
     {'sobel_dir_l': (0.7, 1.2, 15), 'single': 'sobel_dir_l'}, \
-    {'color_s': (140, 255), 'sobel_abs_x_l': (25, 100, 9), 'sobel_dir_l': (0.8, 1.2, 15), \
+    {'color_s': (180, 255), 'sobel_abs_x_l': (25, 100, 9), 'sobel_dir_l': (0.8, 1.2, 15), \
        'combine': [['color_s', 'color_s'], ['sobel_abs_x_l', 'sobel_dir_l']]}]
 
 # Coordinates from forward view and topdown view for making perspective transform
@@ -360,7 +360,7 @@ def draw_lane_image(image, left, right, left_region, right_region, index, binary
 
     output = draw_lane_polygon(image, left.best_fit, right.best_fit, \
         M_INV, LANE_COLOR, LINE_COLOR, THICKNESS)
-    binary = draw_lane_boxes(binary, left, right, BOX_COLOR)
+    # binary = draw_lane_boxes(binary, left, right, BOX_COLOR)
     draw_curvature_text(output, left.radius_of_curvature, right.radius_of_curvature, TEXT_COLOR)
     center_distance = distance_from_center(output, left.best_fit, right.best_fit)
     draw_center_distance_text(output, center_distance, TEXT_COLOR)
@@ -369,7 +369,7 @@ def draw_lane_image(image, left, right, left_region, right_region, index, binary
     return output, binary
 
 # The index into the LANE_PARAMETERS of the thresholding method to use.
-PIPELINE_INDEX = 8
+PIPELINE_INDEX = 0
 
 # Hack here to disregard noise from other cars at edge of the image at cost of reduced FOV.
 SIDE_MARGIN = 100

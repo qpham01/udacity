@@ -114,11 +114,15 @@ if PROCESS_FAILURE_01:
         print("Processing", file_name)
         draw_image(file_name, binary_name, left1, right1, left_region1, right_region1)
 
-PROCESS_FAILURE02 = True
+PROCESS_FAILURE02 = False
 if PROCESS_FAILURE02:
     process_binary_movie('Failure02.mp4')
 
-PROCESS_PROJECT_MOVIE = False
+PROCESS_FAILURE04 = False
+if PROCESS_FAILURE04:
+    process_movie('Failure03.mp4')
+
+PROCESS_PROJECT_MOVIE = True
 if PROCESS_PROJECT_MOVIE:
     process_movie('project_video.mp4')
 
