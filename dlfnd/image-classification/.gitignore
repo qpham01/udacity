@@ -1,1 +1,3 @@
 cifar*
+*.p
+image_class*

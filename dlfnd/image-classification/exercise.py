@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import problem_unittests as tests
+import helper
 
 def neural_net_image_input(image_shape):
     """
@@ -130,6 +131,31 @@ def conv_net(x, keep_prob):
     # return output
     return out
 
+def train_neural_network(session, optimizer, keep_probability, feature_batch, label_batch):
+    """
+    Optimize the session on a batch of images and labels
+    : session: Current TensorFlow session
+    : optimizer: TensorFlow optimizer function
+    : keep_probability: keep probability
+    : feature_batch: Batch of Numpy image data
+    : label_batch: Batch of Numpy label data
+    """
+    # TODO: Implement 
+    session.run(optimizer, feed_dict={x: feature_batch, y: label_batch, keep_prob: keep_probability})
+
+def print_stats(session, feature_batch, label_batch, cost, accuracy):
+    """
+    Print information about loss and validation accuracy
+    : session: Current TensorFlow session
+    : feature_batch: Batch of Numpy image data
+    : label_batch: Batch of Numpy label data
+    : cost: TensorFlow cost function
+    : accuracy: TensorFlow accuracy function
+    """
+    # TODO: Implement Function
+    output_cost = session.run(cost, feed_dict={x: feature_batch, y: label_batch, keep_prob: keep_probability})
+    output_accuracy = session.run(accuracy, feed_dict={x: feature_batch, y: label_batch, keep_prob: keep_probability})
+    print("Cost: {:.0f}, Accuracy {:.3f}".format(output_cost, output_accuracy)) 
 
 def run_tests():
     """
@@ -186,5 +212,40 @@ def run_tests():
     accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32), name='accuracy')
 
     tests.test_conv_net(conv_net)
+    """
+    DON'T MODIFY ANYTHING IN THIS CELL THAT IS BELOW THIS LINE
+    """
+    x = neural_net_image_input((32, 32, 3))
+    y = neural_net_label_input(10)
+    tests.test_train_nn(train_neural_network)
 
-run_tests()
+# Inputs
+x = neural_net_image_input((32, 32, 3))
+y = neural_net_label_input(10)
+keep_prob = neural_net_keep_prob_input()
+
+#run_tests()
+
+# TODO: Tune Parameters
+epochs = 20
+batch_size = 256
+keep_probability = 0.8
+
+def train_single_batch():
+    """
+    DON'T MODIFY ANYTHING IN THIS CELL
+    """
+    print('Checking the Training on a Single Batch...')
+    with tf.Session() as sess:
+        # Initializing the variables
+        sess.run(tf.global_variables_initializer())
+
+        # Training cycle
+        for epoch in range(epochs):
+            batch_i = 1
+            for batch_features, batch_labels in helper.load_preprocess_training_batch(batch_i, batch_size):
+                train_neural_network(sess, optimizer, keep_probability, batch_features, batch_labels)
+            print('Epoch {:>2}, CIFAR-10 Batch {}:  '.format(epoch + 1, batch_i), end='')
+            print_stats(sess, batch_features, batch_labels, cost, accuracy)
+
+train_single_batch()
