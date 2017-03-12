@@ -1,7 +1,12 @@
+""" CFAR-10 """
+import pickle
 import numpy as np
 import tensorflow as tf
 import problem_unittests as tests
 import helper
+
+# Load the Preprocessed Validation data
+valid_features, valid_labels = pickle.load(open('preprocess_validation.p', mode='rb'))
 
 def neural_net_image_input(image_shape):
     """
@@ -140,7 +145,7 @@ def train_neural_network(session, optimizer, keep_probability, feature_batch, la
     : feature_batch: Batch of Numpy image data
     : label_batch: Batch of Numpy label data
     """
-    # TODO: Implement 
+    # Implement 
     session.run(optimizer, feed_dict={x: feature_batch, y: label_batch, keep_prob: keep_probability})
 
 def print_stats(session, feature_batch, label_batch, cost, accuracy):
@@ -152,9 +157,9 @@ def print_stats(session, feature_batch, label_batch, cost, accuracy):
     : cost: TensorFlow cost function
     : accuracy: TensorFlow accuracy function
     """
-    # TODO: Implement Function
-    output_cost = session.run(cost, feed_dict={x: feature_batch, y: label_batch, keep_prob: keep_probability})
-    output_accuracy = session.run(accuracy, feed_dict={x: feature_batch, y: label_batch, keep_prob: keep_probability})
+    # Implement Function
+    output_cost = session.run(cost, feed_dict={x: feature_batch, y: label_batch, keep_prob: 1.0})
+    output_accuracy = session.run(accuracy, feed_dict={x: valid_features, y: valid_labels, keep_prob: 1.0})
     print("Cost: {:.0f}, Accuracy {:.3f}".format(output_cost, output_accuracy)) 
 
 def run_tests():
@@ -226,7 +231,7 @@ keep_prob = neural_net_keep_prob_input()
 
 #run_tests()
 
-# TODO: Tune Parameters
+# Tune Parameters
 epochs = 20
 batch_size = 256
 keep_probability = 0.8
