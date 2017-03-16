@@ -33,7 +33,7 @@ def plot3d(pixels, colors_rgb,
 
 
 # Read a color image
-img = cv2.imread("000275.png")
+img = cv2.imread("test_images/000275.png")
 
 # Select a small fraction of pixels to plot by subsampling it
 scale = max(img.shape[0], img.shape[1], 64) / 64  # at most 64 rows and columns
