@@ -158,9 +158,9 @@ def draw_labeled_bboxes(img, labels, color):
 #scales = [3.5, 2.5, 1.5, 0.9]
 xstart = 0
 xstop = 1280
-ystarts = [500, 360, 360]
-ystops = [700, 600, 500]
-scales = [2, 1.5, 1]
+ystarts = [360, 360, 400]
+ystops = [720, 600, 480]
+scales = [2, 1.3, 0.6]
 
 heat_threshold = 8
 frame_count = 10
@@ -203,6 +203,8 @@ def process_image(image):
     draw_img = np.copy(image)
     #for box in bboxes:
     #    draw_img = cv2.rectangle(draw_img, box[0], box[1], (255,0,255), 4)
+    for r in box_list:
+        cv2.rectangle(draw_img, r[0], r[1], (0, 0, 255), 5)
     draw_img = draw_labeled_bboxes(draw_img, labels, (0,255,200))
 
     if len(all_boxes) > frame_count:
@@ -286,11 +288,20 @@ PROCESS_TEST_MOVIE2 = False
 if PROCESS_TEST_MOVIE2:
     process_movie('test_video2.mp4')
 
-PROCESS_PROJECT_MOVIE = False
+PROCESS_TEST_MOVIE3 = False
+if PROCESS_TEST_MOVIE3:
+    process_movie('test_video3.mp4')
+
+
+PROCESS_TEST_MOVIE4 = False
+if PROCESS_TEST_MOVIE4:
+    process_movie('test_video4.mp4')
+
+PROCESS_PROJECT_MOVIE = True
 if PROCESS_PROJECT_MOVIE:
     process_movie('project_video.mp4')    
 
-PROCESS_SAVE_FRAMES = True
+PROCESS_SAVE_FRAMES = False
 if PROCESS_SAVE_FRAMES:
     save_frames = True
     process_movie('test_video.mp4')

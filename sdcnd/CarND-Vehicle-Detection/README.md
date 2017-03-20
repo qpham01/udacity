@@ -134,9 +134,9 @@ The parameterizations of the different window scales are between lines 159 and 1
 
     xstart = 0
     xstop = 1280
-    ystarts = [500, 360, 360]
-    ystops = [700, 600, 500]
-    scales = [2, 1.5, 1]
+    ystarts = [360, 360, 400]
+    ystops = [720, 600, 480]
+    scales = [2, 1.3, 0.6]
 
 I also applied the heat map to detection boxes over multiple frames.  Below, I set the frame count to use for heatmap to 10 and the heat_threshold to 8 (lines 165-166), so that only areas with slightly less than one detection per frame will be counted to minimize false positives.  This higher bar could also result in the occasional detection dropout but recovery from this is very quick.
 
@@ -172,11 +172,8 @@ I basically followed the lessons on vehicle detection, used the provided data, a
 
 I really liked the approach in this project of collecting various color and image features from known labeled data, combining them into a single normalized feature vector, and then train a binary classifer to detect the vehicles on differences in this feature vector.  It's good to know the approach of combining classical computer vision and machine learning for image classification after my having used deep learning for much of this kind of work.
 
-This is a great **first pass** at the problem of vehicle detection, but it seems we're just scratching the surface.  To reliably detect vehicles across various terrains, road types and conditions, lighting and weather conditions, etc., massive amount of training will be needed.  Also, it really unclear how well a particular feature combination will work across all driving conditions, even with lots of data. Performance is also an issue with our python implementation for learning purposes.  Since we're combining results from multiple frames for more reliable detetion, and real driving will need multiple results per second for proper control, I imagine this whole pipeline will need to run at 30 iterations per second or more in the real world.
+This is a great **first pass** at the problem of vehicle detection, but it seems we're just scratching the surface. I have to try quite a few sets of ystart/ystop/scaling parameters to get full detection of two cars throughout the short project video.  This seems to be an indication of brittleness.
+
+To reliably detect vehicles across various terrains, road types, road conditions, slopes and elevations, lighting and weather conditions, etc., massive amount of training data will be needed, as well as some level of automatic adaptability.  Also, it really unclear how well a particular feature combination will work across all driving conditions, even with lots of data. Performance is also an issue with our python implementation for learning purposes.  Since we're combining results from multiple frames for more reliable detetion, and real driving will need multiple results per second for proper control, I imagine this whole pipeline will need to run at 30 iterations per second or more in the real world.
 
 It would be cool to combine vehicle detection and lane detection from this course with pedestrian and road sign detection.  The combined system needs to run at multiple full updates per second so will provide an interesting optimization and computation challenge.
-
-
-
-
-
