@@ -146,7 +146,7 @@ I also applied the heat map to detection boxes over multiple frames.  Below, I s
 
 Here's a [link to my video result](https://youtu.be/WdKpBuRJjkA)
 
-Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
+Below are example results showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video.  
 
 Here are six frames and their corresponding heatmaps:
 
@@ -160,7 +160,7 @@ Here the resulting bounding boxes are drawn onto the last frame in the series:
 
 ![bbox][bboximg]
 
-Note that the above images were taken from the notebook process_images.ipynb.
+Note that the above images were displayed by the notebook **process_images.ipynb**, but their generation is part of the video creation process at lines 211 through 225 in **vehicle_detector.py**.
 
 ---
 
