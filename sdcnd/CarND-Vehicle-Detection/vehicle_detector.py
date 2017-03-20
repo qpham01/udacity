@@ -56,12 +56,12 @@ def color_hist(img, nbins=32):    #bins_range=(0, 256)
     return hist_features
 
 # Define a single function that can extract features using hog sub-sampling and make predictions
-def find_car_rects(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, 
-              spatial_size, hist_bins):
+def find_car_rects(img, xstart, xstop, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, 
+    cell_per_block, spatial_size, hist_bins):
     
     img = img.astype(np.float32)/255
     
-    img_tosearch = img[ystart:ystop,:,:]
+    img_tosearch = img[ystart:ystop,xstart:xstop,:]
     ctrans_tosearch = convert_color(img_tosearch, conv='RGB2YCrCb')
     if scale != 1:
         imshape = ctrans_tosearch.shape
@@ -156,23 +156,29 @@ def draw_labeled_bboxes(img, labels, color):
 #ystarts = [440, 320, 320, 360]
 #ystops = [700, 640, 600, 520]
 #scales = [3.5, 2.5, 1.5, 0.9]
+xstart = 0
+xstop = 1280
 ystarts = [500, 360, 360]
 ystops = [700, 600, 500]
 scales = [2, 1.5, 1]
 
-heat_threshold = 5
+heat_threshold = 8
 frame_count = 10
 all_boxes = []
 
-def process_image(image):
+save_frames = False
+save_count = 0
 
+def process_image(image):
+    global save_count, save_frames
+    save_count += 1
     bboxes = []
     for i in range(len(ystarts)):
         ystart = ystarts[i]
         ystop = ystops[i]
         scale = scales[i]
 
-        rects = find_car_rects(image, ystart, ystop, scale, svc, X_scaler, orient,\
+        rects = find_car_rects(image, xstart, xstop, ystart, ystop, scale, svc, X_scaler, orient,\
             pix_per_cell, cell_per_block, spatial_size, hist_bins)
         bboxes.extend(rects)
 
@@ -180,7 +186,7 @@ def process_image(image):
 
     box_list = [item for sublist in all_boxes for item in sublist]
     # print("ab", len(all_boxes), "bb", len(bboxes), "bl", len(box_list))
-
+    
     heat = np.zeros_like(image[:, :, 0]).astype(np.float)
 
     # Add heat to each box in box list
@@ -202,7 +208,23 @@ def process_image(image):
     if len(all_boxes) > frame_count:
         del all_boxes[0]
 
+    if save_frames:
+        if save_count <= frame_count:           
+            box_img = np.copy(image)
+            for r in box_list:
+                cv2.rectangle(box_img, r[0], r[1], (0, 0, 255), 5)
+            box_name = 'output_images/box_image{}.png'.format(save_count)
+            heat_name = 'output_images/heat_image{}.png'.format(save_count)
+            mpimg.imsave(box_name, box_img)
+            mpimg.imsave(heat_name, heatmap, cmap='hot')
+
+        if save_count == frame_count:
+            label_name = 'output_images/label_image{}.png'.format(save_count)
+            mpimg.imsave(label_name, labels[0], cmap='gray')
+            bbox_name = 'output_images/bbox_image{}.png'.format(save_count)
+            mpimg.imsave(bbox_name, draw_img)
     return draw_img
+    
 
 with open("vehicle_classifier_8_60.p", 'rb') as file:
     dist_pickle = pickle.load(file)
@@ -264,6 +286,11 @@ PROCESS_TEST_MOVIE2 = False
 if PROCESS_TEST_MOVIE2:
     process_movie('test_video2.mp4')
 
-PROCESS_PROJECT_MOVIE = True
+PROCESS_PROJECT_MOVIE = False
 if PROCESS_PROJECT_MOVIE:
     process_movie('project_video.mp4')    
+
+PROCESS_SAVE_FRAMES = True
+if PROCESS_SAVE_FRAMES:
+    save_frames = True
+    process_movie('test_video.mp4')

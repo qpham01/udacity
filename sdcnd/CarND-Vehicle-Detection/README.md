@@ -16,19 +16,24 @@ The goals / steps of this project are the following:
 [notcar]: ./examples/notcar.png
 [hls]: ./examples/hls.png
 [carnot]: ./examples/cars_and_notcars.png
-[luvhist]: ./examples/luvhist.png
-[image3]: ./examples/sliding_windows.jpg
-[image4]: ./examples/sliding_window.jpg
-[image5]: ./examples/bboxes_and_heat.png
-[image6]: ./examples/labels_map.png
-[image7]: ./examples/output_bboxes.png
-[video1]: ./project_video.mp4
+[colclas]: ./examples/color_classify.png
+[hogclas]: ./examples/hog_classify.png
+[slidewin]: ./examples/sliding_windows.png
+[rgbclas]: ./examples/rgb_classify.png
+[testdet]: ./examples/test_detections.png
+[test860]: ./examples/detect_8_60.png
+[multiscale]: ./examples/multiscale.png
+[heatmap]: ./examples/heatmap.png
+[boximgs]: ./examples/box_images.png
+[heatimgs]: ./examples/heat_images.png
+[labelimg]: ./examples/label_image.png
+[bboximg]: ./examples/bbox_image.png
 
 ## Overview
 
 ### Work Log
 
-The Jupyter notebook **vehicle_detection.ipynb** contains a full log of my work through the various lessons leading up to the implementation of this project.  I will be drawing materials from that notebook to show progress toward various rubric items in this file.
+The Jupyter notebook **vehicle_detection.ipynb** contains a full log of my work through the various lessons leading up to the implementation of this project.  This write up is a section-by-section summary of the work done and the results from that notebook.  Please refer to the notebook as necessary to see more details of the work described herein.
 
 ### Example Images
 
@@ -64,66 +69,113 @@ The **get_hog_features()** method in the first code cell of the **HOG** section 
 
 ## Color Classify
 
+In this section I tried different values for spatial and histogram binnings, starting with (32, 32) for spatial bins and 32 for histogram bins and varying from there.  I found that using (8, 8) spatial bins and 60 histogram bins resulted in similar training accuracy but is quicker by more than a factor of 10, 0.17 seconds as opposed to 2.58 seconds, as shown in the results here:
+
+![color classify][colclas]
+
+Later on I will user the (8, 8) spatial bins and 60 histogram bins in the training of the classifier.
+
 ## HOG Classify
 
-I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  
+In this section I explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).
 
+The best performing color space and parameter combination is 9 orientations, 8 pixels_per_cell, and 2 cells_per_block with all hog channels, as shown below.
 
+![hog classify][hogclas]
 
-![alt text][image2]
-
-####2. Explain how you settled on your final choice of HOG parameters.
-
-I tried various combinations of parameters and...
-
-####3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
+The classification accuracy at 1.0 is the best among all color space and parameter combinations I tried, and it also has among the smallest feature count at 5292 for more rapid predictions, clocking in at just over 2 milliseconds per prediction.
 
 I trained a linear SVM using...
 
-###Sliding Window Search
+## Sliding Windows
 
-####1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
+In the sliding windows section I just implemented the sliding windows approach and drew rectangles on a test image to test it out.
 
-I decided to search random window positions at random scales all over the image and came up with this (ok just kidding I didn't actually ;):
+![sliding windows][slidewin]
 
-![alt text][image3]
+Nothing exciting here as the car detection with the classifier comes later.
 
-####2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
+## Search Classify
 
-Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
+In this section I tried out car detection with different combinations of HOG features and other features like spatial features and histogram features.  For speed I am still using only 500 and 3000 data points among the provided data set.  This work here is mainly about testing out the full classification pipeline code.  Below is an image of classification using the RGB color space and all feature sets.  There are more combinations and results in the **vehicle_detection.ipynb** notebook.
 
-![alt text][image4]
----
+![rgb classify][rgbclas]
+
+## Hog Sub-Sampling Window Search
+
+Now its time to do the full training of the classifier using the entire training dataset.  I trained the classifier with all training data and tried out the sub-sampling approach suggested in the lessons using the provided **find_cars()** method with the LUV color space and good parameter values discovered in my previous explorations.  I applied the classification to all 6 test images (test1.jpg through test6.jpg in the folder test_images) with the following results:
+
+![test detections][testdet]
+
+I tried training with a couple of different paramater sets, including (8, 8) spatial bins and 60 histogram bins that I found to be efficient and good in earlier exploration.  I saved the LinearSVC classifier and the X_scaler with these parameters to use in the project video.  The result from this classifier is here:
+
+![detect 8 60][test860]
+
+## Multi-Scale Windows
+
+In this section I implemented multiple window scales.  I adjusted the **find_cars()** method to return rectangles (now renamed **find_car_rects()**).  Here is the result, with different colors showing detection windows at different scale:
+
+![multiscale][multiscale]
+
+## Heat Map
+
+This section implements the heat map and bounding boxes.  This is the final step before video implementation.  Here are the results for the six test images:
+
+![heatmap][heatmap]
 
 ### Video Implementation
 
-####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./project_video.mp4)
+The code of the video implementation is in **vehicle_detector.py**.
+
+I recorded the positions of positive detections in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.
+
+The parameterizations of the different window scales are between lines 159 and 163, reproduced here:
+
+    xstart = 0
+    xstop = 1280
+    ystarts = [500, 360, 360]
+    ystops = [700, 600, 500]
+    scales = [2, 1.5, 1]
+
+I also applied the heat map to detection boxes over multiple frames.  Below, I set the frame count to use for heatmap to 10 and the heat_threshold to 8 (lines 165-166), so that only areas with slightly less than one detection per frame will be counted to minimize false positives.  This higher bar could also result in the occasional detection dropout but recovery from this is very quick.
+
+    heat_threshold = 8
+    frame_count = 10
 
 
-####2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
-
-I recorded the positions of positive detections in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
+Here's a [link to my video result](https://youtu.be/WdKpBuRJjkA)
 
 Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
 
-### Here are six frames and their corresponding heatmaps:
+Here are six frames and their corresponding heatmaps:
 
-![alt text][image5]
+![heat images][heatimgs]
 
-### Here is the output of `scipy.ndimage.measurements.label()` on the integrated heatmap from all six frames:
-![alt text][image6]
+Here is the output of `scipy.ndimage.measurements.label()` on the integrated heatmap from all six frames:
 
-### Here the resulting bounding boxes are drawn onto the last frame in the series:
-![alt text][image7]
+![label image][labelimg]
 
+Here the resulting bounding boxes are drawn onto the last frame in the series:
 
+![bbox][bboximg]
+
+Note that the above images were taken from the notebook process_images.ipynb.
 
 ---
 
-###Discussion
+## Discussion
 
-####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
+Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+I basically followed the lessons on vehicle detection, used the provided data, and applied the lesson code with minor modifications.  Exploring the parameter and color spaces was instructive on seeing what worked and what didn't, as well as the relative effectiveness and computational efficiencies of various approaches.  There still a few false positives in the project video, as well as detection drop outs here and there, but the implemented version works well for nearly all of the video.
+
+I really liked the approach in this project of collecting various color and image features from known labeled data, combining them into a single normalized feature vector, and then train a binary classifer to detect the vehicles on differences in this feature vector.  It's good to know the approach of combining classical computer vision and machine learning for image classification after my having used deep learning for much of this kind of work.
+
+This is a great **first pass** at the problem of vehicle detection, but it seems we're just scratching the surface.  To reliably detect vehicles across various terrains, road types and conditions, lighting and weather conditions, etc., massive amount of training will be needed.  Also, it really unclear how well a particular feature combination will work across all driving conditions, even with lots of data. Performance is also an issue with our python implementation for learning purposes.  Since we're combining results from multiple frames for more reliable detetion, and real driving will need multiple results per second for proper control, I imagine this whole pipeline will need to run at 30 iterations per second or more in the real world.
+
+It would be cool to combine vehicle detection and lane detection from this course with pedestrian and road sign detection.  The combined system needs to run at multiple full updates per second so will provide an interesting optimization and computation challenge.
+
+
+
+
 
