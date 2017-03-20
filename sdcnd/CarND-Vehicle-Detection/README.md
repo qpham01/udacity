@@ -15,6 +15,7 @@ The goals / steps of this project are the following:
 [car]: ./examples/car.png
 [notcar]: ./examples/notcar.png
 [hls]: ./examples/hls.png
+[luvhist]: ./examples/luvhist.png
 [carnot]: ./examples/cars_and_notcars.png
 [colclas]: ./examples/color_classify.png
 [hogclas]: ./examples/hog_classify.png
