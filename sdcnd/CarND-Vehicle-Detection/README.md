@@ -136,22 +136,23 @@ I recorded the positions of positive detections in each frame of the video.  Fro
 
 The parameterizations of the different window scales are between lines 159 and 163, reproduced here:
 
-    xstarts = [0, 0, 200]
-    xstops = [1280, 1280, 1080]
-    ystarts = [360, 360, 400]
-    ystops = [720, 600, 480]
-    scales = [2, 1.3, 0.6]
+xstarts = [0, 0]
+xstops = [1280, 1280]
+ystarts = [480, 360]
+ystops = [720, 600]
+scales = [2, 1.2]
+
 
 I also applied the heat map to detection boxes over multiple frames to counter false positives.  Below, I set the frame count to use for heatmap to 10 and the heat_threshold to 12 (lines 165-166), so that only areas with slightly more than one detection per frame will be counted to minimize false positives.  This higher bar could also result in the occasional detection dropout that needed further parameter tunings to fix.
 
-    heat_threshold = 12
+    heat_threshold = 6
     frame_count = 10
 
-The above numbers were arrived at after numerous trials and errors on various snippets of video.  The main issues are false positives and the occasional missing detection of the white car which lasted up to 2-3 seconds.  To address the missing detections I needed to reduce the lowest scale to 0.6.  This results in the frames being blown up to a larger size with a smaller relative scanning window and thus reduces the overall processing speed, but was necessary to keep up the detection of the cars through the entire video.  It also produces more false positives along the image edges in the tree lines, which are the most likely of all the terrains to be mistaken for cars.  To address the latter problem I had to add 200 pixels of margin on the left and right edges of the detection area for the 0.6 scale.
+The above numbers were arrived at after numerous trials and errors on various snippets of video.  The main issues are false positives and the occasional missing detection of the white car which lasted up to 2-3 seconds.  To address the missing detections I needed to lower the heat_threshold below the frame_count.
 
 Here's a [link to my video result](https://youtu.be/WdKpBuRJjkA)
 
-Below are example results showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video.  
+Below are example results showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video.
 
 Here are six frames and their corresponding heatmaps:
 
@@ -165,7 +166,7 @@ Here the resulting bounding boxes are drawn onto the last frame in the series:
 
 ![bbox][bboximg]
 
-Note that the above images were displayed by the notebook **process_images.ipynb**, but their generation is part of the video creation process at lines 211 through 225 in **vehicle_detector.py**.
+Note that the above images were displayed by the notebook **process_images.ipynb**, but their generation is part of the video creation process at lines 215 through 229 in **vehicle_detector.py**.
 
 ---
 
@@ -173,12 +174,12 @@ Note that the above images were displayed by the notebook **process_images.ipynb
 
 Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.
 
-I basically followed the lessons on vehicle detection, used the provided data, and applied the lesson code with minor modifications.  Exploring the parameter and color spaces was instructive on seeing what worked and what didn't, as well as the relative effectiveness and computational efficiencies of various approaches.  There still a few false positives in the project video, as well as detection drop outs here and there, but the implemented version works well for nearly all of the video.
+I basically followed the lessons on vehicle detection, used the provided data, and applied the lesson code with minor modifications.  Exploring the parameter and color spaces was instructive on seeing what worked and what didn't, as well as the relative effectiveness and computational efficiencies of various approaches. There still a few false positives in the project video, as well as detection drop outs on the white car, usually when its in front of the gold-colored hillside, pointing to a lack of robustness to different kinds of terrain backgrounds.  However, the implemented version works well for nearly all of the video.
 
-I really liked the approach in this project of collecting various color and image features from known labeled data, combining them into a single normalized feature vector, and then train a binary classifer to detect the vehicles on differences in this feature vector.  It's good to know the approach of combining classical computer vision and machine learning for image classification after my having used deep learning for much of this kind of work.
+It's neat to get to tryout the approach in this project of collecting various color and image features from known labeled data, combining them into a single normalized feature vector, and then train a binary classifer to detect the vehicles on differences in this feature vector.  It's good to know the approach of combining classical computer vision and machine learning for image classification after my having used deep learning for much of this kind of work.  I think though that a deep convolutional neural net will take care of this kind of hand-tuned feature and color selection auto-magically. I wonder what the relative performance (both processing and accuracy) of using some kind of region-proposal output from a deep convnet would be like in comparison, and also how to compose a loss function for such a network.  If there's any good paper on this kind of work already please let me know.
 
 This is a great **first pass** at the problem of vehicle detection, but it seems we're just scratching the surface. I have to try quite a few sets of ystart/ystop/scaling parameters to get full detection of two cars throughout this 50 second project video with not much terrain or car variety.  This seems to be an indication of brittleness of what I've implemented and the data I've used so far.
 
-To reliably detect vehicles across various terrains, road types, road conditions, slopes and elevations, lighting and weather conditions, etc., massive amount of training data will be needed, as well as some level of automatic adaptability.  Also, it really unclear how well a particular feature combination will work across all driving conditions, even with lots of data. Performance is also an issue with our python implementation for learning purposes.  Since we're combining results from multiple frames for more reliable detetion, and real driving will need multiple results per second for proper control, I imagine this whole pipeline will need to run at 30 iterations per second or more in the real world.
+To reliably detect vehicles across various terrains, road types, road conditions, slopes and elevations, lighting and weather conditions, etc., massive amount of training data will be needed, as well as some level of automatic adaptability.  Also, it really unclear how well a particular feature combination will work across all driving conditions, even with lots of data. Performance is also an issue with our python implementation for learning purposes.  Since we're combining results from multiple frames for more reliable detection, and real driving will need multiple results per second for proper control, I imagine this whole pipeline will need to run at least another order of magnitude faster in the real world.
 
 It would be cool to combine vehicle detection and lane detection from this course with pedestrian and road sign detection.  The combined system needs to run at multiple full updates per second so will provide an interesting optimization and computation challenge.

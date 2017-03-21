@@ -156,13 +156,13 @@ def draw_labeled_bboxes(img, labels, color):
 #ystarts = [440, 320, 320, 360]
 #ystops = [700, 640, 600, 520]
 #scales = [3.5, 2.5, 1.5, 0.9]
-xstarts = [0, 0, 200]
-xstops = [1280, 1280, 1080]
-ystarts = [360, 360, 400]
-ystops = [720, 600, 480]
-scales = [2, 1.3, 0.6]
+xstarts = [0, 0]
+xstops = [1280, 1280]
+ystarts = [480, 400]
+ystops = [720, 600]
+scales = [1.6, 1.2]
 
-heat_threshold = 12
+heat_threshold = 8
 frame_count = 10
 all_boxes = []
 
@@ -293,7 +293,6 @@ if PROCESS_TEST_MOVIE2:
 PROCESS_TEST_MOVIE3 = False
 if PROCESS_TEST_MOVIE3:
     process_movie('test_video3.mp4')
-
 
 PROCESS_TEST_MOVIE4 = False
 if PROCESS_TEST_MOVIE4:
