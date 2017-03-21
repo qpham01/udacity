@@ -135,7 +135,7 @@ def add_heat(heatmap, bbox_list):
 def apply_threshold(heatmap, threshold):
     # Zero out pixels below the threshold
     heatmap[heatmap <= threshold] = 0
-    # Return thresholded map
+    # Return thresholded maphttp://www.dnsrsearch.com/index.php?origURL=http%3A//www.quarterstothree.com/&r=&bc=
     return heatmap
 
 def draw_labeled_bboxes(img, labels, color):
@@ -156,13 +156,13 @@ def draw_labeled_bboxes(img, labels, color):
 #ystarts = [440, 320, 320, 360]
 #ystops = [700, 640, 600, 520]
 #scales = [3.5, 2.5, 1.5, 0.9]
-xstart = 0
-xstop = 1280
+xstarts = [0, 0, 200]
+xstops = [1280, 1280, 1080]
 ystarts = [360, 360, 400]
 ystops = [720, 600, 480]
 scales = [2, 1.3, 0.6]
 
-heat_threshold = 8
+heat_threshold = 12
 frame_count = 10
 all_boxes = []
 
@@ -174,6 +174,8 @@ def process_image(image):
     save_count += 1
     bboxes = []
     for i in range(len(ystarts)):
+        xstart = xstarts[i]
+        xstop = xstops[i]
         ystart = ystarts[i]
         ystop = ystops[i]
         scale = scales[i]
@@ -203,8 +205,8 @@ def process_image(image):
     draw_img = np.copy(image)
     #for box in bboxes:
     #    draw_img = cv2.rectangle(draw_img, box[0], box[1], (255,0,255), 4)
-    for r in box_list:
-        cv2.rectangle(draw_img, r[0], r[1], (0, 0, 255), 5)
+    #for r in box_list:
+    #    cv2.rectangle(draw_img, r[0], r[1], (0, 0, 255), 5)
     draw_img = draw_labeled_bboxes(draw_img, labels, (0,255,200))
 
     if len(all_boxes) > frame_count:
