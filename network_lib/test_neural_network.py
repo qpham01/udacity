@@ -1,6 +1,7 @@
 """
 Test for neural network lib
 """
+import os
 import unittest
 import tensorflow as tf
 from neural_network import NeuralNetwork
@@ -105,7 +106,7 @@ class TestNeuralNetwork(unittest.TestCase):
             get_mnist_data()
 
         with tf.Session() as sess:
-            sess.run(tf.initialize_all_variables())
+            sess.run(tf.global_variables_initializer())
 
             network.train_with_validate(sess, train_inputs, train_labels, valid_inputs, \
                 valid_labels, epochs, batch_size)
@@ -113,7 +114,8 @@ class TestNeuralNetwork(unittest.TestCase):
             test_accuracy = network.evaluate_in_batches(sess, test_inputs, test_labels, batch_size)
             print("Test accuracy:", test_accuracy)
 
-            saver.save(sess, 'convnet')
+            save_file = os.path.join(os.getcwd(), 'convnet')
+            saver.save(sess, save_file)
             print("Model saved")
 
     def test_network_lenet(self):
@@ -182,7 +184,7 @@ class TestNeuralNetwork(unittest.TestCase):
         saver = tf.train.Saver()
 
         with tf.Session() as sess:
-            sess.run(tf.initialize_all_variables())
+            sess.run(tf.global_variables_initializer())
 
             network.train_with_validate(sess, train_inputs, train_labels, valid_inputs, \
                 valid_labels, epochs, batch_size)
@@ -190,7 +192,8 @@ class TestNeuralNetwork(unittest.TestCase):
             test_accuracy = network.evaluate_in_batches(sess, test_inputs, test_labels, batch_size)
             print("Test accuracy:", test_accuracy)
 
-            saver.save(sess, 'lenet')
+            save_file = os.path.join(os.getcwd(), 'lenet')
+            saver.save(sess, save_file)
             print("Model saved")
 
 if __name__ == '__main__':
