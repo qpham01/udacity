@@ -253,4 +253,4 @@ def train_single_batch():
             print('Epoch {:>2}, CIFAR-10 Batch {}:  '.format(epoch + 1, batch_i), end='')
             print_stats(sess, batch_features, batch_labels, cost, accuracy)
 
-train_single_batch()
+run_tests()

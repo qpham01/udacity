@@ -1,86 +1,136 @@
+#!/usr/bin/python
+
+# Ref:https://confluence.slac.stanford.edu/display/PSDM/How+to+access+HDF5+data+from+Python 
+
 import h5py
+import numpy as np
 
-# The DigitStructFile is just a wrapper around the h5py data.  It basically references 
-#    inf:              The input h5 matlab file
-#    digitStructName   The h5 ref to all the file names
-#    digitStructBbox   The h5 ref to all struc data
-class DigitStructFile:
-    def __init__(self, inf):
-        self.inf = h5py.File(inf, 'r')
-        self.digitStructName = self.inf['digitStruct']['name']
-        self.digitStructBbox = self.inf['digitStruct']['bbox']
-
-# getName returns the 'name' string for for the n(th) digitStruct. 
-    def getName(self,n):
-        return ''.join([chr(c[0]) for c in self.inf[self.digitStructName[n][0]].value])
-
-# bboxHelper handles the coding difference when there is exactly one bbox or an array of bbox. 
-    def bboxHelper(self,attr):
-        if (len(attr) > 1):
-            attr = [self.inf[attr.value[j].item()].value[0][0] for j in range(len(attr))]
-        else:
-            attr = [attr.value[0][0]]
-        return attr
-
-# getBbox returns a dict of data for the n(th) bbox. 
-    def getBbox(self,n):
-        bbox = {}
-        bb = self.digitStructBbox[n].item()
-        bbox['height'] = self.bboxHelper(self.inf[bb]["height"])
-        bbox['label'] = self.bboxHelper(self.inf[bb]["label"])
-        bbox['left'] = self.bboxHelper(self.inf[bb]["left"])
-        bbox['top'] = self.bboxHelper(self.inf[bb]["top"])
-        bbox['width'] = self.bboxHelper(self.inf[bb]["width"])
-        return bbox
-
-    def getDigitStructure(self,n):
-        s = self.getBbox(n)
-        s['name']=self.getName(n)
-        return s
-
-# getAllDigitStructure returns all the digitStruct from the input file.     
-    def getAllDigitStructure(self):
-        return [self.getDigitStructure(i) for i in range(len(self.digitStructName))]
-
-# Return a restructured version of the dataset (one structure by boxed digit).
 #
-#   Return a list of such dicts :
-#      'filename' : filename of the samples
-#      'boxes' : list of such dicts (one by digit) :
-#          'label' : 1 to 9 corresponding digits. 10 for digit '0' in image.
-#          'left', 'top' : position of bounding box
-#          'width', 'height' : dimension of bounding box
+# Bounding Box
 #
-# Note: We may turn this to a generator, if memory issues arise.
-    def getAllDigitStructure_ByDigit(self):
-        pictDat = self.getAllDigitStructure()
-        result = []
-        structCnt = 1
-        for i in range(len(pictDat)):
-            item = { 'filename' : pictDat[i]["name"] }
-            figures = []
-            for j in range(len(pictDat[i]['height'])):
-               figure = {}
-               figure['height'] = pictDat[i]['height'][j]
-               figure['label']  = pictDat[i]['label'][j]
-               figure['left']   = pictDat[i]['left'][j]
-               figure['top']    = pictDat[i]['top'][j]
-               figure['width']  = pictDat[i]['width'][j]
-               figures.append(figure)
-            structCnt = structCnt + 1
-            item['boxes'] = figures
-            result.append(item)
-        return result
+class BBox:
+    def __init__(self):
+        self.label = ""     # Digit
+        self.left = 0
+        self.top = 0
+        self.width = 0
+        self.height = 0
+
+class DigitStruct:
+    def __init__(self):
+        self.name = None    # Image file name
+        self.bboxList = None # List of BBox structs
+
+# Function for debugging
+def printHDFObj(theObj, theObjName):
+    isFile = isinstance(theObj, h5py.File)
+    isGroup = isinstance(theObj, h5py.Group)
+    isDataSet = isinstance(theObj, h5py.Dataset)
+    isReference = isinstance(theObj, h5py.Reference)
+    print("{}".format(theObjName))
+    print("    type(): {}".format(type(theObj)))
+    if isFile or isGroup or isDataSet:
+        # if theObj.name != None:
+        #    print("    name: {}".format(theObj.name)
+        print("    id: {}".format(theObj.id))
+    if isFile or isGroup:
+        print("    keys: {}".format(theObj.keys()))
+    if not isReference:
+        print("    Len: {}".format(len(theObj)))
+
+    if not (isFile or isGroup or isDataSet or isReference):
+        print(theObj)
+
+def readDigitStructGroup(dsFile):
+    dsGroup = dsFile["digitStruct"]
+    return dsGroup
+
+#
+# Reads a string from the file using its reference
+#
+def readString(strRef, dsFile):
+    strObj = dsFile[strRef]
+    str = ''.join(chr(i) for i in strObj)
+    return str
+
+#
+# Reads an integer value from the file
+#
+def readInt(intArray, dsFile):
+    intRef = intArray[0]
+    isReference = isinstance(intRef, h5py.Reference)
+    intVal = 0
+    if isReference:
+        intObj = dsFile[intRef]
+        intVal = int(intObj[0])
+    else: # Assuming value type
+        intVal = int(intRef)
+    return intVal
+
+def yieldNextInt(intDataset, dsFile):
+    for intData in intDataset:
+        intVal = readInt(intData, dsFile)
+        yield intVal 
+
+def yieldNextBBox(bboxDataset, dsFile):
+    for bboxArray in bboxDataset:
+        bboxGroupRef = bboxArray[0]
+        bboxGroup = dsFile[bboxGroupRef]
+        labelDataset = bboxGroup["label"]
+        leftDataset = bboxGroup["left"]
+        topDataset = bboxGroup["top"]
+        widthDataset = bboxGroup["width"]
+        heightDataset = bboxGroup["height"]
+
+        left = yieldNextInt(leftDataset, dsFile)
+        top = yieldNextInt(topDataset, dsFile)
+        width = yieldNextInt(widthDataset, dsFile)
+        height = yieldNextInt(heightDataset, dsFile)
+
+        bboxList = []
+
+        for label in yieldNextInt(labelDataset, dsFile):
+            bbox = BBox()
+            bbox.label = label
+            bbox.left = next(left)
+            bbox.top = next(top)
+            bbox.width = next(width)
+            bbox.height = next(height)
+            bboxList.append(bbox)
+
+        yield bboxList
+
+def yieldNextFileName(nameDataset, dsFile):
+    for nameArray in nameDataset:
+        nameRef = nameArray[0]
+        name = readString(nameRef, dsFile)
+        yield name
+
+# dsFile = h5py.File('../data/gsvhn/train/digitStruct.mat', 'r')
+def yieldNextDigitStruct(dsFileName):
+    dsFile = h5py.File(dsFileName, 'r')
+    dsGroup = readDigitStructGroup(dsFile)
+    nameDataset = dsGroup["name"]
+    bboxDataset = dsGroup["bbox"]
+
+    bboxListIter = yieldNextBBox(bboxDataset, dsFile)
+    for name in yieldNextFileName(nameDataset, dsFile):
+        bboxList = next(bboxListIter)
+        obj = DigitStruct()
+        obj.name = name
+        obj.bboxList = bboxList
+        yield obj
 
 def testMain():
-    
+
     dsFileName = 'data/train/digitStruct.mat'
     testCounter = 0
-    dsFile = DigitStructFile(dsFileName)
-    for index in range(1000):
+    for dsObj in yieldNextDigitStruct(dsFileName):
         # testCounter += 1
-        dsObj = dsFile.getDigitStructure(index)
-        print("{}:{}".format(dsFile.getName(index), dsObj['label']))
+        labels = []
+        for bbox in dsObj.bboxList:
+            labels.append(bbox.label)
+        print("{}:{}".format(dsObj.name, labels))
         #print(dsObj.name)
         #for bbox in dsObj.bboxList:
         #    print("    {}:{},{},{},{}".format(
@@ -89,4 +139,5 @@ def testMain():
             break
 
 if __name__ == "__main__":
-    testMain()        
+    testMain()
+

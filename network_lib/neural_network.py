@@ -73,8 +73,8 @@ class NeuralNetwork:
         self.learning_rate = learning_rate
         # self.cross_entropy = tf.nn.softmax_cross_entropy_with_logits(self.outputs, self.one_hot)
         # Using sparse_softmax... means no need to use one_hot with logits, just the labels directly
-        self.cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(self.outputs, \
-            self.label_placeholder)
+        self.cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.outputs, \
+            labels=self.label_placeholder)
         self.loss_operation = tf.reduce_mean(self.cross_entropy)
         if optimizer == 'gradient_descent':
             self.optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
