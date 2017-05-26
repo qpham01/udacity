@@ -3,7 +3,7 @@ Download and read text8 dataset
 """
 from urllib.request import urlretrieve
 import zipfile
-from os.path import isfile, isdir
+from os.path import isfile, isdir, getsize
 from utils import DLProgress
 
 DATASET_FOLDER_PATH = 'data'
@@ -23,7 +23,9 @@ def get_text8():
         with zipfile.ZipFile(DATASET_FILENAME) as zip_ref:
             zip_ref.extractall(DATASET_FOLDER_PATH)
 
-    with open('data/text8') as fread:
+    file_name = 'data/text8'
+    print("Loading file {}, size {} bytes".format(file_name, getsize(file_name)))
+    with open(file_name) as fread:
         text = fread.read()
 
     return text

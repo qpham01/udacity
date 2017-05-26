@@ -20,7 +20,7 @@ def preprocess(text):
     # text = text.replace('\n', ' <NEW_LINE> ')
     text = text.replace(':', ' <COLON> ')
     words = text.split()
-    
+
     # Remove all words with  5 or fewer occurences
     word_counts = Counter(words)
     trimmed_words = [word for word in words if word_counts[word] > 5]
