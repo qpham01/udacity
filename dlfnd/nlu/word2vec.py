@@ -4,6 +4,7 @@ Create word2vec embeddings from a text corpus
 import os
 import time
 import random
+import pickle
 from collections import Counter
 from tqdm import tqdm
 import numpy as np
@@ -73,16 +74,18 @@ class Word2Vec:
         p_drop = {word: 1 - np.sqrt(self.subsample_threshold / freqs[word]) for word in word_counts}
         self.train_words = []
         dropped_words = []
-        for word in tqdm(self.int_words):
+        train_words = []
+        for i, word in tqdm(enumerate(self.int_words)):
             rnd = random.random()
             if rnd > p_drop[word]:
                 self.train_words.append(word)
+                train_words.append(self.words[i])
             else:
                 dropped_words.append(word)
         # self.train_words = [word for word in self.int_words if random.random() > p_drop[word]]
         self.drop_counter = Counter(dropped_words)
         self.drop_count = self.total_count - len(self.train_words)
-        self.vocab = set(self.train_words)
+        self.vocab = set(train_words)
         self.vocab_size = len(self.vocab)
 
     def print_sample_words(self, start=0, end=20):
@@ -233,3 +236,15 @@ class Word2Vec:
             saver.restore(sess, tf.train.latest_checkpoint(self.save_folder))
             embed_mat = sess.run(self.embedding)
             return embed_mat
+
+    def pickle_embeddings(self, checkpoint_folder, file_path):
+        """ Load embeddings from checkpoint and save the embedding matrix to a pickle file """
+        embed_matrix = self.load_embeddings(checkpoint_folder)
+        embed_data = {}
+        embed_data["embeddings"] = embed_matrix
+        embed_data["vocab"] = self.vocab
+        embed_data["vocab_to_int"] = self.vocab_to_int
+        embed_data["int_to_vocab"] = self.int_to_vocab
+
+        with open(file_path, 'wb') as fwrite:
+            pickle.dump(embed_data, fwrite)
