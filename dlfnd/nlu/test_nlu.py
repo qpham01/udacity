@@ -24,6 +24,9 @@ class TestNlu(unittest.TestCase):
                 ner.add_named_entity(name, entity)
 
         found_entities = ner.extract_named_entity(TestNlu.phrases[0].split())
+        for entity, values in found_entities.items():
+            print(entity + " : {}".format(values))
+            print()
         assert len(found_entities) == 3
 
 if __name__ == '__main__':

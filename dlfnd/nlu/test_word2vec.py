@@ -41,7 +41,7 @@ class TestWord2Vec(unittest.TestCase):
         embed_matrix = self.word2vec.load_embeddings('checkpoints')
         shape = embed_matrix.shape
         assert shape == (self.word2vec.vocab_size, self.word2vec.embedding_size)
-    
+
     def test_04_pickle_embeddings(self):
         """ Test pickling of embeddings """
         save = "checkpoints"
