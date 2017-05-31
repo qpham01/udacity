@@ -12,20 +12,16 @@ class TestWord2Vec(unittest.TestCase):
 
     def test_01_preparing_data(self):
         """ Test preparing data for word2vec """
-        text = get_text8()
-        self.word2vec.prepare_text(text)
-        self.word2vec.print_data_stats()
-        self.word2vec.print_top_dropped_words()
+        self.word2vec.load_text8()
+
         train_fraction = len(self.word2vec.train_words) / self.word2vec.total_count
         assert train_fraction < 0.7
 
     def test_02_training(self):
         """ Test the training of word embeddings """
-        text = get_text8()
-        self.word2vec.prepare_text(text)
-        self.word2vec.make_embedding_graph()
+        self.word2vec.load_text8()
 
-        epochs = 20
+        epochs = 1
         batch_size = 10000
         window_size = 10
 
@@ -34,9 +30,7 @@ class TestWord2Vec(unittest.TestCase):
 
     def test_03_load_embeddings(self):
         """ Test loading of the embedding matrix """
-        text = get_text8()
-        self.word2vec.prepare_text(text)
-        self.word2vec.make_embedding_graph()
+        self.word2vec.load_text8()
 
         embed_matrix = self.word2vec.load_embeddings('checkpoints')
         shape = embed_matrix.shape
@@ -48,9 +42,7 @@ class TestWord2Vec(unittest.TestCase):
         name = "text8"
         file_path = "data/text8_embeddings.p"
 
-        text = get_text8()
-        self.word2vec.prepare_text(text)
-        self.word2vec.make_embedding_graph()
+        self.word2vec.load_text8()
 
         self.word2vec.pickle_embeddings(save, file_path)
 
@@ -61,7 +53,6 @@ class TestWord2Vec(unittest.TestCase):
         embed_matrix = restore["embeddings"]
         shape = embed_matrix.shape
         assert shape == (self.word2vec.vocab_size, self.word2vec.embedding_size)
-
-
+    
 if __name__ == '__main__':
     unittest.main()

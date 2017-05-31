@@ -10,6 +10,7 @@ from tqdm import tqdm
 import numpy as np
 import tensorflow as tf
 from utils import preprocess, create_lookup_tables
+from data_text8 import get_text8
 
 class Word2Vec:
     """ Encapsulates word2vec embeddings """
@@ -56,6 +57,14 @@ class Word2Vec:
         # Saving and loading
         self.save_folder = None
         self.save_file = None
+
+    def load_text8(self):
+        """ Load in text8 data """
+        text = get_text8()
+        self.prepare_text(text)
+        self.print_data_stats()
+        self.print_top_dropped_words()
+        self.make_embedding_graph()
 
     def prepare_text(self, text, subsample_threshold=1e-3):
         """ Prepare text for training embeddings """

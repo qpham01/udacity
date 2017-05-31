@@ -42,7 +42,7 @@ class NamedEntityExtractor:
         embedding = self.embeddings[self.vocab_to_int[entity]]
         self.named_entity_embeddings[name].append(embedding)
 
-    def extract_named_entity(self, tokens, threshold=0.2):
+    def extract_named_entity(self, tokens, threshold=4.2):
         """ Extract a named entity by cosine distance """
         # for each token, find its word vector
         token_embeddings = []
@@ -64,7 +64,7 @@ class NamedEntityExtractor:
         return candidates
 
     def find_matching_entities(self, tokens, entities, entity_embeddings, threshold, \
-        method='cosine distance'):
+        method='euclidean distance'):
         """
         Find the best matching entity from a named entity list given word tokens from phrase.
 
@@ -85,12 +85,22 @@ class NamedEntityExtractor:
         found = []
         for token, vectors in tokens:
             for i, entity in enumerate(entity_embeddings):
-                if method == 'cosine distance':
-                    cosines = np.dot(entity, vectors)
-                    score = np.mean(cosines)
+                if method == 'euclidean distance':
+                    score = NamedEntityExtractor.euclidean_distance(entity, vectors)
                     print("Score between {} and {} is {}".format(token, entities[i], score))
                 else:
                     raise "Unknown entity matching method {}".format(method)
                 if score < threshold:
                     found.append((score, token))
         return found
+
+    @staticmethod
+    def cosine_distance(entity, vectors):
+        ''' Calculate the cosine distance '''
+        cosines = np.dot(entity, vectors)
+        return np.mean(cosines)
+
+    @staticmethod
+    def euclidean_distance(entity, vectors):
+        ''' Calculate the cosine distance '''
+        return np.linalg.norm(entity - vectors)
