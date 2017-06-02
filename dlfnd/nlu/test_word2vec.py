@@ -53,6 +53,6 @@ class TestWord2Vec(unittest.TestCase):
         embed_matrix = restore["embeddings"]
         shape = embed_matrix.shape
         assert shape == (self.word2vec.vocab_size, self.word2vec.embedding_size)
-    
+
 if __name__ == '__main__':
     unittest.main()
