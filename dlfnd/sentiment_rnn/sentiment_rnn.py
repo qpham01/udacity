@@ -98,7 +98,8 @@ class SentimentAnalyzer:
         self.sorted_vocab = sorted(word_counts, key=word_counts.get, reverse=True)
         self.int_to_vocab = {idx: word for idx, word in enumerate(self.sorted_vocab)}
         self.vocab_to_int = {word: idx for idx, word in enumerate(self.sorted_vocab, 1)}
-
+        self.vocab_size = len(self.vocab_to_int)
+        
     def _encode_features(self):
         """ Convert the reviews to integers, same shape as reviews list, but with integers """
         int_features = []

@@ -3,9 +3,7 @@ import pickle
 import unittest
 import numpy as np
 from sentiment_rnn import SentimentAnalyzer
-
-REVIEW_FILE = '../sentiment_network/reviews.txt'
-LABEL_FILE = '../sentiment_network/labels.txt'
+from data_reviews import prepare_review_data
 
 class TestSentiment(unittest.TestCase):
     """ Contains tests for sentiment analysis """
@@ -15,7 +13,7 @@ class TestSentiment(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestSentiment, self).__init__(*args, **kwargs)
         if TestSentiment.reviews is None:
-            TestSentiment.prepare_review_data()
+            TestSentiment.reviews, TestSentiment.labels = prepare_review_data()
         self.analyzer = SentimentAnalyzer()
         self.analyzer.prepare_training_data(TestSentiment.reviews, TestSentiment.labels)
 
@@ -27,14 +25,6 @@ class TestSentiment(unittest.TestCase):
 
         self.analyzer.make_training_graph(lstm_size, lstm_layers, batch_size, embed_size, \
             learning_rate)
-
-    @staticmethod
-    def prepare_review_data():
-        """ Read in review data file and prepare data once for testing """
-        with open(REVIEW_FILE, 'r') as fread:
-            TestSentiment.reviews = fread.read()
-        with open(LABEL_FILE, 'r') as fread:
-            TestSentiment.labels = fread.read()
 
     def test_01_prepare_training_data(self):
         """ Test review preparation """
@@ -71,6 +61,6 @@ class TestSentiment(unittest.TestCase):
         test_acc = np.mean(self.analyzer.test())
         print("Test accuracy: {:.3f}".format(test_acc))
         assert test_acc > 0.6
-    
+
 if __name__ == '__main__':
     unittest.main()
