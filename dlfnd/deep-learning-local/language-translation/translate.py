@@ -20,7 +20,17 @@ def sentence_to_seq(sentence, vocab_to_int):
     :return: List of word ids
     """
     # TODO: Implement Function
-    return None
+    print(vocab_to_int)
+    lower_case_word_list = sentence.lower().split()
+    id_unk = vocab_to_int['<UNK>']
+    sentence_ids = []
+    for word in lower_case_word_list:
+        try:
+            id = vocab_to_int[word]
+        except KeyError:
+            id = id_unk
+        sentence_ids.append(id)
+    return sentence_ids
 
 
 """
