@@ -85,7 +85,7 @@ def text_to_ids(source_text, target_text, source_vocab_to_int, target_vocab_to_i
     token_source_sentences = source_text.split('\n')
     source_id_text = []
     for sentence in token_source_sentences:
-        print("source: ", sentence)
+        # print("source: ", sentence)
         words = sentence.split()
         id_text = [source_vocab_to_int[word] for word in words]
         source_id_text.append(id_text)
@@ -94,7 +94,7 @@ def text_to_ids(source_text, target_text, source_vocab_to_int, target_vocab_to_i
     token_target_sentences = token_target_text.split('\n')
     target_id_text = []
     for sentence in token_target_sentences:
-        print("target: ", sentence)
+        # print("target: ", sentence)
         words = sentence.split()
         id_text = [target_vocab_to_int[word] for word in words]
         target_id_text.append(id_text)

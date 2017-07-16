@@ -101,6 +101,8 @@ def encoding_layer_1(rnn_inputs, rnn_size, num_layers, keep_prob,
     
     return enc_output, enc_state
 
+def lstm_cell(rnn_size):
+    return tf.contrib.rnn.BasicLSTMCell(rnn_size)
 
 def encoding_layer(rnn_inputs, rnn_size, num_layers, keep_prob, 
                    source_sequence_length, source_vocab_size, 
@@ -120,18 +122,13 @@ def encoding_layer(rnn_inputs, rnn_size, num_layers, keep_prob,
     # Stack up multiple LSTM layers, for deep learning... Need to stack different multiple
     # lstm layers for tensorflow v1.2: 
     # https://stackoverflow.com/questions/44615147/valueerror-trying-to-share-variable-rnn-multi-rnn-cell-cell-0-basic-lstm-cell-k
-    stacked_rnn = []
-    for layer_index in range(num_layers):
-        lstm = tf.nn.rnn_cell.LSTMCell(num_units=rnn_size)
-        drop = tf.contrib.rnn.DropoutWrapper(lstm, output_keep_prob=keep_prob)        
-        stacked_rnn.append(drop)    
-    cell = tf.contrib.rnn.MultiRNNCell(stacked_rnn)
-    #print("State Size", cell.state_size)
+    stacked_lstm = tf.contrib.rnn.MultiRNNCell([lstm_cell(rnn_size) for _ in range(num_layers)])
+    enc_cell = tf.contrib.rnn.DropoutWrapper(stacked_lstm, keep_prob)
 
     embed = tf.contrib.layers.embed_sequence(rnn_inputs, source_vocab_size, encoding_embedding_size)
     #print(embed.get_shape())
     
-    outputs, final_state = tf.nn.dynamic_rnn(cell, embed, sequence_length=source_sequence_length, dtype=tf.float32)
+    outputs, final_state = tf.nn.dynamic_rnn(enc_cell, embed, sequence_length=source_sequence_length, dtype=tf.float32)
     
     # final_state = tf.identity(final_state, name='final_state')
     return outputs, final_state
@@ -157,10 +154,10 @@ def decoding_layer_train(encoder_state, dec_cell, dec_embed_input,
     :param keep_prob: Dropout keep probability
     :return: BasicDecoderOutput containing training logits and sample_id
     """
-    # TODO: Implement Function
+    # TODO: Implement Function   
     training_helper = tf.contrib.seq2seq.TrainingHelper(dec_embed_input, target_sequence_length)
     decoder = tf.contrib.seq2seq.BasicDecoder(dec_cell, training_helper, encoder_state, output_layer)
-    final_outputs, _, _ = tf.contrib.seq2seq.dynamic_decode(decoder)
+    final_outputs, _ = tf.contrib.seq2seq.dynamic_decode(decoder)
     return final_outputs
 
 
@@ -193,7 +190,7 @@ def decoding_layer_infer(encoder_state, dec_cell, dec_embeddings, start_of_seque
     helper = tf.contrib.seq2seq.GreedyEmbeddingHelper(dec_embeddings, start_tokens, \
         end_of_sequence_id)
     decoder = tf.contrib.seq2seq.BasicDecoder(dec_cell, helper, encoder_state, output_layer)
-    outputs, _, _ = tf.contrib.seq2seq.dynamic_decode(decoder)
+    outputs, _ = tf.contrib.seq2seq.dynamic_decode(decoder)
     return outputs
 
 
@@ -230,31 +227,28 @@ def decoding_layer(dec_input, encoder_state,
     dec_embed_input = tf.nn.embedding_lookup(dec_embeddings, dec_input)
 
     # Construct the decoder LSTM cell (just like you constructed the encoder cell above)
-    stacked_rnn = []
-    for layer_index in range(num_layers):
-        lstm = tf.nn.rnn_cell.LSTMCell(num_units=rnn_size)
-        drop = tf.contrib.rnn.DropoutWrapper(lstm, output_keep_prob=keep_prob)        
-        stacked_rnn.append(drop)    
-    dec_cell = tf.contrib.rnn.MultiRNNCell(stacked_rnn)
+    stacked_lstm = tf.contrib.rnn.MultiRNNCell([lstm_cell(rnn_size) for _ in range(num_layers)])
+    dec_cell = tf.contrib.rnn.DropoutWrapper(stacked_lstm, keep_prob)
 
     # Create an output layer to map the outputs of the decoder to the elements of our vocabulary
     output_layer = Dense(target_vocab_size,
         kernel_initializer = tf.truncated_normal_initializer(mean = 0.0, stddev=0.1))
 
-    # Use the your decoding_layer_train(encoder_state, dec_cell, dec_embed_input, target_sequence_length, 
-    # max_target_sequence_length, output_layer, keep_prob) function to get the training logits.
-    train_logits = decoding_layer_train(encoder_state, dec_cell, dec_embed_input, target_sequence_length, \
-        max_target_sequence_length, output_layer, keep_prob)
-    
+    with tf.variable_scope("decoding_layer", reuse=None) as dec_scope:        
+        # Use the your decoding_layer_train(encoder_state, dec_cell, dec_embed_input, target_sequence_length, 
+        # max_target_sequence_length, output_layer, keep_prob) function to get the training logits.
+        train_logits = decoding_layer_train(encoder_state, dec_cell, dec_embed_input, target_sequence_length, \
+            max_target_sequence_length, output_layer, keep_prob)
+
     # Use your decoding_layer_infer(encoder_state, dec_cell, dec_embeddings, start_of_sequence_id, 
     # end_of_sequence_id, max_target_sequence_length, vocab_size, output_layer, batch_size, keep_prob) 
     # function to get the inference logits
     start_id = target_vocab_to_int['<GO>']
     end_id = target_vocab_to_int['<EOS>']
-    
-    
-    infer_logits = decoding_layer_infer(encoder_state, dec_cell, dec_embeddings, start_id, end_id, \
-        max_target_sequence_length, target_vocab_size, output_layer, batch_size, keep_prob)
+
+    with tf.variable_scope("decoding_layer", reuse=True) as dec_scope:        
+        infer_logits = decoding_layer_infer(encoder_state, dec_cell, dec_embeddings, start_id, end_id, \
+            max_target_sequence_length, target_vocab_size, output_layer, batch_size, keep_prob)
 
     return train_logits, infer_logits
 
@@ -319,14 +313,14 @@ tests.test_seq2seq_model(seq2seq_model)
 # Number of Epochs
 epochs = 5
 # Batch Size
-batch_size = 64
+batch_size = 32
 # RNN Size
-rnn_size = 32
+rnn_size = 200
 # Number of Layers
 num_layers = 2
 # Embedding Size
-encoding_embedding_size = 100
-decoding_embedding_size = 100
+encoding_embedding_size = 200
+decoding_embedding_size = 200
 # Learning Rate
 learning_rate = 0.01
 # Dropout Keep Probability
