@@ -157,7 +157,7 @@ def decoding_layer_train(encoder_state, dec_cell, dec_embed_input,
     # TODO: Implement Function   
     training_helper = tf.contrib.seq2seq.TrainingHelper(dec_embed_input, target_sequence_length)
     decoder = tf.contrib.seq2seq.BasicDecoder(dec_cell, training_helper, encoder_state, output_layer)
-    final_outputs, _ = tf.contrib.seq2seq.dynamic_decode(decoder, maximum_iterations=max_summary_length)
+    final_outputs, _, _ = tf.contrib.seq2seq.dynamic_decode(decoder, maximum_iterations=max_summary_length)
     return final_outputs
 
 
@@ -190,7 +190,7 @@ def decoding_layer_infer(encoder_state, dec_cell, dec_embeddings, start_of_seque
     helper = tf.contrib.seq2seq.GreedyEmbeddingHelper(dec_embeddings, start_tokens, \
         end_of_sequence_id)
     decoder = tf.contrib.seq2seq.BasicDecoder(dec_cell, helper, encoder_state, output_layer)
-    outputs, _ = tf.contrib.seq2seq.dynamic_decode(decoder, maximum_iterations=max_target_sequence_length)
+    outputs, _, _ = tf.contrib.seq2seq.dynamic_decode(decoder, maximum_iterations=max_target_sequence_length)
     return outputs
 
 
@@ -311,7 +311,7 @@ tests.test_seq2seq_model(seq2seq_model)
 # Hyper parameters
 
 # Number of Epochs
-epochs = 15
+epochs = 10
 # Batch Size
 batch_size = 64
 # RNN Size
@@ -319,13 +319,13 @@ rnn_size = 256
 # Number of Layers
 num_layers = 2
 # Embedding Size
-encoding_embedding_size = 32 
-decoding_embedding_size = 32   
+encoding_embedding_size = 1000
+decoding_embedding_size = 1000 
 # Learning Rate
 learning_rate = 0.001
 # Dropout Keep Probability
 keep_probability = 0.5
-display_step = 100
+display_step = 10
 
 # Build the graph
 import time
