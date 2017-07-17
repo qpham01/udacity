@@ -311,21 +311,21 @@ tests.test_seq2seq_model(seq2seq_model)
 # Hyper parameters
 
 # Number of Epochs
-epochs = 10
+epochs = 5
 # Batch Size
 batch_size = 64
 # RNN Size
-rnn_size = 256
+rnn_size = 512
 # Number of Layers
 num_layers = 2
 # Embedding Size
-encoding_embedding_size = 1000
-decoding_embedding_size = 1000 
+encoding_embedding_size = 300
+decoding_embedding_size = 300 
 # Learning Rate
 learning_rate = 0.001
 # Dropout Keep Probability
 keep_probability = 0.5
-display_step = 10
+display_step = 100
 
 # Build the graph
 import time
