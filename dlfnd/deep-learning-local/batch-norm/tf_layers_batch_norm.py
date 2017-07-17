@@ -2,10 +2,10 @@ import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets("MNIST_data/", one_hot=True, reshape=False)
 
-def fully_connected(prev_layer, num_units):
+def fully_connected(prev_layer, num_units, is_training):
     """
     Create a fully connectd layer with the given layer as input and the given number of neurons.
-    
+
     :param prev_layer: Tensor
         The Tensor that acts as input into this layer
     :param num_units: int
@@ -13,13 +13,15 @@ def fully_connected(prev_layer, num_units):
     :returns Tensor
         A new fully connected layer
     """
-    layer = tf.layers.dense(prev_layer, num_units, activation=tf.nn.relu)
-    return layer
+    output = tf.layers.dense(prev_layer, num_units, activation=None)
+    output = tf.layers.batch_normalization(output, training=is_training)
+    output = tf.nn.relu(output)
+    return output
 
-def conv_layer(prev_layer, layer_depth):
+def conv_layer(prev_layer, layer_depth, is_training):
     """
     Create a convolutional layer with the given layer as input.
-    
+
     :param prev_layer: Tensor
         The Tensor that acts as input into this layer
     :param layer_depth: int
@@ -29,37 +31,42 @@ def conv_layer(prev_layer, layer_depth):
         A new convolutional layer
     """
     strides = 2 if layer_depth % 3 == 0 else 1
-    conv_layer = tf.layers.conv2d(prev_layer, layer_depth*4, 3, strides, 'same', activation=tf.nn.relu)
-    return conv_layer
+    output = tf.layers.conv2d(prev_layer, layer_depth*4, 3, strides, 'same', activation=None)
+    output = tf.layers.batch_normalization(output, training=is_training)
+    output = tf.nn.relu(output)
+    return output
 
 def train(num_batches, batch_size, learning_rate):
-    # Build placeholders for the input samples and labels 
+    # Build placeholders for the input samples and labels
     inputs = tf.placeholder(tf.float32, [None, 28, 28, 1])
     labels = tf.placeholder(tf.float32, [None, 10])
-    
-    # Feed the inputs into a series of 20 convolutional layers 
+    is_training = tf.placeholder(tf.bool)
+    # Feed the inputs into a series of 20 convolutional layers
     layer = inputs
     for layer_i in range(1, 20):
-        layer = conv_layer(layer, layer_i)
+        layer = conv_layer(layer, layer_i, is_training)
 
-    # Flatten the output from the convolutional layers 
+    # Flatten the output from the convolutional layers
     orig_shape = layer.get_shape().as_list()
     layer = tf.reshape(layer, shape=[-1, orig_shape[1] * orig_shape[2] * orig_shape[3]])
 
     # Add one fully connected layer
-    layer = fully_connected(layer, 100)
+    layer = fully_connected(layer, 100, is_training)
 
-    # Create the output layer with 1 node for each 
+    # Create the output layer with 1 node for each
     logits = tf.layers.dense(layer, 10)
-    
+
     # Define loss and training operations
-    model_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, labels=labels))
-    train_opt = tf.train.AdamOptimizer(learning_rate).minimize(model_loss)
-    
+    model_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=logits, \
+        labels=labels))
+
+    with tf.control_dependencies(tf.get_collection(tf.GraphKeys.UPDATE_OPS)):
+        train_opt = tf.train.AdamOptimizer(learning_rate).minimize(model_loss)
+
     # Create operations to test accuracy
-    correct_prediction = tf.equal(tf.argmax(logits,1), tf.argmax(labels,1))
+    correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(labels, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    
+
     # Train and test the network
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -68,29 +75,36 @@ def train(num_batches, batch_size, learning_rate):
 
             # train this batch
             sess.run(train_opt, {inputs: batch_xs, labels: batch_ys})
-            
+
             # Periodically check the validation or training loss and accuracy
             if batch_i % 100 == 0:
                 loss, acc = sess.run([model_loss, accuracy], {inputs: mnist.validation.images,
-                                                              labels: mnist.validation.labels})
-                print('Batch: {:>2}: Validation loss: {:>3.5f}, Validation accuracy: {:>3.5f}'.format(batch_i, loss, acc))
+                                                              labels: mnist.validation.labels,
+                                                              is_training: True})
+                print('Batch: {:>2}: Validation loss: {:>3.5f}, Validation accuracy: {:>3.5f}'\
+                    .format(batch_i, loss, acc))
             elif batch_i % 25 == 0:
-                loss, acc = sess.run([model_loss, accuracy], {inputs: batch_xs, labels: batch_ys})
-                print('Batch: {:>2}: Training loss: {:>3.5f}, Training accuracy: {:>3.5f}'.format(batch_i, loss, acc))
+                loss, acc = sess.run([model_loss, accuracy], {inputs: batch_xs, labels: batch_ys, \
+                    is_training: True})
+                print('Batch: {:>2}: Training loss: {:>3.5f}, Training accuracy: {:>3.5f}'\
+                    .format(batch_i, loss, acc))
 
         # At the end, score the final accuracy for both the validation and test sets
         acc = sess.run(accuracy, {inputs: mnist.validation.images,
-                                  labels: mnist.validation.labels})
+                                  labels: mnist.validation.labels,
+                                  is_training: False})
         print('Final validation accuracy: {:>3.5f}'.format(acc))
         acc = sess.run(accuracy, {inputs: mnist.test.images,
-                                  labels: mnist.test.labels})
+                                  labels: mnist.test.labels,
+                                  is_training: False})
         print('Final test accuracy: {:>3.5f}'.format(acc))
-        
-        # Score the first 100 test images individually. This won't work if batch normalization isn't implemented correctly.
+
+        # Score the first 100 test images individually. This won't work if batch normalization\
+        # isn't implemented correctly.
         correct = 0
         for i in range(100):
-            correct += sess.run(accuracy,feed_dict={inputs: [mnist.test.images[i]],
-                                                    labels: [mnist.test.labels[i]]})
+            correct += sess.run(accuracy, feed_dict={inputs: [mnist.test.images[i]], \
+                labels: [mnist.test.labels[i]]})
 
         print("Accuracy on 100 samples:", correct/100)
 
