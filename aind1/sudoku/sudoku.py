@@ -29,17 +29,13 @@ class Sudoku:
             - keys: Box labels, e.g. 'A1'
             - values: Value in corresponding box, e.g. '8', or '123456789' if it is empty.
         """
-        """
-        Produce a dictionary of cells labeled by A1 through I9 whose values are from a string like:
-        '..3.2.6..9..3.5..1..18.64....81.29..7.......8..67.82....26.95..8..2.3..9..5.1.3..'
-        """
         values = dict()
         for i, label in enumerate(self.boxes):
             values[label] = grid[i] if not grid[i] == '.' else '123456789'
 
         return values
 
-    def eliminate(self, value_dict):
+    def eliminate(self, values):
         """Eliminate values from peers of each box with a single value.
 
         Go through all the boxes, and whenever there is a box with a single value,
@@ -50,31 +46,45 @@ class Sudoku:
         Returns:
             Resulting Sudoku in dictionary form after eliminating values.
         """
-        """
-        Given a value dict with unfilled cells ('.'), eliminate invalid values and returns a new
-        dictionary where '.' are replaced by a string of possible valid values.
-        """
-        all_values = '123456789'
-        values = copy.copy(value_dict)
-        for i, label in enumerate(self.boxes):
-            if value_dict[label] == all_values:
-                row_index = ord(label[0]) - ord('A')
-                row_unit = self.row_units[row_index]
-                col_index = int(label[1]) - 1
-                column_unit = self.column_units[col_index]
-                square_index = row_index // 3 * 3 + col_index // 3
-                square_unit = self.square_units[square_index]
+        solved_values = [box for box in values.keys() if len(values[box]) == 1]
+        for box in solved_values:
+            digit = values[box]
+            for peer in self.peers[box]:
+                values[peer] = values[peer].replace(digit,'')
+        return values
 
-                for unit_label in row_unit:
-                    value = value_dict[unit_label]
-                    if value != all_values:
-                        values[label] = values[label].replace(value, '')
-                for unit_label in column_unit:
-                    value = value_dict[unit_label]
-                    if value != all_values:
-                        values[label] = values[label].replace(value, '')
-                for unit_label in square_unit:
-                    value = value_dict[unit_label]
-                    if value != all_values:
-                        values[label] = values[label].replace(value, '')
+    def only_choice(self, values):
+        """Finalize all values that are the only choice for a unit.
+
+        Go through all the units, and whenever there is a unit with a value
+        that only fits in one box, assign the value to this box.
+
+        Input: Sudoku in dictionary form.
+        Output: Resulting Sudoku in dictionary form after filling in only choices.
+        """
+        for unit in self.unitlist:
+            for digit in '123456789':
+                dplaces = [box for box in unit if digit in values[box]]
+                if len(dplaces) == 1:
+                    values[dplaces[0]] = digit
+        return values
+
+    def reduce_puzzle(self, values):
+        """
+        Iterate eliminate() and only_choice(). If at some point, there is a box with no available values, return False.
+        If the sudoku is solved, return the sudoku.
+        If after an iteration of both functions, the sudoku remains the same, return the sudoku.
+        Input: A sudoku in dictionary form.
+        Output: The resulting sudoku in dictionary form.
+        """
+        solved_values = [box for box in values.keys() if len(values[box]) == 1]
+        stalled = False
+        while not stalled:
+            solved_values_before = len([box for box in values.keys() if len(values[box]) == 1])
+            values = self.eliminate(values)
+            values = self.only_choice(values)
+            solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
+            stalled = solved_values_before == solved_values_after
+            if len([box for box in values.keys() if len(values[box]) == 0]):
+                return False
         return values

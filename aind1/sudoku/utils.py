@@ -21,6 +21,7 @@ def display(values):
     Input: The sudoku in dictionary form
     Output: None
     """
+    print()
     width = 1+max(len(values[s]) for s in boxes)
     line = '+'.join(['-'*(width*3)]*3)
     for r in rows:
