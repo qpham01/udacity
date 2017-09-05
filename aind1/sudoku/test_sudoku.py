@@ -50,21 +50,21 @@ class SudokuTests(unittest.TestCase):
         sudoku = Sudoku()
         values = sudoku.grid_values(EASY_GRID)
         values = sudoku.reduce_puzzle(values)
-        for label in sudoku.boxes:
-            assert len(values[label]) == 1
+        solved_values = [box for box in values.keys() if len(values[box]) == 1]    
+        assert len(solved_values) == len(values)
 
     def test_05_reduce_hard_puzzle(self):
         """ Tests reduce_puzzle """
         sudoku = Sudoku()
         values = sudoku.grid_values(HARD_GRID)
-        values = sudoku.reduce_puzzle(values)
-        #for label in sudoku.boxes:
-        #    assert len(values[label]) == 1
-        display(values)
-        print()
-        values['G2'] = '9'
-        values = sudoku.reduce_puzzle(values)
-        display(values)
+        values = sudoku.search(values)
+        if values:
+            solved_values = [box for box in values.keys() if len(values[box]) == 1]   
+            assert len(solved_values) == len(values)
+            display(values)
+        else:
+            print("No solution found!")
+
 
 if __name__ == '__main__':
     unittest.main()

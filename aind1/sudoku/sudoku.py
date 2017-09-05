@@ -1,5 +1,6 @@
 """ Sudoku Solver """
 import copy
+from utils import display
 
 def cross(a, b):
     return [s+t for s in a for t in b]
@@ -88,3 +89,22 @@ class Sudoku:
             if len([box for box in values.keys() if len(values[box]) == 0]):
                 return False
         return values
+
+    def search(self, values):
+        "Using depth-first search and propagation, try all possible values."
+        # First, reduce the puzzle using the previous function
+        values = self.reduce_puzzle(values)
+        if values is False:
+            return False ## Failed earlier
+        if all(len(values[s]) == 1 for s in self.boxes): 
+            return values ## Solved!
+        # Choose one of the unfilled squares with the fewest possibilities
+        _, s = min((len(values[s]), s) for s in self.boxes if len(values[s]) > 1)
+        print("s", s)
+        # Now use recurrence to solve each one of the resulting sudokus, and 
+        for value in values[s]:
+            new_sudoku = values.copy()
+            new_sudoku[s] = value
+            attempt = self.search(new_sudoku)
+            if attempt:
+                return attempt
