@@ -129,6 +129,7 @@ def load_preprocess_training_batch(batch_id, batch_size):
     Load the Preprocessed Training data and return them in batches of <batch_size> or less
     """
     filename = 'preprocess_batch_' + str(batch_id) + '.p'
+    print('loaded data file {}'.format(filename))
     features, labels = pickle.load(open(filename, mode='rb'))
 
     # Return the training data in batches of size <batch_size> or less

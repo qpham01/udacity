@@ -83,7 +83,7 @@ def get_image(image_path, width, height, mode):
     return np.array(image.convert(mode))
 
 
-def get_batch(image_files, width, height, mode):
+def get_batch2(image_files, width, height, mode):
     data_batch = np.array(
         [get_image(sample_file, width, height, mode) for sample_file in image_files]).astype(np.float32)
 
