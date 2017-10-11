@@ -12,10 +12,11 @@ boxes = cross(rows, cols)
 row_units = [cross(r, cols) for r in rows]
 column_units = [cross(rows, c) for c in cols]
 square_units = [cross(rs, cs) for rs in ('ABC', 'DEF', 'GHI') for cs in ('123', '456', '789')]
+
+# Adding diagonal units for diagonal constraints
 diag_units1 = [rows[i] + cols[i] for i, _ in enumerate(rows)]
 diag_units2 = [rows[i] + cols[8 - i] for i, _ in enumerate(rows)]
-print(diag_units1)
-print(diag_units2)
+
 unitlist = [diag_units1, diag_units2] + row_units + column_units + square_units
 units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
 peers = dict((s, set(sum(units[s], [])) - set([s])) for s in boxes)
@@ -43,6 +44,8 @@ def naked_twins(values):
     Returns:
         the values dictionary with the naked twins eliminated from peers.
     """
+    # Find all instances of naked twins
+    # Eliminate the naked twins as possibilities for their peers
     for unit in row_units:
         values = eliminate_naked_twins_numbers(unit, values)
     for unit in column_units:
@@ -52,8 +55,30 @@ def naked_twins(values):
     values = eliminate_naked_twins_numbers(diag_units1, values)
     values = eliminate_naked_twins_numbers(diag_units2, values)
     return values
-    # Find all instances of naked twins
-    # Eliminate the naked twins as possibilities for their peers
+
+def eliminate_naked_twins_numbers(unit, values):
+    """ Find a list of numbers in naked twins in a unit, if any """
+    twin_numbers = dict()
+    for box1 in unit:
+        box1_len = len(values[box1])
+        # for each box of lenght 2 in each unit, find another box with the same content
+        if box1_len == 2:
+            for box2 in unit:
+                if box1 == box2:
+                    continue
+                if values[box1] == values[box2]:
+                    # once found, keep track of the twin boxes and the numbers in them.
+                    for number in values[box1]:
+                        twin_numbers[number] = [box1, box2]
+    for number in twin_numbers:
+        twin_boxes = twin_numbers[number]
+        non_twin_boxes = [box for box in unit if box not in twin_boxes]
+        # Remove each twin number from all boxes that are not the twin boxes.
+        for box in non_twin_boxes:
+            current_value = values[box]
+            test = current_value.replace(number, '')
+            assign_value(values, box, test)
+    return values
 
 def grid_values(grid):
     """
@@ -65,11 +90,15 @@ def grid_values(grid):
             Keys: The boxes, e.g., 'A1'
             Values: The value in each box, e.g., '8'. If the box has no value, then the value will be '123456789'.
     """
-    values = dict()
-    for label in boxes:
-        values[label] = grid[label] if label in grid else '123456789'
-
-    return values
+    values = []
+    all_digits = '123456789'
+    for c in grid:
+        if c == '.':
+            values.append(all_digits)
+        elif c in all_digits:
+            values.append(c)
+    assert len(values) == 81
+    return dict(zip(boxes, values))
 
 def display(values):
     """
@@ -96,46 +125,26 @@ def eliminate(values):
 
 def only_choice(values):
     for unit in unitlist:
-        for digit in '123456789':            
+        for digit in '123456789':
             dplaces = [box for box in unit if digit in values[box]]
-            if len(dplaces) == 1 and len(values[dplaces[0]]) > 1:
-                #print("dplaces for {}: {}, {}".format(digit, dplaces, [values[box] for box in dplaces]))            
-                assign_value(values, dplaces[0], digit)
+            if len(dplaces) == 1:
+                values[dplaces[0]] = digit
     return values
-
-def eliminate_naked_twins_numbers(unit, values):
-    """ Find a list of numbers in naked twins in a unit, if any """
-    twin_numbers = dict()
-    for box1 in unit:
-        box1_len = len(values[box1])
-        if box1_len == 2:
-            for box2 in unit:
-                if box1 == box2:
-                    continue
-                if values[box1] == values[box2]:
-                    for number in values[box1]:
-                        twin_numbers[number] = [box1, box2]
-    #new_values = values.copy()
-    for number in twin_numbers:
-        twin_boxes = twin_numbers[number]
-        non_twin_boxes = [box for box in unit if box not in twin_boxes]
-        for box in non_twin_boxes:
-            current_value = values[box]
-            test = current_value.replace(number, '')
-            assign_value(values, box, test)            
-    return values
-
 
 def reduce_puzzle(values):
-    solved_values = [box for box in values.keys() if len(values[box]) == 1]
     stalled = False
     while not stalled:
+        # Check how many boxes have a determined value
         solved_values_before = len([box for box in values.keys() if len(values[box]) == 1])
-        #values = naked_twins(values)
+        # Use the Eliminate Strategy
         values = eliminate(values)
+        # Use the Only Choice Strategy
         values = only_choice(values)
+        # Check how many boxes have a determined value, to compare
         solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
+        # If no new values were added, stop the loop.
         stalled = solved_values_before == solved_values_after
+        # Sanity check, return False if there is a box with zero available values:
         if len([box for box in values.keys() if len(values[box]) == 0]):
             return False
     return values
@@ -148,7 +157,7 @@ def search(values):
     if all(len(values[s]) == 1 for s in boxes):
         return values ## Solved!
     # Choose one of the unfilled squares with the fewest possibilities
-    _, s = min((len(values[s]), s) for s in boxes if len(values[s]) > 1)
+    n,s = min((len(values[s]), s) for s in boxes if len(values[s]) > 1)
     # Now use recurrence to solve each one of the resulting sudokus, and
     for value in values[s]:
         new_sudoku = values.copy()
@@ -169,7 +178,7 @@ def solve(grid):
     values = grid_values(grid)
     values = search(values)
     if values:
-        solved_values = [box for box in values.keys() if len(values[box]) == 1]   
+        solved_values = [box for box in values.keys() if len(values[box]) == 1]
         assert len(solved_values) == len(values)
         # display(values)
     else:
@@ -185,7 +194,7 @@ def test_valid_solution(values):
         for i, box1 in enumerate(unit):
             for j, box2 in enumerate(unit):
                 if i != j:
-                    assert values[box1] != values[box2] 
+                    assert values[box1] != values[box2]
     return True
 
 if __name__ == '__main__':

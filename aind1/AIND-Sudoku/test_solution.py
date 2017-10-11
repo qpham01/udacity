@@ -116,12 +116,6 @@ class TestDiagonalSudoku(unittest.TestCase):
         result = solution.solve(self.diagonal_grid)
         #display(result)
         assert test_valid_solution(result)
-        '''
-        for key in result:
-            if result[key] != self.solved_diag_sudoku:
-                print("Diff: {}: result: {} solved: {}".format(key, result[key], 
-                    self.solved_diag_sudoku[key]))
-        '''
         self.assertEqual(result, self.solved_diag_sudoku)   
 
 if __name__ == '__main__':
