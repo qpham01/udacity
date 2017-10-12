@@ -5,13 +5,13 @@ class GameState:
     max_size = 10000
 
     """ The isolation game state """
-    def __init__(self, width=3, height=2, blocked=[(2, 1)]):
-        self.width = width
-        self.height = height
-        self.last_states = [[0 for _ in range(self.height)] for _ in range(self.width)]
+    def __init__(self, xlim=3, ylim=2, blocked=[(2, 1)]):
+        self.xlim = xlim
+        self.ylim = ylim
+        self._board = [[0 for _ in range(self.ylim)] for _ in range(self.xlim)]
         for block in blocked:
-            self.last_states[block[0]][block[1]] = -1
-        self.current_player = 1
+            self._board[block[0]][block[1]] = 1
+        self._parity = 1
         self.last_moves = {}
         self.last_moves[1] = None
         self.last_moves[2] = None
@@ -25,9 +25,9 @@ class GameState:
         move: tuple
             The target position for the active player's next move
         """
-        self.last_states[move[0]][move[1]] = self.current_player
-        self.last_moves[self.current_player] = move
-        self.current_player = 2 if self.current_player == 1 else 1
+        self._board[move[0]][move[1]] = 1
+        self.last_moves[self._parity] = move
+        self._parity = 2 if self._parity == 1 else 1
         return copy.deepcopy(self)
 
     def get_legal_moves(self):
@@ -41,13 +41,13 @@ class GameState:
         be a pair of integers in (column, row) order specifying
         the zero-indexed coordinates on the board.
         """
-        last_move = self.last_moves[self.current_player]
+        last_move = self.last_moves[self._parity]
         legal_moves = []
         if last_move is None:
             # Return all empty spaces
-            for x in range(self.width):
-                for y in range(self.height):
-                    if self.last_states[x][y] == 0:
+            for x in range(self.xlim):
+                for y in range(self.ylim):
+                    if self._board[x][y] == 0:
                         legal_moves.append((x, y))
         else:
             # block indicator in 8 directions, starting north and going clockwise.
@@ -69,7 +69,7 @@ class GameState:
 
     def get_legal_move(self, direction, i):
         """ Check if move is legal """
-        last_x, last_y = self.last_moves[self.current_player]
+        last_x, last_y = self.last_moves[self._parity]
         if direction in [0, 4]:
             x = last_x
         elif direction in [1, 2, 3]:
@@ -88,6 +88,6 @@ class GameState:
         else:
             raise ValueError(direction)
 
-        if x < 0 or y < 0 or x >= self.width or y >= self.height or self.last_states[x][y] != 0:
+        if x < 0 or y < 0 or x >= self.xlim or y >= self.ylim or self._board[x][y] != 0:
             return None
         return (x, y)

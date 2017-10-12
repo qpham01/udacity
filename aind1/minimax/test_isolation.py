@@ -1,46 +1,48 @@
 """ Test for isolation game """
 import unittest
 from isolation import GameState
+#from isolation_udacity import GameState
 
 class GameStateTest(unittest.TestCase):
     block = (2, 1)
     move_1 = (1, 2)
     move_2 = (3, 2)
-    width = 4
-    height = 4
+    xlim = 4
+    ylim = 4
 
     """ Test GameState class """
     def test_00_forecast_move(self):
         game = GameState()
         game = game.forecast_move((0, 0))
-        assert game.last_states[0][0] == 1
-        assert game.last_states[2][1] == -1
+        assert game._board[0][0] == 1
+        assert game._board[2][1] == 1, 'value is {}'.format(game._board[2][1])
         game = game.forecast_move((1, 0))
-        assert game.last_states[0][0] == 1
-        assert game.last_states[1][0] == 2
-        assert game.last_states[2][1] == -1
+        assert game._board[0][0] == 1
+        assert game._board[1][0] == 1, 'value is {}'.format(game._board[1][0])
+        assert game._board[2][1] == 1
 
     def first_two_moves(self):
         """ Create a game and make two moves """
-        width = GameStateTest.width
-        height = GameStateTest.height
-        game = GameState(width=width, height=height)
+        width = GameStateTest.xlim
+        height = GameStateTest.ylim
+        game = GameState(xlim=width, ylim=height)
 
         # Get legal moves for player 1
         legal_moves = game.get_legal_moves()
         assert len(legal_moves) == width * height - 1
-        assert GameStateTest.block not in legal_moves
+        #assert GameStateTest.block not in legal_moves
 
         # Player 1 moves
-        _ = game.forecast_move(GameStateTest.move_1)
+        game = game.forecast_move(GameStateTest.move_1)
 
         # Get legal moves for player 2
         legal_moves = game.get_legal_moves()
-        assert len(legal_moves) == width * height - 2
+        assert len(legal_moves) == width * height - 2, "legal moves count: {}".\
+            format(len(legal_moves))
         assert GameStateTest.move_1 not in legal_moves
 
         # Player 2 moves
-        _ = game.forecast_move(GameStateTest.move_2)
+        game = game.forecast_move(GameStateTest.move_2)
 
         return game
 
