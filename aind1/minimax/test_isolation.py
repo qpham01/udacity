@@ -1,7 +1,7 @@
 """ Test for isolation game """
 import unittest
-from isolation import GameState
-#from isolation_udacity import GameState
+#from isolation import GameState
+from isolation_udacity import GameState
 
 class GameStateTest(unittest.TestCase):
     block = (2, 1)

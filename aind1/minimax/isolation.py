@@ -11,10 +11,10 @@ class GameState:
         self._board = [[0 for _ in range(self.ylim)] for _ in range(self.xlim)]
         for block in blocked:
             self._board[block[0]][block[1]] = 1
-        self._parity = 1
+        self._parity = 0
         self.last_moves = {}
+        self.last_moves[0] = None
         self.last_moves[1] = None
-        self.last_moves[2] = None
 
     def forecast_move(self, move):
         """ Return a new board object with the specified move
@@ -27,7 +27,7 @@ class GameState:
         """
         self._board[move[0]][move[1]] = 1
         self.last_moves[self._parity] = move
-        self._parity = 2 if self._parity == 1 else 1
+        self._parity = 1 if self._parity == 0 else 0
         return copy.deepcopy(self)
 
     def get_legal_moves(self):
