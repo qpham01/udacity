@@ -42,19 +42,26 @@ class IsolationTest(unittest.TestCase):
 
     def test_02_iterative_deepening(self):
         """ Test that depth-limited minimax performs to the right depth """
-        player1 = game_agent.AlphaBetaPlayer()
-        player2 = game_agent.AlphaBetaPlayer()
+        player1 = game_agent.AlphaBetaPlayer(score_fn=game_agent.custom_score)
+        player2 = game_agent.AlphaBetaPlayer(score_fn=game_agent.custom_score)
         board = isolation.Board(player1, player2)
 
-        move, board = make_move(player1, board, time_limit=1000)
-        assert player1.depth_searched > 5
-        #print()
-        #print("1 move", move)
+        for count in range(5):
+            move, board = make_move(player1, board, time_limit=1000)
+            assert player1.depth_searched > 3
+            print()
+            print("1 move", move)
 
-        move, board = make_move(player2, board, time_limit=1000)
-        assert player2.depth_searched > 5
-        #print("2 move", move)
+            move, board = make_move(player2, board, time_limit=1000)
+            assert player2.depth_searched > 3
+            print("2 move", move)
 
+    def test_03_play(self):
+        """ Test playing the game """
+        player1 = game_agent.AlphaBetaPlayer(score_fn=game_agent.custom_score)
+        player2 = game_agent.AlphaBetaPlayer(score_fn=game_agent.custom_score)
+        board = isolation.Board(player1, player2)
+        #board.play()
 
 if __name__ == '__main__':
     unittest.main()
