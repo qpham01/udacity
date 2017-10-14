@@ -11,7 +11,7 @@ import game_agent
 from importlib import reload
 
 
-def make_move(player, board, time_limit=500):
+def make_move(player, board, time_limit=50):
     """ Make a move with player """
     time_millis = lambda: 1000 * timeit.default_timer()
     move_start = time_millis()
@@ -46,14 +46,15 @@ class IsolationTest(unittest.TestCase):
         player2 = game_agent.AlphaBetaPlayer()
         board = isolation.Board(player1, player2)
 
-        move, board = make_move(player1, board)
+        move, board = make_move(player1, board, time_limit=1000)
         assert player1.depth_searched > 5
         #print()
         #print("1 move", move)
 
-        move, board = make_move(player2, board)
+        move, board = make_move(player2, board, time_limit=1000)
         assert player2.depth_searched > 5
         #print("2 move", move)
+
 
 if __name__ == '__main__':
     unittest.main()
