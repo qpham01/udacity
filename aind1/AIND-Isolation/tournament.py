@@ -14,6 +14,7 @@ order corrects for imbalances due to both starting position and initiative.
 import itertools
 import random
 import warnings
+import json
 
 from collections import namedtuple
 
@@ -21,9 +22,10 @@ from isolation import Board
 from sample_players import (RandomPlayer, open_move_score,
                             improved_score, center_score)
 from game_agent import (MinimaxPlayer, AlphaBetaPlayer, custom_score,
-                        custom_score_2, custom_score_3)
+                        custom_score_2, custom_score_3, IsolationPlayer)
+import game_agent
 
-NUM_MATCHES = 5  # number of matches against each opponent
+NUM_MATCHES = 50  # number of matches against each opponent
 TIME_LIMIT = 150  # number of milliseconds before timeout
 
 DESCRIPTION = """
@@ -62,6 +64,8 @@ def play_round(cpu_agent, test_agents, win_counts, num_matches):
         for game in games:
             winner, _, termination = game.play(time_limit=TIME_LIMIT)
             win_counts[winner] += 1
+            if isinstance(winner, IsolationPlayer):
+                winner.collect_moves()
 
             if termination == "timeout":
                 timeout_count += 1
@@ -123,21 +127,28 @@ def play_matches(cpu_agents, test_agents, num_matches):
         print(("\nYour agents forfeited {} games while there were still " +
                "legal moves available to play.\n").format(total_forfeits))
 
+    print(IsolationPlayer.move_library)
+    print("Center score range: {} to {}".format(game_agent.MIN_CENTER_SCORE, \
+        game_agent.MAX_CENTER_SCORE))
+    print("Improved score range: {} to {}".format(game_agent.MIN_IMPROVED_SCORE, \
+        game_agent.MAX_IMPROVED_SCORE))
+
+    print("Center improved move uses: {}".format(game_agent.USE_CENTER_IMPROVED_MOVES))
 
 def main():
 
     # Define two agents to compare -- these agents will play from the same
     # starting position against the same adversaries in the tournament
     test_agents = [
-        Agent(AlphaBetaPlayer(score_fn=improved_score), "AB_Improved"),
+        #Agent(AlphaBetaPlayer(score_fn=improved_score), "AB_Improved"),
         Agent(AlphaBetaPlayer(score_fn=custom_score), "AB_Custom"),
-        Agent(AlphaBetaPlayer(score_fn=custom_score_2), "AB_Custom_2"),
-        Agent(AlphaBetaPlayer(score_fn=custom_score_3), "AB_Custom_3")
+        #Agent(AlphaBetaPlayer(score_fn=custom_score_2), "AB_Custom_2"),
+        #Agent(AlphaBetaPlayer(score_fn=custom_score_3), "AB_Custom_3")
     ]
 
     # Define a collection of agents to compete against the test agents
     cpu_agents = [
-        Agent(RandomPlayer(), "Random"),
+        #Agent(RandomPlayer(), "Random"),
         Agent(MinimaxPlayer(score_fn=open_move_score), "MM_Open"),
         Agent(MinimaxPlayer(score_fn=center_score), "MM_Center"),
         Agent(MinimaxPlayer(score_fn=improved_score), "MM_Improved"),

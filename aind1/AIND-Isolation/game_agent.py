@@ -8,6 +8,35 @@ class SearchTimeout(Exception):
     """Subclass base exception for code clarity. """
     pass
 
+PREVIOUS_WINNING_MOVES = {2541362466717371775, 6613518629096764163, -5922411857726037879, \
+    -4124497621896485880, 3712459401281602566, 8959178795773461642, 2043278012265184782, \
+    -3117231302084458479, 1179086284973040145, -4065377259998740588, -5643407236606792939, \
+    -8880693091086586596, -7205252939492120675, -9219103124958940003, 4595044614575255580, \
+    -8454898365370349406, -7562532989805496157, -3528899285924755678, -7411251582680342621, \
+    -681149453922084829, -1639357473832979670, -9112372332266814035, 3131934224197803057, \
+    -717265128158893004, 2634389482399694004, -6835707712614575433, -2107432665631315914, \
+    4523663662488875447, 4178600175680483647, -5475465816669476157, 9151901460630510014, \
+    4454756738268245574, 4783577801001473222, -2556277200415811511, 2410160771677001291, \
+    -5318178240155740844, -8564206493023033258, 2760371433826102867, 2252284256375038421, \
+    -4698803984634587306, -8124041784644533284, 1914665153764618205, -2340381771048152733, \
+    -7461629609994424475, -8132711426459648409, -6408641414864738585, 1109001614428474598, \
+    2378083494567628513, -3233339490522568983, -6142529134493233941, -5172695250098518419, \
+    -2942012007243071891, -4689516257051816591, -2033223071635331472, 6499624790210474479, \
+    8150728969479665519, -833970151060394892, 5742102486159145462, -4430211693584937218, \
+    -7793216138332559870}
+
+PREVIOUS_WINNING_MOVES2 = {-2266353293002449055, -650875449337648158, 5525512056910805665, \
+    -2364816481388250909, 4911500270585164644, -2828323045933224216, 3627434641136602726, \
+    -8016088851845327542, -7419125688417755986, 812416312008381563, -6908546411081592330, \
+    -8359326560832983721, -1375765300315435754, 7885614127719850548, 3629181729033305238, \
+    3192378902674493656, 627632426918275578, -8660370879263009826, -418406813429635108, \
+    6050162101678600475}
+
+BEST_CENTER_IMPROVED_MOVES = []
+BEST_IMPROVED_MOVES = []
+
+USE_CENTER_IMPROVED_MOVES = 0
+
 
 def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
@@ -33,15 +62,20 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
+    global USE_CENTER_IMPROVED_MOVES
+
     if game.is_loser(player):
         return float("-inf")
 
     if game.is_winner(player):
         return float("inf")
 
-    own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - opp_moves)
+    # If found, use a previous winning move
+    if game.hash() in BEST_CENTER_IMPROVED_MOVES:
+        USE_CENTER_IMPROVED_MOVES += 1
+        return float("inf")
+
+    return improved_score(game, player) - 0.2 * center_score(game, player)
 
 
 
@@ -73,7 +107,7 @@ def custom_score_2(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    return float(len(game.get_legal_moves(player)))
+    return center_score(game, player)
 
 
 
@@ -105,9 +139,10 @@ def custom_score_3(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    return float(len(game.get_legal_moves(player)))
+    return open_move_score(game, player)
 
 
+MOVES = set()
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never
@@ -131,18 +166,32 @@ class IsolationPlayer:
         positive value large enough to allow the function to return before the
         timer expires.
     """
+    move_library = None
+    move_count = 5
+
     def __init__(self, search_depth=3, score_fn=custom_score, timeout=10.):
         self.search_depth = search_depth
         self.score = score_fn
         self.time_left = None
         self.TIMER_THRESHOLD = timeout
+        self.game_moves = []
+
+        if IsolationPlayer.move_library is None:
+            IsolationPlayer.move_library = set()
+            for move in MOVES:
+                IsolationPlayer.move_library.add(move)
+
+    def collect_moves(self):
+        """ Print the first 'count' moves in a game """
+        for move in self.game_moves[:IsolationPlayer.move_count]:
+            IsolationPlayer.move_library.add(move)
 
 
 class MinimaxPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using depth-limited minimax
     search. You must finish and test this player to make sure it properly uses
     minimax to return a good move before the search time limit expires.
-    """
+    """    
     def __init__(self, search_depth=3, score_fn=custom_score, timeout=10.):
         super(MinimaxPlayer, self).__init__(search_depth, score_fn, timeout)
         self.depth_searched = 0
@@ -188,6 +237,8 @@ class MinimaxPlayer(IsolationPlayer):
 
         except SearchTimeout:
             pass  # Handle any actions required after timeout as needed
+
+        self.game_moves.append(game.forecast_move(best_move).hash())
 
         # Return the best move from the last completed search iteration
         return best_move
@@ -339,6 +390,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         # Initialize the best move so that this function returns something
         # in case the search fails due to timeout
         best_move = (-1, -1)
+
         self.depth_searched = 0
         try:
             # The try/except block will automatically catch the exception
@@ -355,7 +407,10 @@ class AlphaBetaPlayer(IsolationPlayer):
                 search_depth += 1
 
         except SearchTimeout:
+            self.game_moves.append(game.forecast_move(best_move).hash())
             return best_move
+
+        self.game_moves.append(game.forecast_move(best_move).hash())
 
         # Return the best move from the last completed search iteration
         return best_move
@@ -469,3 +524,101 @@ class AlphaBetaPlayer(IsolationPlayer):
                 return value
             alpha = max(alpha, value)
         return value
+
+
+# The following methods are copied from sample_player.py and are used in the composite
+# scoring schemes in combination with one or more other scoring functions.  The check
+# for losing or winning are removed from these methods because they are already performed
+# in the custom score functions.
+def open_move_score(game, player):
+    """The basic evaluation function described in lecture that outputs a score
+    equal to the number of moves open for your computer player on the board.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : hashable
+        One of the objects registered by the game object as a valid player.
+        (i.e., `player` should be either game.__player_1__ or
+        game.__player_2__).
+
+    Returns
+    ----------
+    float
+        The heuristic value of the current game state
+    """
+    return float(len(game.get_legal_moves(player)))
+
+MAX_IMPROVED_SCORE = float('-Inf')
+MIN_IMPROVED_SCORE = float('Inf')
+
+def improved_score(game, player):
+    """The "Improved" evaluation function discussed in lecture that outputs a
+    score equal to the difference in the number of moves available to the
+    two players.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : hashable
+        One of the objects registered by the game object as a valid player.
+        (i.e., `player` should be either game.__player_1__ or
+        game.__player_2__).
+
+    Returns
+    ----------
+    float
+        The heuristic value of the current game state
+    """
+    global MAX_IMPROVED_SCORE, MIN_IMPROVED_SCORE
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    score = float(own_moves - opp_moves)
+    if score > MAX_IMPROVED_SCORE:
+        MAX_IMPROVED_SCORE = score
+    if score < MIN_IMPROVED_SCORE:
+        MIN_IMPROVED_SCORE = score
+    return score
+
+MAX_CENTER_SCORE = float('-Inf')
+MIN_CENTER_SCORE = float('Inf')
+
+def center_score(game, player):
+    """Outputs a score equal to square of the distance from the center of the
+    board to the position of the player.
+
+    This heuristic is only used by the autograder for testing.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : hashable
+        One of the objects registered by the game object as a valid player.
+        (i.e., `player` should be either game.__player_1__ or
+        game.__player_2__).
+
+    Returns
+    ----------
+    float
+        The heuristic value of the current game state
+    """
+    global MAX_CENTER_SCORE, MIN_CENTER_SCORE
+
+    w, h = game.width / 2., game.height / 2.
+    y, x = game.get_player_location(player)
+    score = float((h - y)**2 + (w - x)**2)
+    if score > MAX_CENTER_SCORE:
+        MAX_CENTER_SCORE = score
+    if score < MIN_CENTER_SCORE:
+        MIN_CENTER_SCORE = score
+    return score
