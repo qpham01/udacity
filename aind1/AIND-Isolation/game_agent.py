@@ -70,12 +70,25 @@ def custom_score(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    # If found, use a previous winning move
-    if game.hash() in BEST_CENTER_IMPROVED_MOVES:
-        USE_CENTER_IMPROVED_MOVES += 1
+    # If is center move, return inf
+    location = game.get_player_location(game.active_player)
+    if location == (4, 4):
         return float("inf")
 
-    return improved_score(game, player) - 0.2 * center_score(game, player)
+    # Identify partitions
+    our_moves = set(game.get_legal_moves())
+    opp_moves = set(game.get_legal_moves(game.inactive_player))
+
+    shared_moves = our_moves & opp_moves
+    if not shared_moves:
+        # If partition found, identify move as winning or losing
+        if len(our_moves) >= len(opp_moves):
+            return float("inf")
+        else:
+            return float("-inf")
+
+
+    return improved_score(game, player, factor=2)
 
 
 
@@ -107,7 +120,7 @@ def custom_score_2(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    return center_score(game, player)
+    return improved_score(game, player, factor=2.0)
 
 
 
@@ -139,7 +152,7 @@ def custom_score_3(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    return open_move_score(game, player)
+    return improved_score(game, player) - 0.2 * center_score(game, player)
 
 
 MOVES = set()
@@ -555,7 +568,7 @@ def open_move_score(game, player):
 MAX_IMPROVED_SCORE = float('-Inf')
 MIN_IMPROVED_SCORE = float('Inf')
 
-def improved_score(game, player):
+def improved_score(game, player, factor=1):
     """The "Improved" evaluation function discussed in lecture that outputs a
     score equal to the difference in the number of moves available to the
     two players.
@@ -580,7 +593,7 @@ def improved_score(game, player):
 
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    score = float(own_moves - opp_moves)
+    score = float(factor * own_moves - opp_moves)
     if score > MAX_IMPROVED_SCORE:
         MAX_IMPROVED_SCORE = score
     if score < MIN_IMPROVED_SCORE:
