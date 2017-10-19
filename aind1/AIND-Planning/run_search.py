@@ -62,6 +62,7 @@ def run_search(problem, search_function, parameter=None):
     print("{}\n".format(ip))
     show_solution(node, end - start)
     print()
+    print("Seconds elapsed: {:.2f}".format(end - start))
 
 
 def manual():
