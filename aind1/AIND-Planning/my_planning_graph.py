@@ -338,7 +338,7 @@ class PlanningGraph():
                 # connect to s nodes of the previous literal level
                 node.parents = previous_literal_level
                 #print("Added action:", action)
-        
+
         # Persistent actions
         for symbol in positive:
             action = Action(symbol, [[symbol], []], [[symbol], []])
@@ -348,12 +348,12 @@ class PlanningGraph():
             #print("Added positive persistent action node: {}:{}".format(symbol, node))
 
         for symbol in negative:
-            action = Action(symbol, [[], [symbol]], [[], [symbol]])            
+            action = Action(symbol, [[], [symbol]], [[], [symbol]])
             action.args = action.args + ("neg",)
             node = PgNode_a(action)
             new_level.add(node)
             #rint("Added negative persistent action node: {}:{}".format(symbol, node))
-            
+
         #print("Action node count:", len(new_level))
         #print("New level", new_level)
 
@@ -375,18 +375,18 @@ class PlanningGraph():
         #   may be "added" to the set without fear of duplication.  However, it is important to then correctly create and connect
         #   all of the new S nodes as children of all the A nodes that could produce them, and likewise add the A nodes to the
         #   parent sets of the S nodes
-        
+
         # Previous action level
         previous_action_level = self.a_levels[level - 1]
 
         # Create new literal level as set and append to literal level list.
         new_level = set()
-        self.s_levels.append(new_level)        
+        self.s_levels.append(new_level)
 
         # Add effect nodes from previous action level
         for action_node in previous_action_level:
             for node in action_node.effnodes:
-                # connect node to parent action                
+                # connect node to parent action
                 action_node.children.add(node)
                 # connect parent to node
                 node.parents.add(action_node)
@@ -469,12 +469,31 @@ class PlanningGraph():
         :return: bool
         """
         # test for Interference between nodes
+        for effect1 in node_a1.action.effect_add:
+            for precond2 in node_a2.action.precond_neg:
+                if effect1 == precond2:
+                    return True
+        for effect1 in node_a1.action.effect_rem:
+            for precond2 in node_a2.action.precond_pos:
+                if effect1 == precond2:
+                    return True
+        for effect2 in node_a2.action.effect_add:
+            for precond1 in node_a1.action.precond_neg:
+                if effect2 == precond1:
+                    return True
+        for effect2 in node_a2.action.effect_rem:
+            for precond1 in node_a1.action.precond_pos:
+                if effect2 == precond1:
+                    return True
+        return False
+        '''
+        # Initial set operation approach, slower.
         intersect = set(node_a1.action.effect_add).intersection(set(node_a2.action.precond_neg)).\
             union(set(node_a1.action.effect_rem).intersection(set(node_a2.action.precond_pos))).\
             union(set(node_a2.action.effect_add).intersection(set(node_a1.action.precond_neg))).\
             union(set(node_a2.action.effect_rem).intersection(set(node_a1.action.precond_pos)))
-
         return len(intersect) > 0
+        '''
 
     def competing_needs_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:
         """
@@ -485,7 +504,7 @@ class PlanningGraph():
         :param node_a1: PgNode_a
         :param node_a2: PgNode_a
         :return: bool
-        """        
+        """
         for precond1 in node_a1.parents:
             for precond2 in node_a2.parents:
                 if precond1.is_mutex(precond2):
