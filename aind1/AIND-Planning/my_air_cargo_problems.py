@@ -213,8 +213,13 @@ class AirCargoProblem(Problem):
         # implement (see Russell-Norvig Ed-3 10.2.3  or Russell-Norvig Ed-2 11.2)
         # without preconditions, the distance is just the number of actions that will satisfy
         # all goals, which is just the number of goals, assuming no action can satisfy multiple
-        # goals, which is the case for air cargo.
-        return len(self.goal)        
+        # goals, which is the case for these simplified air cargo problems.
+        count = 0
+        fluent_state = decode_state(node.state, self.state_map)
+        for goal in self.goal:
+            if goal in fluent_state.pos:
+                count += 1
+        return count
 
 def print_actions(actions):
     """ Print out actions and their args """
