@@ -75,9 +75,21 @@ class SelectorBIC(ModelSelector):
         :return: GaussianHMM object
         """
         warnings.filterwarnings("ignore", category=DeprecationWarning)
+        best_score = float('inf')
+        best_count = 0
+        logN = math.log(len(self.X))
+        for p in range(self.min_n_components, self.max_n_components + 1):
+            try:
+                model = self.base_model(p)
+                logL = model.score(self.X, lengths=self.lengths)
+                score = -2 * logL + p * logN
+            except:
+                continue
+            if score < best_score:
+                best_score = score
+                best_count = p
 
-        # TODO implement model selection based on BIC scores
-        raise NotImplementedError
+        return self.base_model(best_count)
 
 
 class SelectorDIC(ModelSelector):
@@ -93,8 +105,25 @@ class SelectorDIC(ModelSelector):
     def select(self):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-        # TODO implement model selection based on DIC scores
-        raise NotImplementedError
+        # Need to compute the scores of all words with all components for comparison
+
+        best_score = float('inf')
+        best_count = 0
+        logN = math.log(len(self.X))
+
+        print("hwords", self.hwords)
+        for p in range(self.min_n_components, self.max_n_components + 1):
+            try:
+                model = self.base_model(p)
+                logL = model.score(self.X, lengths=self.lengths)
+                score = -2 * logL + p * logN
+            except:
+                continue
+            if score < best_score:
+                best_score = score
+                best_count = p
+
+        return self.base_model(best_count)
 
 
 class SelectorCV(ModelSelector):
