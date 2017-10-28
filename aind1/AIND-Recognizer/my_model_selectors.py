@@ -101,27 +101,52 @@ class SelectorDIC(ModelSelector):
     https://pdfs.semanticscholar.org/ed3d/7c4a5f607201f3848d4c02dd9ba17c791fc2.pdf
     DIC = log(P(X(i)) - 1/(M-1)SUM(log(P(X(all but i))
     '''
+    all_scores = None
+
+
+    def __init__(self, all_word_sequences: dict, all_word_Xlengths: dict, this_word: str, \
+        n_constant=3, min_n_components=2, max_n_components=10, random_state=14, verbose=False):
+        super(SelectorDIC, self).__init__(all_word_sequences, all_word_Xlengths, this_word, \
+            n_constant=n_constant, min_n_components=min_n_components, \
+            max_n_components=max_n_components, random_state=random_state, verbose=verbose)
+        # A dictionary to store all scores
+        if SelectorDIC.all_scores is None:
+            SelectorDIC.all_scores = dict()
+            print("Making database of scores for all words and their model state counts.")
+            for num_states in range(min_n_components, max_n_components + 1):
+                print("Creating scores for state count {}".format(num_states))
+                SelectorDIC.all_scores[num_states] = dict()
+                for word in self.words:
+                    X, lengths = self.hwords[word]
+                    try:
+                        model = self.base_model(num_states)
+                        score = model.score(X, lengths=lengths)
+                    except:
+                        score = 0 # ignore models that don't work
+
+                    SelectorDIC.all_scores[num_states][word] = score
 
     def select(self):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
 
         # Need to compute the scores of all words with all components for comparison
 
-        best_score = float('inf')
+        best_score = float('-inf') # best DIC score is highest score
         best_count = 0
-        logN = math.log(len(self.X))
+        m_prime = len(self.words) - 1 # m_prime = M - 1
 
-        print("hwords", self.hwords)
-        for p in range(self.min_n_components, self.max_n_components + 1):
-            try:
-                model = self.base_model(p)
-                logL = model.score(self.X, lengths=self.lengths)
-                score = -2 * logL + p * logN
-            except:
-                continue
-            if score < best_score:
+        for num_states in range(self.min_n_components, self.max_n_components + 1):
+            scores = []
+            for word in self.words:
+                if word == self.this_word:
+                    continue
+                scores.append(SelectorDIC.all_scores[num_states][word])
+
+            score = SelectorDIC.all_scores[num_states][self.this_word] - sum(scores) / m_prime
+
+            if score > best_score:
                 best_score = score
-                best_count = p
+                best_count = num_states
 
         return self.base_model(best_count)
 
@@ -130,9 +155,36 @@ class SelectorCV(ModelSelector):
     ''' select best model based on average log Likelihood of cross-validation folds
 
     '''
+    def __init__(self, all_word_sequences: dict, all_word_Xlengths: dict, this_word: str, \
+        n_constant=3, min_n_components=2, max_n_components=10, random_state=14, verbose=False):
+        super(SelectorCV, self).__init__(all_word_sequences, all_word_Xlengths, this_word, \
+            n_constant=n_constant, min_n_components=min_n_components, \
+            max_n_components=max_n_components, random_state=random_state, verbose=verbose)
+        split_method = KFold(n_splits=2)
+        word_sequences = self.words[self.this_word]
+        train_list = []
+        test_list = []
+        for train_idx, test_idx in split_method.split(word_sequences):
+            train_list.extend(train_idx)
+            test_list.extend(test_idx)
+        self.X, self.lengths = combine_sequences(train_list, word_sequences)
+        self.test_X, self.test_lengths = combine_sequences(test_list, word_sequences)
 
     def select(self):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
 
         # TODO implement model selection using CV
-        raise NotImplementedError
+        best_score = float('-inf')
+        best_count = 0
+        logN = math.log(len(self.X))
+        for num_states in range(self.min_n_components, self.max_n_components + 1):
+            try:
+                model = self.base_model(num_states)
+                score = model.score(self.test_X, lengths=self.test_lengths)
+            except:
+                continue
+            if score > best_score:
+                best_score = score
+                best_count = num_states
+
+        return self.base_model(best_count)
