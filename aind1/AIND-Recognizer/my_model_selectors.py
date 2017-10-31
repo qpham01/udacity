@@ -191,27 +191,3 @@ class SelectorCV(ModelSelector):
                 best_count = num_states
 
         return self.base_model(best_count)
-
-
-class SelectorCV_Recognize(ModelSelector):
-    ''' select best model based on average log Likelihood of cross-validation folds
-
-    '''
-    def select(self):
-        warnings.filterwarnings("ignore", category=DeprecationWarning)
-
-        # TODO implement model selection using CV
-        best_score = float('-inf')
-        best_count = 0
-        logN = math.log(len(self.X))
-        for num_states in range(self.min_n_components, self.max_n_components + 1):
-            try:
-                model = self.base_model(num_states)
-                score = model.score(self.test_X, lengths=self.test_lengths)
-            except:
-                continue
-            if score > best_score:
-                best_score = score
-                best_count = num_states
-
-        return self.base_model(best_count)
