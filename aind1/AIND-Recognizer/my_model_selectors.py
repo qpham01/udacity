@@ -155,21 +155,48 @@ class SelectorCV(ModelSelector):
     ''' select best model based on average log Likelihood of cross-validation folds
 
     '''
-    def __init__(self, all_word_sequences: dict, all_word_Xlengths: dict, this_word: str, \
-        n_constant=3, min_n_components=2, max_n_components=10, random_state=14, verbose=False):
-        super(SelectorCV, self).__init__(all_word_sequences, all_word_Xlengths, this_word, \
-            n_constant=n_constant, min_n_components=min_n_components, \
-            max_n_components=max_n_components, random_state=random_state, verbose=verbose)
-        split_method = KFold(n_splits=2)
-        word_sequences = self.words[self.this_word]
-        train_list = []
-        test_list = []
-        for train_idx, test_idx in split_method.split(word_sequences):
-            train_list.extend(train_idx)
-            test_list.extend(test_idx)
-        self.X, self.lengths = combine_sequences(train_list, word_sequences)
-        self.test_X, self.test_lengths = combine_sequences(test_list, word_sequences)
+    recognize = False
 
+    def select(self):
+        warnings.filterwarnings("ignore", category=DeprecationWarning)
+        global recognize
+
+        if not SelectorCV.recognize:
+            # Handle KFold cross validation
+            split_method = KFold(n_splits=2)
+            word_sequences = self.words[self.this_word]
+            train_list = []
+            test_list = []
+            for train_idx, test_idx in split_method.split(word_sequences):
+                train_list.extend(train_idx)
+                test_list.extend(test_idx)
+            self.X, self.lengths = combine_sequences(train_list, word_sequences)
+            test_X, test_lengths = combine_sequences(test_list, word_sequences)
+
+        # TODO implement model selection using CV
+        best_score = float('-inf')
+        best_count = 0
+        logN = math.log(len(self.X))
+        for num_states in range(self.min_n_components, self.max_n_components + 1):
+            try:
+                model = self.base_model(num_states)
+                if SelectorCV.recognize:
+                    score = model.score(self.X, lengths=self.lengths)
+                else:
+                    score = model.score(test_X, lengths=test_lengths)
+            except:
+                continue
+            if score > best_score:
+                best_score = score
+                best_count = num_states
+
+        return self.base_model(best_count)
+
+
+class SelectorCV_Recognize(ModelSelector):
+    ''' select best model based on average log Likelihood of cross-validation folds
+
+    '''
     def select(self):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
 
